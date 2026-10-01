@@ -4,6 +4,18 @@
 <meta charset="UTF-8">
 <title>Alpha-Mobil &mdash; Einsatzleitzentrale</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<!-- Installierbare App (PWA) -- rein additiv, ändert nichts an der normalen
+     Browser-Ansicht. Wird nur aktiv, wenn jemand die Seite über "Zum
+     Home-Bildschirm hinzufügen" / "App installieren" installiert. -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#00223E">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Alpha-Mobil">
+
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.css" />
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -3741,6 +3753,17 @@
     showEmptyState();
   }
 
+  // ---------- Installierbare App (PWA) ----------
+  // Rein additiv: Registriert nur den Service Worker, damit die Seite sich
+  // "installieren" lässt (Icon, Vollbild). Läuft im Hintergrund nach dem
+  // Laden, blockiert nichts und ändert nichts an der normalen Browser-Nutzung.
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', function () {
+      navigator.serviceWorker.register('service-worker.js').catch(function (err) {
+        console.warn('Service Worker Registrierung fehlgeschlagen:', err);
+      });
+    });
+  }
 </script>
 </body>
 </html>
