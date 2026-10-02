@@ -90,6 +90,8 @@
   #plz-search-input:focus { border-color: var(--accent); }
   #plz-search-btn { background: var(--accent); color: #fff; border: none; font-family: var(--font-body); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
   #plz-search-btn:hover { filter: brightness(1.08); }
+  #plz-search-reset { display: none; background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); font-family: var(--font-body); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; margin-top: 6px; width: 100%; }
+  #plz-search-reset:hover { background: var(--border); color: var(--text); }
   #plz-search-status { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); }
   #plz-search-status.err { color: var(--danger); }
   #plz-search-results { margin-top: 8px; max-height: 320px; overflow-y: auto; }
@@ -165,6 +167,7 @@
           <input type="text" id="plz-search-input" placeholder="z.B. 20095" maxlength="5" inputmode="numeric" />
           <button id="plz-search-btn" type="button">Suchen</button>
         </div>
+        <button id="plz-search-reset" type="button">&#8634; Zur&uuml;cksetzen</button>
         <div id="plz-search-status"></div>
         <div id="plz-search-results"></div>
       </div>
@@ -301,9 +304,12 @@
   var lastIndex = null;
   var lastPlzCoords = null;
   var SEARCH_RADIUS_KM = 50; // gleiche Konvention wie die Trello-Umkreissuche in der Hauptkarte
+  var DEFAULT_MAP_CENTER = [51.1657, 10.4515];
+  var DEFAULT_MAP_ZOOM = 6;
 
   var searchInputEl = document.getElementById('plz-search-input');
   var searchBtnEl = document.getElementById('plz-search-btn');
+  var searchResetEl = document.getElementById('plz-search-reset');
   var searchStatusEl = document.getElementById('plz-search-status');
   var searchResultsEl = document.getElementById('plz-search-results');
 
@@ -439,7 +445,7 @@
   function initOverview() {
     if (overviewInitialized) { loadAndRender(); return; }
     overviewInitialized = true;
-    map = L.map('map', { zoomControl: true, attributionControl: true }).setView([51.1657, 10.4515], 6);
+    map = L.map('map', { zoomControl: true, attributionControl: true }).setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
     L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
       attribution: 'Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, GIS User Community',
       maxZoom: 16
@@ -478,6 +484,8 @@
       searchStatusEl.textContent = 'PLZ ' + plz + ' ist nicht in der Koordinatenliste bekannt.';
       return;
     }
+
+    searchResetEl.style.display = 'block';
 
     var matches = [];
     Object.keys(lastIndex).forEach(function(casePlz) {
@@ -519,7 +527,18 @@
     });
   }
 
+  function resetPlzSearch() {
+    searchLayer.clearLayers();
+    searchInputEl.value = '';
+    searchStatusEl.className = '';
+    searchStatusEl.textContent = '';
+    searchResultsEl.innerHTML = '';
+    searchResetEl.style.display = 'none';
+    map.setView(DEFAULT_MAP_CENTER, DEFAULT_MAP_ZOOM);
+  }
+
   searchBtnEl.addEventListener('click', runPlzSearch);
+  searchResetEl.addEventListener('click', resetPlzSearch);
   searchInputEl.addEventListener('keydown', function(ev) {
     if (ev.key === 'Enter') runPlzSearch();
   });
