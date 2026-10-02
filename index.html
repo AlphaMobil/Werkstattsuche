@@ -1075,6 +1075,52 @@
     text-align: center;
   }
 
+  /* ---------- Fallübersicht (Stecknadel-Ansicht), zusammengelegt in diese Seite ---------- */
+  #case-map { flex: 1; background: #E7EAEF; display: none; }
+  body.view-cases .console { display: none; }
+  body.view-cases #map { display: none; }
+  body.view-cases #case-map { display: block; }
+  body.view-cases #partner-overlay, body.view-cases #werkstatt-overlay { display: none; }
+
+  .case-search-panel { position: absolute; right: 16px; top: 16px; z-index: 850; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: 0 8px 20px -10px rgba(20,30,50,0.18); width: 272px; max-width: calc(100vw - 32px); font-family: var(--font-body); }
+  .case-search-panel-title { font-weight: 700; font-size: 11px; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+  .case-search-row { display: flex; gap: 6px; }
+  .case-search-input-wrap { position: relative; flex: 1; min-width: 0; }
+  #case-plz-search-input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono); font-size: 13px; letter-spacing: 1px; padding: 8px 28px 8px 10px; border-radius: 7px; outline: none; box-sizing: border-box; }
+  #case-plz-search-input:focus { border-color: var(--accent); }
+  #case-plz-search-clear { display: none; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: #fff; border: none; font-size: 12px; line-height: 1; font-weight: 700; cursor: pointer; align-items: center; justify-content: center; padding: 0; }
+  #case-plz-search-clear:hover { filter: brightness(1.1); }
+  #case-plz-search-btn { background: var(--accent); color: #fff; border: none; font-family: var(--font-body); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+  #case-plz-search-btn:hover { filter: brightness(1.08); }
+  #case-plz-search-status { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); }
+  #case-plz-search-status.err { color: var(--danger); }
+  #case-plz-search-status.ok { color: var(--accent); }
+  #case-plz-search-results { margin-top: 8px; max-height: 320px; overflow-y: auto; }
+  .cpsr-item { display: block; padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .cpsr-item:last-child { border-bottom: none; }
+  .cpsr-item:hover .cpsr-name { text-decoration: underline; }
+  .cpsr-name { font-size: 12.5px; font-weight: 600; color: var(--accent); }
+  .cpsr-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .cpsr-dist { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); float: right; }
+
+  .case-legend { position: absolute; left: 16px; bottom: 16px; z-index: 850; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; font-size: 12px; box-shadow: 0 8px 20px -10px rgba(20,30,50,0.18); font-family: var(--font-body); }
+  .case-legend-title { font-weight: 700; font-size: 11px; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+  .case-legend-row { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+  .case-legend-row:last-child { margin-bottom: 0; }
+  .case-legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.15); }
+
+  .case-popup { font-family: var(--font-body); }
+  .case-popup .cp-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
+  .case-popup .cp-card { padding: 6px 0; border-bottom: 1px solid var(--border); }
+  .case-popup .cp-card:last-child { border-bottom: none; }
+  .case-popup .cp-card a { color: var(--accent); text-decoration: none; font-size: 12.5px; font-weight: 600; }
+  .case-popup .cp-card a:hover { text-decoration: underline; }
+  .case-popup .cp-meta { font-size: 11px; color: var(--text-muted); margin-top: 1px; }
+
+  @media (max-width: 720px) {
+    .case-search-panel { width: calc(100vw - 32px); }
+  }
+
   .legend {
     background: rgba(23,29,38,0.94);
     border: 1px solid var(--border);
@@ -1479,7 +1525,7 @@
       <div class="brand">
         <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" />
       </div>
-      <button class="header-btn" id="trello-overview-btn" type="button">📍 Fallübersicht</button>
+      <button class="header-btn" id="view-toggle-btn" type="button">📍 Fallübersicht</button>
       <div id="map-status">Kartendaten werden geladen&hellip;</div>
     </header>
 
@@ -1562,6 +1608,28 @@
       <div id="map"></div>
       <div id="partner-overlay"></div>
       <div id="werkstatt-overlay"></div>
+
+      <!-- Fallübersicht (Stecknadel-Ansicht) — in dieselbe Seite integriert,
+           statt in trello-stecknadeln.html als eigener Tab -->
+      <div id="case-map"></div>
+      <div class="case-search-panel" id="case-search-panel" style="display:none;">
+        <div class="case-search-panel-title">PLZ-Umkreissuche</div>
+        <div class="case-search-row">
+          <div class="case-search-input-wrap">
+            <input type="text" id="case-plz-search-input" placeholder="z.B. 20095" maxlength="5" inputmode="numeric" />
+            <button id="case-plz-search-clear" type="button" title="Zur&uuml;cksetzen">&times;</button>
+          </div>
+          <button id="case-plz-search-btn" type="button">Suchen</button>
+        </div>
+        <div id="case-plz-search-status"></div>
+        <div id="case-plz-search-results"></div>
+      </div>
+      <div class="case-legend" id="case-legend" style="display:none;">
+        <div class="case-legend-title">F&auml;lle je PLZ</div>
+        <div class="case-legend-row"><span class="case-legend-dot" style="background:#004177;"></span>1 Fall</div>
+        <div class="case-legend-row"><span class="case-legend-dot" style="background:#C2760F;"></span>2&ndash;3 F&auml;lle</div>
+        <div class="case-legend-row"><span class="case-legend-dot" style="background:#D14343;"></span>4+ F&auml;lle</div>
+      </div>
     </div>
   </div>
 
@@ -3906,10 +3974,192 @@
     showEmptyState();
   }
 
-  var trelloOverviewBtn = document.getElementById('trello-overview-btn');
-  if (trelloOverviewBtn) {
-    trelloOverviewBtn.addEventListener('click', function() {
-      window.open('trello-stecknadeln.html', '_blank');
+  /* =========================================================================
+     Fallübersicht (Stecknadel-Ansicht) — in dieselbe Seite integriert.
+     Statt eines neuen Tabs (trello-stecknadeln.html) schaltet ein Button hier
+     direkt zwischen der PLZ-Karte (Standard) und der Fallübersicht um, in
+     derselben Karteninstanz-Umgebung und mit denselben Trello-Daten
+     (trelloPlzIndex), die ohnehin schon für die "Umkreis 50 km"-Karte geladen
+     werden — kein zweiter Login, kein zweiter Trello-Abruf nötig.
+     ========================================================================= */
+  var viewToggleBtn = document.getElementById('view-toggle-btn');
+  var currentView = 'plz';
+
+  var caseMap = null;
+  var casePinLayer = null;
+  var caseMapInitialized = false;
+
+  var caseSearchPanel = document.getElementById('case-search-panel');
+  var caseLegend = document.getElementById('case-legend');
+  var casePlzInput = document.getElementById('case-plz-search-input');
+  var casePlzBtn = document.getElementById('case-plz-search-btn');
+  var casePlzClear = document.getElementById('case-plz-search-clear');
+  var casePlzStatus = document.getElementById('case-plz-search-status');
+  var casePlzResults = document.getElementById('case-plz-search-results');
+  var CASE_DEFAULT_CENTER = [51.1657, 10.4515];
+  var CASE_DEFAULT_ZOOM = 6;
+  var CASE_SEARCH_RADIUS_KM = 50;
+
+  function escapeAttrCase(str) {
+    return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
+  }
+
+  function casePinColorForCount(n) {
+    if (n >= 4) return '#D14343';
+    if (n >= 2) return '#C2760F';
+    return '#004177';
+  }
+
+  function makeCasePinIcon(color) {
+    var svg =
+      '<svg width="26" height="34" viewBox="0 0 26 34" xmlns="http://www.w3.org/2000/svg">' +
+        '<path d="M13 0C5.8 0 0 5.8 0 13c0 9.5 13 21 13 21s13-11.5 13-21C26 5.8 20.2 0 13 0z" fill="' + color + '" stroke="#ffffff" stroke-width="1.5"/>' +
+        '<circle cx="13" cy="13" r="5" fill="#ffffff"/>' +
+      '</svg>';
+    return L.divIcon({ className: 'case-pin', html: svg, iconSize: [26, 34], iconAnchor: [13, 34], popupAnchor: [0, -30] });
+  }
+
+  // Eine Stecknadel pro Trello-Karte (nicht gebündelt nach PLZ), analog zur
+  // bisherigen eigenständigen Fallübersicht-Seite. Nutzt die bereits im
+  // Hauptfenster geladenen Daten (trelloPlzIndex, staticPlzCoords).
+  function renderCasePins() {
+    if (!casePinLayer) return;
+    casePinLayer.clearLayers();
+    var placed = 0;
+    Object.keys(trelloPlzIndex).forEach(function(plz) {
+      var coord = staticPlzCoords ? staticPlzCoords[plz] : null;
+      if (!coord) return;
+      var entries = trelloPlzIndex[plz];
+      var color = casePinColorForCount(entries.length);
+      entries.forEach(function(e, i) {
+        var offset = entries.length > 1 ? (i - (entries.length - 1) / 2) * 0.012 : 0;
+        var icon = makeCasePinIcon(color);
+        var popupHtml = '<div class="case-popup"><div class="cp-title">PLZ ' + plz + '</div>' +
+          '<div class="cp-card"><a href="' + escapeAttrCase(e.cardUrl) + '" target="_blank" rel="noopener">' + escapeAttrCase(e.cardName) + '</a>' +
+          '<div class="cp-meta">' + escapeAttrCase(e.listName) + ' &middot; ' + escapeAttrCase(e.boardName) + '</div></div></div>';
+        L.marker([coord[0], coord[1] + offset], { icon: icon }).addTo(casePinLayer).bindPopup(popupHtml, { maxWidth: 280 });
+        placed++;
+      });
+    });
+    return placed;
+  }
+
+  function initCaseMapIfNeeded() {
+    if (caseMapInitialized) return;
+    caseMapInitialized = true;
+    caseMap = L.map('case-map', { zoomControl: true, attributionControl: true }).setView(CASE_DEFAULT_CENTER, CASE_DEFAULT_ZOOM);
+    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+      attribution: 'Esri, HERE, Garmin, FAO, NOAA, USGS, &copy; OpenStreetMap contributors, GIS User Community',
+      maxZoom: 16
+    }).addTo(caseMap);
+    casePinLayer = L.layerGroup().addTo(caseMap);
+  }
+
+  function runCasePlzSearch() {
+    var raw = (casePlzInput.value || '').trim();
+    casePlzResults.innerHTML = '';
+
+    if (!raw) {
+      casePlzStatus.className = 'err';
+      casePlzStatus.textContent = 'Bitte eine PLZ eingeben.';
+      return;
+    }
+    var plz = padPlz(raw);
+    if (!/^\d{5}$/.test(plz)) {
+      casePlzStatus.className = 'err';
+      casePlzStatus.textContent = 'Bitte eine gültige 5-stellige PLZ eingeben.';
+      return;
+    }
+    var origin = staticPlzCoords ? staticPlzCoords[plz] : null;
+    if (!origin) {
+      casePlzStatus.className = 'err';
+      casePlzStatus.textContent = 'PLZ ' + plz + ' ist nicht in der Koordinatenliste bekannt.';
+      return;
+    }
+
+    casePlzClear.style.display = 'flex';
+
+    var matches = [];
+    Object.keys(trelloPlzIndex).forEach(function(casePlz) {
+      var coord = staticPlzCoords[casePlz];
+      if (!coord) return;
+      var dist = haversineKm(origin[0], origin[1], coord[0], coord[1]);
+      if (dist > CASE_SEARCH_RADIUS_KM) return;
+      trelloPlzIndex[casePlz].forEach(function(e) {
+        matches.push({ plz: casePlz, coord: coord, dist: dist, entry: e });
+      });
+    });
+    matches.sort(function(a, b) { return a.dist - b.dist; });
+
+    caseMap.setView([origin[0], origin[1]], 9);
+
+    if (matches.length === 0) {
+      casePlzStatus.className = '';
+      casePlzStatus.textContent = 'Keine Fälle im Umkreis von ' + CASE_SEARCH_RADIUS_KM + ' km um ' + plz + '.';
+      return;
+    }
+    casePlzStatus.className = 'ok';
+    casePlzStatus.textContent = matches.length + ' ' + (matches.length === 1 ? 'Fall' : 'Fälle') + ' im Umkreis von ' + CASE_SEARCH_RADIUS_KM + ' km um ' + plz + ':';
+
+    matches.forEach(function(m) {
+      var item = document.createElement('div');
+      item.className = 'cpsr-item';
+      item.innerHTML = '<span class="cpsr-dist">' + m.dist.toFixed(1) + ' km</span>' +
+        '<div class="cpsr-name">' + escapeAttrCase(m.entry.cardName) + '</div>' +
+        '<div class="cpsr-meta">PLZ ' + m.plz + ' &middot; ' + escapeAttrCase(m.entry.listName) + ' &middot; ' + escapeAttrCase(m.entry.boardName) + '</div>';
+      item.addEventListener('click', function() {
+        caseMap.setView([m.coord[0], m.coord[1]], 12);
+        window.open(m.entry.cardUrl, '_blank', 'noopener');
+      });
+      casePlzResults.appendChild(item);
+    });
+  }
+
+  function resetCasePlzSearch() {
+    casePlzInput.value = '';
+    casePlzStatus.className = '';
+    casePlzStatus.textContent = '';
+    casePlzResults.innerHTML = '';
+    casePlzClear.style.display = 'none';
+    if (caseMap) caseMap.setView(CASE_DEFAULT_CENTER, CASE_DEFAULT_ZOOM);
+  }
+
+  casePlzBtn.addEventListener('click', runCasePlzSearch);
+  casePlzClear.addEventListener('click', resetCasePlzSearch);
+  casePlzInput.addEventListener('input', function() {
+    casePlzClear.style.display = casePlzInput.value ? 'flex' : 'none';
+  });
+  casePlzInput.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Enter') runCasePlzSearch();
+  });
+
+  function switchToCasesView() {
+    currentView = 'cases';
+    document.body.classList.add('view-cases');
+    viewToggleBtn.textContent = '🗺️ Zur PLZ-Karte';
+    caseSearchPanel.style.display = 'block';
+    caseLegend.style.display = 'block';
+    initCaseMapIfNeeded();
+    renderCasePins();
+    // Falls die statische PLZ-Koordinatentabelle noch lädt, nach dem Laden erneut zeichnen.
+    if (staticPlzCoordsPromise) { staticPlzCoordsPromise.then(function() { if (currentView === 'cases') renderCasePins(); }); }
+    setTimeout(function() { caseMap.invalidateSize(); }, 50);
+  }
+
+  function switchToPlzView() {
+    currentView = 'plz';
+    document.body.classList.remove('view-cases');
+    viewToggleBtn.textContent = '📍 Fallübersicht';
+    caseSearchPanel.style.display = 'none';
+    caseLegend.style.display = 'none';
+    initMapIfNeeded();
+    setTimeout(function() { if (map) map.invalidateSize(); }, 50);
+  }
+
+  if (viewToggleBtn) {
+    viewToggleBtn.addEventListener('click', function() {
+      if (currentView === 'plz') switchToCasesView();
+      else switchToPlzView();
     });
   }
 
