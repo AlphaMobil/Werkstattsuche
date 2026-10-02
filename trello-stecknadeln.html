@@ -86,12 +86,13 @@
   .search-panel { position: absolute; right: 16px; top: 16px; z-index: 850; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: 0 8px 20px -10px rgba(20,30,50,0.18); width: 272px; max-width: calc(100vw - 32px); }
   .search-panel-title { font-weight: 700; font-size: 11px; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
   .search-row { display: flex; gap: 6px; }
-  #plz-search-input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono); font-size: 13px; letter-spacing: 1px; padding: 8px 10px; border-radius: 7px; outline: none; }
+  .search-input-wrap { position: relative; flex: 1; min-width: 0; }
+  #plz-search-input { width: 100%; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono); font-size: 13px; letter-spacing: 1px; padding: 8px 28px 8px 10px; border-radius: 7px; outline: none; }
   #plz-search-input:focus { border-color: var(--accent); }
+  #plz-search-clear { display: none; position: absolute; right: 4px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; border-radius: 50%; background: var(--danger); color: #fff; border: none; font-size: 12px; line-height: 1; font-weight: 700; cursor: pointer; align-items: center; justify-content: center; padding: 0; }
+  #plz-search-clear:hover { filter: brightness(1.1); }
   #plz-search-btn { background: var(--accent); color: #fff; border: none; font-family: var(--font-body); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
   #plz-search-btn:hover { filter: brightness(1.08); }
-  #plz-search-reset { display: none; background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border); font-family: var(--font-body); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; margin-top: 6px; width: 100%; }
-  #plz-search-reset:hover { background: var(--border); color: var(--text); }
   #plz-search-status { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); }
   #plz-search-status.err { color: var(--danger); }
   #plz-search-results { margin-top: 8px; max-height: 320px; overflow-y: auto; }
@@ -164,10 +165,12 @@
       <div class="search-panel">
         <div class="search-panel-title">PLZ-Umkreissuche</div>
         <div class="search-row">
-          <input type="text" id="plz-search-input" placeholder="z.B. 20095" maxlength="5" inputmode="numeric" />
+          <div class="search-input-wrap">
+            <input type="text" id="plz-search-input" placeholder="z.B. 20095" maxlength="5" inputmode="numeric" />
+            <button id="plz-search-clear" type="button" title="Zur&uuml;cksetzen">&times;</button>
+          </div>
           <button id="plz-search-btn" type="button">Suchen</button>
         </div>
-        <button id="plz-search-reset" type="button">&#8634; Zur&uuml;cksetzen</button>
         <div id="plz-search-status"></div>
         <div id="plz-search-results"></div>
       </div>
@@ -309,7 +312,7 @@
 
   var searchInputEl = document.getElementById('plz-search-input');
   var searchBtnEl = document.getElementById('plz-search-btn');
-  var searchResetEl = document.getElementById('plz-search-reset');
+  var searchResetEl = document.getElementById('plz-search-clear');
   var searchStatusEl = document.getElementById('plz-search-status');
   var searchResultsEl = document.getElementById('plz-search-results');
 
@@ -485,7 +488,7 @@
       return;
     }
 
-    searchResetEl.style.display = 'block';
+    searchResetEl.style.display = 'flex';
 
     var matches = [];
     Object.keys(lastIndex).forEach(function(casePlz) {
@@ -539,6 +542,9 @@
 
   searchBtnEl.addEventListener('click', runPlzSearch);
   searchResetEl.addEventListener('click', resetPlzSearch);
+  searchInputEl.addEventListener('input', function() {
+    searchResetEl.style.display = searchInputEl.value ? 'flex' : 'none';
+  });
   searchInputEl.addEventListener('keydown', function(ev) {
     if (ev.key === 'Enter') runPlzSearch();
   });
