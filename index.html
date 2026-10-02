@@ -2668,7 +2668,7 @@
       var entries = [];
       cards.forEach(function(c) {
         var listName = listNameById[c.idList] || '—';
-        if (/erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung/i.test(listName)) return; // ausgeschlossene Listen werden nicht angezeigt
+        if (/erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung|keine\s*reaktion|kb\s*an\s*kd|abgelehnt/i.test(listName)) return; // ausgeschlossene Listen werden nicht angezeigt
         var plz = extractPlzFromCardName(c.name || '');
         if (!plz) return;
         entries.push({

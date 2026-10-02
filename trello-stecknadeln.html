@@ -82,6 +82,24 @@
   .legend-row:last-child { margin-bottom: 0; }
   .legend-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; border: 1.5px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,0.15); }
 
+  /* ---------- PLZ-Umkreissuche ---------- */
+  .search-panel { position: absolute; right: 16px; top: 16px; z-index: 850; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 12px 14px; box-shadow: 0 8px 20px -10px rgba(20,30,50,0.18); width: 272px; max-width: calc(100vw - 32px); }
+  .search-panel-title { font-weight: 700; font-size: 11px; letter-spacing: .03em; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; }
+  .search-row { display: flex; gap: 6px; }
+  #plz-search-input { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); color: var(--text); font-family: var(--font-mono); font-size: 13px; letter-spacing: 1px; padding: 8px 10px; border-radius: 7px; outline: none; }
+  #plz-search-input:focus { border-color: var(--accent); }
+  #plz-search-btn { background: var(--accent); color: #fff; border: none; font-family: var(--font-body); font-weight: 600; font-size: 12.5px; padding: 8px 12px; border-radius: 7px; cursor: pointer; white-space: nowrap; }
+  #plz-search-btn:hover { filter: brightness(1.08); }
+  #plz-search-status { font-size: 11.5px; color: var(--text-muted); margin-top: 8px; font-family: var(--font-mono); }
+  #plz-search-status.err { color: var(--danger); }
+  #plz-search-results { margin-top: 8px; max-height: 320px; overflow-y: auto; }
+  .psr-item { display: block; padding: 8px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+  .psr-item:last-child { border-bottom: none; }
+  .psr-item:hover .psr-name { text-decoration: underline; }
+  .psr-name { font-size: 12.5px; font-weight: 600; color: var(--accent); }
+  .psr-meta { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+  .psr-dist { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); float: right; }
+
   .case-popup { font-family: var(--font-body); }
   .case-popup .cp-title { font-weight: 700; font-size: 13px; margin-bottom: 6px; }
   .case-popup .cp-card { padding: 6px 0; border-bottom: 1px solid var(--border); }
@@ -140,6 +158,15 @@
         <div class="legend-row"><span class="legend-dot" style="background:#004177;"></span>1 Fall</div>
         <div class="legend-row"><span class="legend-dot" style="background:#C2760F;"></span>2&ndash;3 F&auml;lle</div>
         <div class="legend-row"><span class="legend-dot" style="background:#D14343;"></span>4+ F&auml;lle</div>
+      </div>
+      <div class="search-panel">
+        <div class="search-panel-title">PLZ-Umkreissuche</div>
+        <div class="search-row">
+          <input type="text" id="plz-search-input" placeholder="z.B. 20095" maxlength="5" inputmode="numeric" />
+          <button id="plz-search-btn" type="button">Suchen</button>
+        </div>
+        <div id="plz-search-status"></div>
+        <div id="plz-search-results"></div>
       </div>
     </div>
   </div>
@@ -240,7 +267,7 @@
       var entries = [];
       cards.forEach(function(c) {
         var listName = listNameById[c.idList] || '—';
-        if (/erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung/i.test(listName)) return;
+        if (/erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung|keine\s*reaktion|kb\s*an\s*kd|abgelehnt/i.test(listName)) return;
         var plz = extractPlzFromCardName(c.name || '');
         if (!plz) return;
         entries.push({ plz: plz, boardName: boardInfo.name || boardId, listName: listName, cardName: c.name, cardUrl: c.shortUrl });
@@ -263,10 +290,42 @@
   /* ---------- Karte + Stecknadeln ---------- */
   var map = null;
   var pinLayer = null;
+  var searchLayer = null;
   var statusEl = document.getElementById('overview-status');
   var mapStatusEl = document.getElementById('map-status');
   var refreshBtn = document.getElementById('refresh-btn');
   var overviewInitialized = false;
+
+  // Zuletzt geladene Daten, damit die PLZ-Suche ohne erneuten Trello-Abruf
+  // funktioniert.
+  var lastIndex = null;
+  var lastPlzCoords = null;
+  var SEARCH_RADIUS_KM = 50; // gleiche Konvention wie die Trello-Umkreissuche in der Hauptkarte
+
+  var searchInputEl = document.getElementById('plz-search-input');
+  var searchBtnEl = document.getElementById('plz-search-btn');
+  var searchStatusEl = document.getElementById('plz-search-status');
+  var searchResultsEl = document.getElementById('plz-search-results');
+
+  function padPlz(val) {
+    if (val === undefined || val === null || val === '') return '';
+    var num = parseInt(val, 10);
+    if (!isNaN(num) && String(val).trim().match(/^\d+$/)) {
+      return String(num).padStart(5, '0');
+    }
+    return String(val).trim();
+  }
+
+  function haversineKm(lat1, lon1, lat2, lon2) {
+    var R = 6371;
+    var dLat = (lat2 - lat1) * Math.PI / 180;
+    var dLon = (lon2 - lon1) * Math.PI / 180;
+    var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+      Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+  }
 
   function escapeAttr(str) {
     return String(str).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;');
@@ -355,6 +414,8 @@
     Promise.all([plzCoordsP, dataP]).then(function(results) {
       var plzCoords = results[0];
       var data = results[1];
+      lastIndex = data.index;
+      lastPlzCoords = plzCoords;
       var placed = renderPins(data.index, plzCoords);
 
       if (placed === 0) {
@@ -384,9 +445,84 @@
       maxZoom: 16
     }).addTo(map);
     pinLayer = L.layerGroup().addTo(map);
+    searchLayer = L.layerGroup().addTo(map);
     setTimeout(function() { map.invalidateSize(); }, 50);
     loadAndRender();
   }
+
+  /* ---------- PLZ-Umkreissuche ---------- */
+  function runPlzSearch() {
+    var raw = (searchInputEl.value || '').trim();
+    searchResultsEl.innerHTML = '';
+    searchLayer.clearLayers();
+
+    if (!raw) {
+      searchStatusEl.className = 'err';
+      searchStatusEl.textContent = 'Bitte eine PLZ eingeben.';
+      return;
+    }
+    var plz = padPlz(raw);
+    if (!/^\d{5}$/.test(plz)) {
+      searchStatusEl.className = 'err';
+      searchStatusEl.textContent = 'Bitte eine gültige 5-stellige PLZ eingeben.';
+      return;
+    }
+    if (!lastPlzCoords || !lastIndex) {
+      searchStatusEl.className = 'err';
+      searchStatusEl.textContent = 'Daten werden noch geladen – bitte kurz warten.';
+      return;
+    }
+    var origin = lastPlzCoords[plz];
+    if (!origin) {
+      searchStatusEl.className = 'err';
+      searchStatusEl.textContent = 'PLZ ' + plz + ' ist nicht in der Koordinatenliste bekannt.';
+      return;
+    }
+
+    var matches = [];
+    Object.keys(lastIndex).forEach(function(casePlz) {
+      var coord = lastPlzCoords[casePlz];
+      if (!coord) return;
+      var dist = haversineKm(origin[0], origin[1], coord[0], coord[1]);
+      if (dist > SEARCH_RADIUS_KM) return;
+      lastIndex[casePlz].forEach(function(e) {
+        matches.push({ plz: casePlz, coord: coord, dist: dist, entry: e });
+      });
+    });
+    matches.sort(function(a, b) { return a.dist - b.dist; });
+
+    // Suchradius als Kreis einzeichnen und Karte darauf zentrieren.
+    L.circle([origin[0], origin[1]], { radius: SEARCH_RADIUS_KM * 1000, color: '#004177', weight: 1.5, fillOpacity: 0.04 }).addTo(searchLayer);
+    L.marker([origin[0], origin[1]], { icon: L.divIcon({ className: '', html: '<div style="width:10px;height:10px;border-radius:50%;background:#1B2028;border:2px solid #fff;box-shadow:0 0 0 1px rgba(0,0,0,0.3);"></div>', iconSize: [10, 10], iconAnchor: [5, 5] }) })
+      .addTo(searchLayer).bindPopup('Suchzentrum: PLZ ' + plz);
+    map.setView([origin[0], origin[1]], 9);
+
+    if (matches.length === 0) {
+      searchStatusEl.className = '';
+      searchStatusEl.textContent = 'Keine Fälle im Umkreis von ' + SEARCH_RADIUS_KM + ' km um ' + plz + '.';
+      return;
+    }
+    searchStatusEl.className = 'ok';
+    searchStatusEl.textContent = matches.length + ' ' + (matches.length === 1 ? 'Fall' : 'Fälle') + ' im Umkreis von ' + SEARCH_RADIUS_KM + ' km um ' + plz + ':';
+
+    matches.forEach(function(m) {
+      var item = document.createElement('div');
+      item.className = 'psr-item';
+      item.innerHTML = '<span class="psr-dist">' + m.dist.toFixed(1) + ' km</span>' +
+        '<div class="psr-name">' + escapeAttr(m.entry.cardName) + '</div>' +
+        '<div class="psr-meta">PLZ ' + m.plz + ' &middot; ' + escapeAttr(m.entry.listName) + ' &middot; ' + escapeAttr(m.entry.boardName) + '</div>';
+      item.addEventListener('click', function() {
+        map.setView([m.coord[0], m.coord[1]], 12);
+        window.open(m.entry.cardUrl, '_blank', 'noopener');
+      });
+      searchResultsEl.appendChild(item);
+    });
+  }
+
+  searchBtnEl.addEventListener('click', runPlzSearch);
+  searchInputEl.addEventListener('keydown', function(ev) {
+    if (ev.key === 'Enter') runPlzSearch();
+  });
 
   refreshBtn.addEventListener('click', loadAndRender);
 
