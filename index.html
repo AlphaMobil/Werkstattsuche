@@ -225,7 +225,7 @@
   .header-btn:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); }
   /* Zusätzlicher Tourenplaner-Button im Header, nur auf schmalen Bildschirmen sichtbar
      (siehe @media (max-width: 600px)) — auf dem Desktop bleibt der große Button in der Konsole. */
-  #tour-planner-btn-header { display: none; }
+  /* Jetzt auch auf dem Desktop sichtbar, direkt rechts neben "Fallübersicht" */
 
   /* ---------- Console / lookup panel ---------- */
   .console {
@@ -1527,8 +1527,8 @@
       <div class="brand">
         <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" />
       </div>
-      <button class="header-btn" id="tour-planner-btn-header" type="button">🗺️ Tourenplaner</button>
       <button class="header-btn" id="view-toggle-btn" type="button">📍 Fallübersicht</button>
+      <button class="header-btn" id="tour-planner-btn-header" type="button">🗺️ Tourenplaner</button>
       <div id="map-status">Kartendaten werden geladen&hellip;</div>
     </header>
 
