@@ -4000,6 +4000,8 @@
   var caseMap = null;
   var casePinLayer = null;
   var caseMapInitialized = false;
+  var caseRadiusCircle = null;
+  var caseOriginMarker = null;
 
   var caseSearchPanel = document.getElementById('case-search-panel');
   var caseLegend = document.getElementById('case-legend');
@@ -4091,6 +4093,23 @@
 
     casePlzClear.style.display = 'flex';
 
+    if (caseRadiusCircle) { caseMap.removeLayer(caseRadiusCircle); caseRadiusCircle = null; }
+    if (caseOriginMarker) { caseMap.removeLayer(caseOriginMarker); caseOriginMarker = null; }
+    caseRadiusCircle = L.circle([origin[0], origin[1]], {
+      radius: CASE_SEARCH_RADIUS_KM * 1000,
+      color: '#004177',
+      weight: 2,
+      fillColor: '#004177',
+      fillOpacity: 0.07
+    }).addTo(caseMap);
+    caseOriginMarker = L.circleMarker([origin[0], origin[1]], {
+      radius: 6,
+      color: '#fff',
+      weight: 2,
+      fillColor: '#E8821A',
+      fillOpacity: 1
+    }).addTo(caseMap).bindPopup('Suchzentrum: PLZ ' + plz);
+
     var matches = [];
     Object.keys(trelloPlzIndex).forEach(function(casePlz) {
       var coord = staticPlzCoords[casePlz];
@@ -4103,7 +4122,7 @@
     });
     matches.sort(function(a, b) { return a.dist - b.dist; });
 
-    caseMap.setView([origin[0], origin[1]], 9);
+    caseMap.fitBounds(caseRadiusCircle.getBounds(), { padding: [24, 24] });
 
     if (matches.length === 0) {
       casePlzStatus.className = '';
@@ -4133,6 +4152,8 @@
     casePlzStatus.textContent = '';
     casePlzResults.innerHTML = '';
     casePlzClear.style.display = 'none';
+    if (caseRadiusCircle) { caseMap.removeLayer(caseRadiusCircle); caseRadiusCircle = null; }
+    if (caseOriginMarker) { caseMap.removeLayer(caseOriginMarker); caseOriginMarker = null; }
     if (caseMap) caseMap.setView(CASE_DEFAULT_CENTER, CASE_DEFAULT_ZOOM);
   }
 
