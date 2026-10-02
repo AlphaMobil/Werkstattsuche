@@ -316,8 +316,34 @@
     width: 0%;
     transition: width 0.4s ease;
   }
-  #werkstatt-reset-btn {
-    display: none;
+  /* ---------- Einstellungen (Werkstätten-Update, Trello, geteilte PLZ-Zuordnung) ---------- */
+  #settings-toggle-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    color: var(--text-muted);
+    font-family: var(--font-body);
+    font-size: 12px;
+    font-weight: 600;
+    padding: 8px 14px;
+    border-radius: var(--radius);
+    cursor: pointer;
+    margin-top: 10px;
+  }
+  #settings-toggle-btn:hover { border-color: var(--accent); color: var(--accent); }
+  #settings-panel {
+    margin-top: 12px;
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    background: var(--surface-2);
+  }
+  .settings-link-btn {
+    display: block;
+    width: 100%;
+    text-align: left;
     background: none;
     border: none;
     font-family: var(--font-mono);
@@ -325,24 +351,13 @@
     color: var(--text-dim);
     text-decoration: underline;
     cursor: pointer;
-    padding: 6px 0 0;
+    padding: 0;
+    margin: 0 0 12px;
   }
-  #werkstatt-reset-btn:hover { color: var(--accent); }
-  body.authed #werkstatt-reset-btn.visible { display: inline-block; }
-
-  #werkstatt-update-toggle {
-    display: inline-block;
-    background: none;
-    border: none;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 6px 0 0;
-    margin-left: 14px;
-  }
-  #werkstatt-update-toggle:hover { color: var(--accent); }
+  .settings-link-btn:last-child { margin-bottom: 0; }
+  .settings-link-btn:hover { color: var(--accent); }
+  #werkstatt-reset-btn { display: none; }
+  body.authed #werkstatt-reset-btn.visible { display: block; }
 
   .dropzone {
     margin-top: 12px;
@@ -425,32 +440,7 @@
   #werkstatt-update-status.ok { color: var(--accent); }
   #werkstatt-update-status.err { color: var(--danger); }
 
-  #trello-toggle {
-    display: inline-block;
-    background: none;
-    border: none;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 6px 0 0;
-    margin-left: 14px;
-  }
-  #trello-toggle:hover { color: var(--accent); }
-  #shared-sheet-toggle {
-    display: inline-block;
-    background: none;
-    border: none;
-    font-family: var(--font-mono);
-    font-size: 11px;
-    color: var(--text-dim);
-    text-decoration: underline;
-    cursor: pointer;
-    padding: 6px 0 0;
-    margin-left: 14px;
-  }
-  #shared-sheet-toggle:hover { color: var(--accent); }
+  /* #trello-toggle / #shared-sheet-toggle: siehe .settings-link-btn weiter unten */
   .trello-panel {
     margin-top: 12px;
     border: 1px solid var(--border);
@@ -1475,13 +1465,6 @@
        weil er auf dieser Breite oben im Header neben "Fallübersicht" steht. */
     .tour-planner-btn { display: none; }
 
-    #werkstatt-reset-btn,
-    #werkstatt-update-toggle,
-    #trello-toggle,
-    #shared-sheet-toggle {
-      margin-left: 0;
-      margin-right: 14px;
-    }
 
     .source-row { flex-wrap: wrap; row-gap: 8px; }
     .source-row input[type="text"] { flex-basis: 100%; font-size: 16px; }
@@ -1550,67 +1533,71 @@
           </div>
         </div>
         <div id="werkstatt-progress"></div>
-        <button id="werkstatt-reset-btn" type="button">Fehlgeschlagene Eintr&auml;ge erneut laden</button>
-        <button id="werkstatt-update-toggle" type="button">Werkst&auml;tten-Liste aktualisieren</button>
-        <div id="werkstatt-dropzone" class="dropzone" style="display:none;">
-          <div class="dropzone-inner">
-            <div class="dropzone-icon">⇩</div>
-            <div class="dropzone-text">Excel-Datei hier ablegen oder klicken zum Ausw&auml;hlen</div>
-            <div class="dropzone-hint">Erwartet Spalten: Name, Telefon(e), Stra&szlig;e, PLZ, Ort &mdash; ohne Kopfzeile</div>
-          </div>
-          <input type="file" id="werkstatt-file-input" accept=".xlsx,.xls" style="display:none;" />
 
-          <div class="source-divider">oder automatisch von einer URL laden (z.&nbsp;B. aus JTL-Sync)</div>
-          <div class="source-row">
-            <input type="text" id="werkstatt-source-url" placeholder="https://..." />
-            <button id="werkstatt-source-save" type="button">Speichern</button>
+        <button id="settings-toggle-btn" type="button">⚙️ Einstellungen</button>
+        <div id="settings-panel" style="display:none;">
+          <button class="settings-link-btn" id="werkstatt-reset-btn" type="button">Fehlgeschlagene Eintr&auml;ge erneut laden</button>
+          <button class="settings-link-btn" id="werkstatt-update-toggle" type="button">Werkst&auml;tten-Liste aktualisieren</button>
+          <div id="werkstatt-dropzone" class="dropzone" style="display:none;">
+            <div class="dropzone-inner">
+              <div class="dropzone-icon">⇩</div>
+              <div class="dropzone-text">Excel-Datei hier ablegen oder klicken zum Ausw&auml;hlen</div>
+              <div class="dropzone-hint">Erwartet Spalten: Name, Telefon(e), Stra&szlig;e, PLZ, Ort &mdash; ohne Kopfzeile</div>
+            </div>
+            <input type="file" id="werkstatt-file-input" accept=".xlsx,.xls" style="display:none;" />
+
+            <div class="source-divider">oder automatisch von einer URL laden (z.&nbsp;B. aus JTL-Sync)</div>
+            <div class="source-row">
+              <input type="text" id="werkstatt-source-url" placeholder="https://..." />
+              <button id="werkstatt-source-save" type="button">Speichern</button>
+            </div>
+            <div class="source-row" id="werkstatt-source-active" style="display:none;">
+              <span id="werkstatt-source-label"></span>
+              <button id="werkstatt-source-refresh" type="button">Jetzt aktualisieren</button>
+              <button id="werkstatt-source-remove" type="button">Entfernen</button>
+            </div>
           </div>
-          <div class="source-row" id="werkstatt-source-active" style="display:none;">
-            <span id="werkstatt-source-label"></span>
-            <button id="werkstatt-source-refresh" type="button">Jetzt aktualisieren</button>
-            <button id="werkstatt-source-remove" type="button">Entfernen</button>
+          <div id="werkstatt-update-status"></div>
+          <button class="settings-link-btn" id="trello-toggle" type="button">Trello verbinden</button>
+          <div id="trello-panel" class="trello-panel" style="display:none;">
+            <div class="trello-hint">
+              API-Key &amp; Token erstellst du unter <a href="https://trello.com/power-ups/admin" target="_blank" rel="noopener">trello.com/power-ups/admin</a> &rarr; eigenes Power-Up anlegen &rarr; &bdquo;API key&ldquo; kopieren &rarr; daneben auf &bdquo;Token generieren&ldquo; klicken. Die Board-ID findest du in der Board-URL oder h&auml;ngst &bdquo;.json&ldquo; an die Board-URL an (Feld &bdquo;id&ldquo; oben).<br/>Mehrere Board-IDs mit Komma trennen. PLZ werden aus dem Kartentitel gelesen (5-stellige Zahl).
+            </div>
+            <div class="source-row">
+              <input type="text" id="trello-api-key" placeholder="API Key" />
+            </div>
+            <div class="source-row">
+              <input type="text" id="trello-token" placeholder="Token" />
+            </div>
+            <div class="source-row">
+              <input type="text" id="trello-board-ids" placeholder="Board-ID(s), Komma-getrennt" />
+              <button id="trello-save-btn" type="button">Speichern</button>
+            </div>
+            <div class="source-row" id="trello-active-row" style="display:none;">
+              <span id="trello-active-label"></span>
+              <button id="trello-refresh-btn" type="button">Jetzt aktualisieren</button>
+              <button id="trello-edit-btn" type="button">Andere Zugangsdaten</button>
+              <button id="trello-remove-btn" type="button" style="display:none;">Zur&uuml;cksetzen</button>
+            </div>
+            <div id="trello-status"></div>
+            <div id="trello-summary" class="trello-summary" style="display:none;"></div>
           </div>
-        </div>
-        <div id="werkstatt-update-status"></div>
-        <button id="trello-toggle" type="button">Trello verbinden</button>
-        <div id="trello-panel" class="trello-panel" style="display:none;">
-          <div class="trello-hint">
-            API-Key &amp; Token erstellst du unter <a href="https://trello.com/power-ups/admin" target="_blank" rel="noopener">trello.com/power-ups/admin</a> &rarr; eigenes Power-Up anlegen &rarr; &bdquo;API key&ldquo; kopieren &rarr; daneben auf &bdquo;Token generieren&ldquo; klicken. Die Board-ID findest du in der Board-URL oder h&auml;ngst &bdquo;.json&ldquo; an die Board-URL an (Feld &bdquo;id&ldquo; oben).<br/>Mehrere Board-IDs mit Komma trennen. PLZ werden aus dem Kartentitel gelesen (5-stellige Zahl).
+          <button class="settings-link-btn" id="shared-sheet-toggle" type="button">Geteilte PLZ-Zuordnung</button>
+          <div id="shared-sheet-panel" class="trello-panel" style="display:none;">
+            <div class="trello-hint" id="shared-sheet-hint">
+              Rechtsklick-Umverteilungen von PLZ-Gebieten liegen sonst nur im Browser der jeweiligen Person. Mit der Web-App-URL eines kleinen Google-Apps-Script-Deployments (Anleitung von Claude) werden sie stattdessen in einem Google Sheet gespeichert und sind f&uuml;r alle Kolleg*innen sichtbar.
+            </div>
+            <div class="source-row">
+              <input type="text" id="shared-sheet-url" placeholder="Web-App-URL (https://script.google.com/.../exec)" />
+              <button id="shared-sheet-save-btn" type="button">Speichern</button>
+            </div>
+            <div class="source-row" id="shared-sheet-active-row" style="display:none;">
+              <span id="shared-sheet-active-label"></span>
+              <button id="shared-sheet-refresh-btn" type="button">Jetzt aktualisieren</button>
+              <button id="shared-sheet-remove-btn" type="button">Entfernen</button>
+            </div>
+            <div id="shared-sheet-status"></div>
           </div>
-          <div class="source-row">
-            <input type="text" id="trello-api-key" placeholder="API Key" />
-          </div>
-          <div class="source-row">
-            <input type="text" id="trello-token" placeholder="Token" />
-          </div>
-          <div class="source-row">
-            <input type="text" id="trello-board-ids" placeholder="Board-ID(s), Komma-getrennt" />
-            <button id="trello-save-btn" type="button">Speichern</button>
-          </div>
-          <div class="source-row" id="trello-active-row" style="display:none;">
-            <span id="trello-active-label"></span>
-            <button id="trello-refresh-btn" type="button">Jetzt aktualisieren</button>
-            <button id="trello-edit-btn" type="button">Andere Zugangsdaten</button>
-            <button id="trello-remove-btn" type="button" style="display:none;">Zur&uuml;cksetzen</button>
-          </div>
-          <div id="trello-status"></div>
-          <div id="trello-summary" class="trello-summary" style="display:none;"></div>
-        </div>
-        <button id="shared-sheet-toggle" type="button">Geteilte PLZ-Zuordnung</button>
-        <div id="shared-sheet-panel" class="trello-panel" style="display:none;">
-          <div class="trello-hint" id="shared-sheet-hint">
-            Rechtsklick-Umverteilungen von PLZ-Gebieten liegen sonst nur im Browser der jeweiligen Person. Mit der Web-App-URL eines kleinen Google-Apps-Script-Deployments (Anleitung von Claude) werden sie stattdessen in einem Google Sheet gespeichert und sind f&uuml;r alle Kolleg*innen sichtbar.
-          </div>
-          <div class="source-row">
-            <input type="text" id="shared-sheet-url" placeholder="Web-App-URL (https://script.google.com/.../exec)" />
-            <button id="shared-sheet-save-btn" type="button">Speichern</button>
-          </div>
-          <div class="source-row" id="shared-sheet-active-row" style="display:none;">
-            <span id="shared-sheet-active-label"></span>
-            <button id="shared-sheet-refresh-btn" type="button">Jetzt aktualisieren</button>
-            <button id="shared-sheet-remove-btn" type="button">Entfernen</button>
-          </div>
-          <div id="shared-sheet-status"></div>
         </div>
       </div>
     </div>
@@ -2361,6 +2348,17 @@
   } catch (e) {
     werkstattCoords = {};
   }
+
+  /* ---------- Einstellungen auf-/zuklappen ---------- */
+  (function() {
+    var settingsToggleBtn = document.getElementById('settings-toggle-btn');
+    var settingsPanel = document.getElementById('settings-panel');
+    if (!settingsToggleBtn || !settingsPanel) return;
+    settingsToggleBtn.addEventListener('click', function() {
+      var open = settingsPanel.style.display !== 'none';
+      settingsPanel.style.display = open ? 'none' : 'block';
+    });
+  })();
 
   var werkstattGeocodingActive = false;
   var progressEl = document.getElementById('werkstatt-progress');
