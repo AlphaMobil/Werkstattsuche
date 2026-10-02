@@ -265,20 +265,25 @@
   }
   #plz-clear-btn {
     position: absolute;
-    right: 12px;
+    right: 10px;
     top: 50%;
     transform: translateY(-50%);
-    background: var(--surface-1);
+    background: var(--danger);
     border: none;
-    color: var(--text-muted);
-    width: 26px;
-    height: 26px;
+    color: #fff;
+    width: 22px;
+    height: 22px;
     border-radius: 50%;
-    font-size: 18px;
+    font-size: 13px;
+    font-weight: 700;
     line-height: 1;
     cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
   }
-  #plz-clear-btn:hover { color: var(--accent); }
+  #plz-clear-btn:hover { filter: brightness(1.1); }
   #plz-input::placeholder {
     color: var(--text-dim);
     letter-spacing: 6px;
@@ -1537,10 +1542,12 @@
     <div class="console">
       <div class="console-inner">
         <div class="console-label">Kunden-PLZ pr&uuml;fen</div>
-        <div class="console-row" style="position:relative;">
+        <div class="console-row">
           <button class="tour-planner-btn" id="tour-planner-btn" type="button">🗺️ Tourenplaner</button>
-          <input type="text" id="plz-input" placeholder="00000" maxlength="5" inputmode="numeric" />
-          <button id="plz-clear-btn" type="button" aria-label="PLZ löschen" style="display:none;">&times;</button>
+          <div id="plz-input-wrap" style="position:relative; flex: 0 1 260px;">
+            <input type="text" id="plz-input" placeholder="00000" maxlength="5" inputmode="numeric" />
+            <button id="plz-clear-btn" type="button" aria-label="PLZ löschen" style="display:none;">&times;</button>
+          </div>
         </div>
         <div id="werkstatt-progress"></div>
         <button id="werkstatt-reset-btn" type="button">Fehlgeschlagene Eintr&auml;ge erneut laden</button>
@@ -3329,7 +3336,7 @@
     var raw = plzInputEl.value.trim();
     resultLayer.clearLayers();
     werkstattPinLayer.clearLayers();
-    plzClearBtn.style.display = raw ? 'block' : 'none';
+    plzClearBtn.style.display = raw ? 'flex' : 'none';
 
     if (!/^\d{5}$/.test(raw)) {
       errorTicket('Ung&uuml;ltiges Format. Bitte eine 5-stellige deutsche PLZ eingeben (z.\u00a0B. 22851).');
@@ -3402,7 +3409,7 @@
   plzInputEl.addEventListener('input', function() {
     var digitsOnly = plzInputEl.value.replace(/\D/g, '').slice(0, 5);
     if (digitsOnly !== plzInputEl.value) plzInputEl.value = digitsOnly;
-    plzClearBtn.style.display = digitsOnly ? 'block' : 'none';
+    plzClearBtn.style.display = digitsOnly ? 'flex' : 'none';
     if (digitsOnly.length === 5) {
       runLookup();
     } else if (mapInitialized) {
