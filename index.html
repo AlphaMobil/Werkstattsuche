@@ -4526,6 +4526,7 @@
     if (msConfigured()) getMsal().catch(function() {});
     renderDashboard();
     loadMailData(false);
+    if (getTodoUrl() && !myName()) getDispatchUserName();
     loadTodos();
   }
 
@@ -5060,7 +5061,19 @@
     if (Array.isArray(cachedTodos)) { todos = cachedTodos; todoLoaded = true; }
   } catch (e) {}
 
-  function getTodoUrl() { try { return localStorage.getItem(TODO_URL_KEY) || ''; } catch (e) { return ''; } }
+  // Fest hinterlegte To-do-Liste für das ganze Team (kann pro Browser im Dashboard überschrieben werden).
+  var DEFAULT_TODO_URL = 'https://script.google.com/macros/s/AKfycbwHn9zjdK1GtYv947foWgeXPH-hxhZ0_itIlZ61w3krVHA_M9irEYRk1BSq4Sl9W8Ds/exec';
+  // Hier den TOKEN aus todo-backend.gs eintragen (gleiches Wort wie dort bei const TOKEN = '…').
+  var DEFAULT_TODO_TOKEN = 'WjA0shxsQXBJRkvw6PtD0Azz4cZQhh';
+
+  function isCustomTodoUrl() { try { return !!localStorage.getItem(TODO_URL_KEY); } catch (e) { return false; } }
+  function getTodoUrl() {
+    var custom = '';
+    try { custom = localStorage.getItem(TODO_URL_KEY) || ''; } catch (e) {}
+    if (custom) return custom;
+    if (!DEFAULT_TODO_URL) return '';
+    return DEFAULT_TODO_URL + (DEFAULT_TODO_TOKEN ? (DEFAULT_TODO_URL.indexOf('?') === -1 ? '?' : '&') + 'token=' + encodeURIComponent(DEFAULT_TODO_TOKEN) : '');
+  }
   function setTodoUrl(u) {
     try { if (u) localStorage.setItem(TODO_URL_KEY, u); else { localStorage.removeItem(TODO_URL_KEY); localStorage.removeItem(TODO_CACHE_KEY); } } catch (e) {}
   }
@@ -5137,6 +5150,7 @@
       return;
     }
     setup.style.display = 'none'; filters.style.display = 'flex'; newBtn.style.display = '';
+    document.getElementById('dash-todo-disconnect').style.display = isCustomTodoUrl() ? '' : 'none';
     var me = myName();
     meEl.innerHTML = me ? 'Angemeldet als <b>' + escHtml(me) + '</b> · <button type="button" class="dash-link-btn" id="dash-todo-rename">ändern</button>' : '';
     var renameBtn = document.getElementById('dash-todo-rename');
