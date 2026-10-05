@@ -1572,6 +1572,7 @@
   .dash-td-muted { color: var(--text-dim); font-size: 11.5px; }
   .dash-td-nowrap { white-space: nowrap; font-variant-numeric: tabular-nums; }
   .dash-overdue { color: var(--danger); font-weight: 600; }
+  .dash-table tbody tr.dash-row-overdue td:first-child { box-shadow: inset 3px 0 0 var(--danger); }
   .dash-stale { color: var(--amber); font-weight: 600; }
   .dash-members { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
   .dash-labels { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
@@ -1584,6 +1585,42 @@
   .dash-label-blue { background: #E2EEFB; color: #1E4F8A; border-color: #C3DAF4; }
   .dash-pdot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
 
+  .dash-todo-head-right { display: inline-flex; align-items: center; gap: 12px; font-weight: 400; }
+  .dash-todo-head-right b { color: var(--text); }
+  .dash-seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+  .dash-seg-btn { background: var(--surface-2); border: none; padding: 7px 12px; font-family: var(--font-body); font-size: 12.5px; color: var(--text-muted); cursor: pointer; }
+  .dash-seg-btn + .dash-seg-btn { border-left: 1px solid var(--border); }
+  .dash-seg-btn.active { background: var(--accent); color: #fff; font-weight: 600; }
+  .dash-todo-list { display: flex; flex-direction: column; }
+  .dash-todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 10px 4px; border-bottom: 1px solid var(--border); }
+  .dash-todo-item:last-child { border-bottom: none; }
+  .dash-todo-check { width: 17px; height: 17px; margin-top: 1px; accent-color: var(--accent); cursor: pointer; flex-shrink: 0; }
+  .dash-todo-main { flex: 1; min-width: 0; }
+  .dash-todo-text { font-size: 13px; line-height: 1.4; white-space: pre-wrap; word-break: break-word; }
+  .dash-todo-done .dash-todo-text { text-decoration: line-through; color: var(--text-dim); }
+  .dash-todo-ref { display: inline-block; max-width: 100%; margin-top: 3px; font-size: 11.5px; color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dash-todo-ref:hover { text-decoration: underline; }
+  .dash-todo-meta { font-size: 11px; color: var(--text-dim); margin-top: 3px; }
+  .dash-todo-meta b { color: var(--text-muted); font-weight: 600; }
+  .dash-todo-due { font-family: var(--font-mono); }
+  .dash-todo-del { background: none; border: none; color: var(--text-dim); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; opacity: 0; }
+  .dash-todo-item:hover .dash-todo-del, .dash-todo-del:focus { opacity: 1; }
+  .dash-todo-del:hover { color: var(--danger); }
+  .dash-todo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px; }
+  .dash-todo-add { background: none; border: 1px dashed var(--border); border-radius: 6px; padding: 2px 8px; font-family: var(--font-body); font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: pointer; }
+  .dash-todo-add:hover { border-color: var(--accent); color: var(--accent); }
+  .dash-todo-badge { display: inline-block; font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 6px; background: var(--accent-dim); color: var(--accent); cursor: pointer; }
+  .dash-dialog-backdrop { position: fixed; inset: 0; z-index: 4500; background: rgba(10,20,32,0.5); display: flex; align-items: flex-start; justify-content: center; padding: 60px 16px; }
+  .dash-dialog { width: 100%; max-width: 480px; background: var(--surface); border-radius: 14px; padding: 20px 22px; box-shadow: 0 20px 50px -16px rgba(10,20,32,0.5); }
+  .dash-dialog-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+  .dash-todo-ref-preview { font-size: 12px; color: var(--text-muted); background: var(--surface-2); border-radius: 8px; padding: 8px 10px; margin-bottom: 12px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dash-field-label { display: block; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase; color: var(--text-muted); margin: 0 0 5px; }
+  .dash-dialog textarea, .dash-dialog input[type="text"], .dash-dialog input[type="date"] { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); font-family: var(--font-body); font-size: 13px; color: var(--text); margin-bottom: 12px; }
+  .dash-dialog textarea { resize: vertical; }
+  .dash-dialog textarea:focus, .dash-dialog input:focus { outline: none; border-color: var(--accent); }
+  .dash-dialog-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .dash-dialog-actions { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 4px; }
+
   @media (max-width: 1000px) {
     .dash-grid { grid-template-columns: 1fr 1fr; }
     .dash-panel-mail { grid-column: 1 / -1; }
@@ -1595,6 +1632,9 @@
     .dash-grid { grid-template-columns: 1fr; }
     .dash-filters input[type="search"], .dash-filters select { max-width: none; flex: 1 1 100%; font-size: 16px; }
     .dash-mail-setup-row input { font-size: 16px; }
+    .dash-dialog-row { grid-template-columns: 1fr; }
+    .dash-dialog textarea, .dash-dialog input[type="text"], .dash-dialog input[type="date"] { font-size: 16px; }
+    .dash-todo-del { opacity: 1; }
   }
 </style>
 </head>
@@ -1723,12 +1763,12 @@
           <div class="dash-kpi">
             <div class="dash-kpi-label">Offene Trello-Karten</div>
             <div class="dash-kpi-value" id="dash-kpi-cards">–</div>
-            <div class="dash-kpi-sub">ohne erledigte/abgelehnte Listen</div>
+            <div class="dash-kpi-sub">F&auml;lle mit PLZ, ohne erledigte Listen</div>
           </div>
           <button type="button" class="dash-kpi dash-kpi-click" id="dash-kpi-overdue-card">
             <div class="dash-kpi-label">&Uuml;berf&auml;llig</div>
             <div class="dash-kpi-value" id="dash-kpi-overdue">–</div>
-            <div class="dash-kpi-sub">F&auml;lligkeitsdatum &uuml;berschritten</div>
+            <div class="dash-kpi-sub">F&auml;lligkeit &uuml;berschritten oder 6+ Wochen im System</div>
           </button>
           <button type="button" class="dash-kpi dash-kpi-click" id="dash-kpi-stale-card">
             <div class="dash-kpi-label">Ohne Bewegung</div>
@@ -1776,6 +1816,33 @@
           </div>
         </div>
 
+        <div class="dash-panel" id="dash-todo-panel">
+          <div class="dash-panel-title">
+            <span>To-dos <span id="dash-todo-count" class="dash-meta"></span></span>
+            <span class="dash-todo-head-right">
+              <span id="dash-todo-me" class="dash-meta"></span>
+              <button id="dash-todo-new" class="dash-btn" type="button">+ Neues To-do</button>
+            </span>
+          </div>
+          <div id="dash-todo-setup" style="display:none;">
+            <p class="dash-hint">Einmalig pro Browser: Web-App-URL der To-do-Liste (inkl. <code>?token=&hellip;</code>) einf&uuml;gen. Einrichtung siehe <code>todo-backend.gs</code>.</p>
+            <div class="dash-mail-setup-row">
+              <input type="text" id="dash-todo-url" placeholder="https://script.google.com/macros/s/.../exec?token=..." />
+              <button id="dash-todo-connect" class="dash-btn" type="button">Verbinden</button>
+            </div>
+          </div>
+          <div id="dash-todo-filters" class="dash-filters" style="display:none;">
+            <div class="dash-seg" role="group">
+              <button type="button" class="dash-seg-btn active" data-scope="mine">Meine</button>
+              <button type="button" class="dash-seg-btn" data-scope="all">Alle</button>
+            </div>
+            <select id="dash-todo-person"></select>
+            <label class="dash-check"><input type="checkbox" id="dash-todo-showdone" /> Erledigte zeigen</label>
+            <button id="dash-todo-disconnect" class="dash-link-btn" type="button">Verbindung &auml;ndern</button>
+          </div>
+          <div id="dash-todo-list" class="dash-todo-list"></div>
+        </div>
+
         <div class="dash-panel" id="dash-table-panel">
           <div class="dash-panel-title">
             Alle offenen Karten <span id="dash-table-count" class="dash-meta"></span>
@@ -1790,6 +1857,34 @@
             <button id="dash-f-reset" class="dash-link-btn" type="button">Filter zur&uuml;cksetzen</button>
           </div>
           <div class="dash-table-wrap"><table id="dash-table" class="dash-table"></table></div>
+        </div>
+      </div>
+      <!-- Dialog: To-do anlegen -->
+      <div id="dash-todo-dialog" class="dash-dialog-backdrop" style="display:none;">
+        <div class="dash-dialog" role="dialog" aria-modal="true" aria-labelledby="dash-todo-dialog-title">
+          <div class="dash-dialog-head">
+            <div id="dash-todo-dialog-title" class="dash-panel-title" style="margin:0;">Neues To-do</div>
+            <button type="button" class="tp-close" id="dash-todo-cancel-x" aria-label="Schlie&szlig;en">&times;</button>
+          </div>
+          <div id="dash-todo-ref" class="dash-todo-ref-preview"></div>
+          <label class="dash-field-label" for="dash-todo-text">Was ist zu tun?</label>
+          <textarea id="dash-todo-text" rows="3" placeholder="z.&nbsp;B. Kunde zur&uuml;ckrufen, Ersatzteil bestellen &hellip;"></textarea>
+          <div class="dash-dialog-row">
+            <div>
+              <label class="dash-field-label" for="dash-todo-owner">F&uuml;r wen?</label>
+              <input type="text" id="dash-todo-owner" list="dash-todo-people" />
+              <datalist id="dash-todo-people"></datalist>
+            </div>
+            <div>
+              <label class="dash-field-label" for="dash-todo-due">Bis wann? (optional)</label>
+              <input type="date" id="dash-todo-due" />
+            </div>
+          </div>
+          <div id="dash-todo-dialog-err" class="dash-error" style="padding:4px 0 0;"></div>
+          <div class="dash-dialog-actions">
+            <button type="button" class="dash-link-btn" id="dash-todo-cancel">Abbrechen</button>
+            <button type="button" class="dash-btn" id="dash-todo-save">Speichern</button>
+          </div>
         </div>
       </div>
     </section>
@@ -4431,6 +4526,7 @@
     if (msConfigured()) getMsal().catch(function() {});
     renderDashboard();
     loadMailData(false);
+    loadTodos();
   }
 
   if (viewToggleBtn) {
@@ -4455,6 +4551,8 @@
   var MAIL_CACHE_KEY = 'mailDataCacheV1';
   var MAIL_AUTO_REFRESH_MS = 5 * 60 * 1000;
   var STALE_DAYS = 7;
+  // Karten, die so lange im System sind (seit Erstellung), gelten automatisch als überfällig.
+  var OVERDUE_AFTER_DAYS = 42; // 6 Wochen
   var DASH_MAX_ROWS = 250;
   var mailData = null;      // { ok, query, total, hasMore, threads: [...], ts }
   var mailLoading = false;
@@ -4505,12 +4603,40 @@
     return dt.toLocaleDateString('de-DE', { day: '2-digit', month: '2-digit', year: '2-digit' });
   }
 
-  function isOverdue(c) {
+  // Trello kodiert den Erstellungszeitpunkt in den ersten 8 Zeichen der Karten-ID (Unix-Sekunden, hex).
+  function cardCreatedMs(c) {
+    if (!c || !c.id || c.id.length < 8) return null;
+    var sec = parseInt(c.id.substring(0, 8), 16);
+    return isNaN(sec) ? null : sec * 1000;
+  }
+  function cardAgeDays(c) {
+    var t = cardCreatedMs(c);
+    return t === null ? null : Math.floor((Date.now() - t) / 86400000);
+  }
+  function isDueOverdue(c) {
     return !!(c.due && !c.dueComplete && new Date(c.due).getTime() < Date.now());
+  }
+  function isAgeOverdue(c) {
+    var a = cardAgeDays(c);
+    return a !== null && a >= OVERDUE_AFTER_DAYS;
+  }
+  // Überfällig = Fälligkeitsdatum überschritten ODER seit 6+ Wochen im System
+  function isOverdue(c) {
+    return isDueOverdue(c) || isAgeOverdue(c);
+  }
+  function fmtAge(days) {
+    if (days === null) return '–';
+    if (days < 14) return days + (days === 1 ? ' Tag' : ' Tage');
+    return Math.floor(days / 7) + ' Wochen';
   }
   function isStale(c) {
     var d = daysSince(c.lastActivity);
     return d !== null && d >= STALE_DAYS;
+  }
+
+  // Karten ohne PLZ im Titel sind reine Info-Karten und werden im Dashboard nicht mitgezählt.
+  function dashCards() {
+    return (trelloOpenCards || []).filter(function(c) { return !!c.plz; });
   }
 
   function partnerLabelForCard(c) {
@@ -4560,7 +4686,7 @@
 
   function renderDashboard() {
     if (!dashEl || currentView !== 'dashboard') return;
-    var cards = trelloOpenCards || [];
+    var cards = dashCards();
 
     // ---- Kennzahlen ----
     var overdue = cards.filter(isOverdue).length;
@@ -4606,6 +4732,7 @@
 
     renderDashTable();
     renderMailPanel();
+    renderTodoPanel();
   }
 
   function scrollToTable() {
@@ -4615,7 +4742,7 @@
 
   function renderDashTable() {
     var f = getDashFilters();
-    var rows = (trelloOpenCards || []).filter(function(c) {
+    var rows = dashCards().filter(function(c) {
       if (f.board && c.boardName !== f.board) return false;
       if (f.list && c.listName !== f.list) return false;
       if (f.partner && partnerLabelForCard(c) !== f.partner) return false;
@@ -4633,6 +4760,10 @@
     rows.sort(function(a, b) {
       var av, bv;
       if (field === 'partner') { av = partnerLabelForCard(a); bv = partnerLabelForCard(b); }
+      else if (field === 'created') {
+        av = cardCreatedMs(a) || Infinity; bv = cardCreatedMs(b) || Infinity;
+        return (av - bv) * dir;
+      }
       else if (field === 'due' || field === 'lastActivity') {
         av = a[field] ? new Date(a[field]).getTime() : Infinity;
         bv = b[field] ? new Date(b[field]).getTime() : Infinity;
@@ -4641,11 +4772,11 @@
       return av.localeCompare(bv, 'de') * dir;
     });
 
-    document.getElementById('dash-table-count').textContent = rows.length + ' von ' + (trelloOpenCards || []).length + ' offenen Karten';
+    document.getElementById('dash-table-count').textContent = rows.length + ' von ' + dashCards().length + ' offenen Karten';
 
     var cols = [
       { f: 'name', l: 'Karte' }, { f: 'listName', l: 'Liste' }, { f: 'boardName', l: 'Board' },
-      { f: 'partner', l: 'Partner' }, { f: 'due', l: 'Fällig' }, { f: 'lastActivity', l: 'Letzte Aktivität' }
+      { f: 'partner', l: 'Partner' }, { f: 'created', l: 'Im System' }, { f: 'due', l: 'Fällig' }, { f: 'lastActivity', l: 'Letzte Aktivität' }
     ];
     var head = '<tr>' + cols.map(function(c) {
       var arrow = dashSort.field === c.f ? (dashSort.dir === 'asc' ? ' ▲' : ' ▼') : '';
@@ -4657,22 +4788,26 @@
         return '<span class="dash-label dash-label-' + escHtml(l.color || 'none') + '">' + escHtml(l.name) + '</span>';
       }).join('');
       var members = c.members.length ? '<div class="dash-members">' + escHtml(c.members.join(', ')) + '</div>' : '';
-      var dueCls = isOverdue(c) ? ' dash-overdue' : '';
+      var dueCls = isDueOverdue(c) ? ' dash-overdue' : '';
+      var ageCls = isAgeOverdue(c) ? ' dash-overdue' : '';
+      var created = cardCreatedMs(c);
       var staleCls = isStale(c) ? ' dash-stale' : '';
       var partner = partnerLabelForCard(c);
       var pColor = partnerColors[partner];
-      return '<tr>' +
-        '<td class="dash-td-name"><a href="' + escHtml(c.url) + '" target="_blank" rel="noopener">' + escHtml(c.name) + '</a>' + (labels ? '<div class="dash-labels">' + labels + '</div>' : '') + members + '</td>' +
+      return '<tr' + (isOverdue(c) ? ' class="dash-row-overdue"' : '') + '>' +
+        '<td class="dash-td-name"><a href="' + escHtml(c.url) + '" target="_blank" rel="noopener">' + escHtml(c.name) + '</a>' + (labels ? '<div class="dash-labels">' + labels + '</div>' : '') + members +
+          '<div class="dash-todo-actions">' + todoBadgeHtml('card', c.id) + todoAddBtnHtml('card', c.id, c.name, c.url) + '</div></td>' +
         '<td>' + escHtml(c.listName) + '</td>' +
         '<td class="dash-td-muted">' + escHtml(c.boardName) + '</td>' +
         '<td>' + (pColor ? '<span class="dash-pdot" style="background:' + pColor + '"></span>' : '') + escHtml(partner) + (c.plz ? '<div class="dash-td-muted">PLZ ' + c.plz + '</div>' : '') + '</td>' +
+        '<td class="dash-td-nowrap' + ageCls + '" title="' + (created ? 'erstellt am ' + fmtDate(new Date(created).toISOString()) : '') + '">' + fmtAge(cardAgeDays(c)) + (isAgeOverdue(c) ? ' ⚠' : '') + '</td>' +
         '<td class="dash-td-nowrap' + dueCls + '">' + (c.due ? fmtDate(c.due) + (c.dueComplete ? ' ✓' : '') : '–') + '</td>' +
         '<td class="dash-td-nowrap' + staleCls + '">' + relTime(c.lastActivity) + '</td>' +
       '</tr>';
     }).join('');
 
-    if (!rows.length) body = '<tr><td colspan="6" class="dash-empty">' + ((trelloOpenCards || []).length ? 'Keine Karten passen zu den Filtern.' : 'Trello-Daten werden geladen…') + '</td></tr>';
-    if (rows.length > DASH_MAX_ROWS) body += '<tr><td colspan="6" class="dash-empty">Es werden die ersten ' + DASH_MAX_ROWS + ' Karten angezeigt – Filter nutzen, um einzugrenzen.</td></tr>';
+    if (!rows.length) body = '<tr><td colspan="7" class="dash-empty">' + (dashCards().length ? 'Keine Karten passen zu den Filtern.' : 'Trello-Daten werden geladen…') + '</td></tr>';
+    if (rows.length > DASH_MAX_ROWS) body += '<tr><td colspan="7" class="dash-empty">Es werden die ersten ' + DASH_MAX_ROWS + ' Karten angezeigt – Filter nutzen, um einzugrenzen.</td></tr>';
 
     var table = document.getElementById('dash-table');
     table.innerHTML = '<thead>' + head + '</thead><tbody>' + body + '</tbody>';
@@ -4864,6 +4999,7 @@
           '<span class="dash-mail-age' + ageCls + '">' + relTime(t.date) + '</span></div>' +
           '<div class="dash-mail-subject">' + (t.unread ? '<span class="dash-unread-dot"></span>' : '') + escHtml(t.subject || '(kein Betreff)') + (t.count > 1 ? ' <span class="dash-td-muted">(' + t.count + ')</span>' : '') + '</div>' +
           (t.snippet ? '<div class="dash-mail-snippet">' + escHtml(t.snippet) + '</div>' : '') +
+          '<div class="dash-todo-actions">' + todoBadgeHtml('mail', t.id) + todoAddBtnHtml('mail', t.id, (t.from ? t.from + ': ' : '') + (t.subject || '(kein Betreff)'), link) + '</div>' +
         '</a>';
       }).join('');
     }
@@ -4902,6 +5038,290 @@
       });
   }
 
+  /* =========================================================================
+     Gemeinsame To-do-Liste (Google Sheet über todo-backend.gs).
+     Jede*r kann zu einer Trello-Karte, einer E-Mail oder frei ein To-do anlegen
+     und einer Person zuweisen. Die URL (mit Token) wird pro Browser gespeichert,
+     nicht im Quelltext, weil die Seite öffentlich auf GitHub liegt.
+     ========================================================================= */
+  var TODO_URL_KEY = 'todoSourceUrlV1';
+  var TODO_CACHE_KEY = 'todoCacheV1';
+  var TODO_SCOPE_KEY = 'todoScopeV1';
+  var TODO_REFRESH_MS = 60 * 1000;
+  var todos = [];
+  var todoLoaded = false;
+  var todoError = '';
+  var todoLoading = false;
+  var todoDialogRef = null;
+  var todoScope = 'mine';
+  try { todoScope = localStorage.getItem(TODO_SCOPE_KEY) || 'mine'; } catch (e) {}
+  try {
+    var cachedTodos = JSON.parse(localStorage.getItem(TODO_CACHE_KEY) || 'null');
+    if (Array.isArray(cachedTodos)) { todos = cachedTodos; todoLoaded = true; }
+  } catch (e) {}
+
+  function getTodoUrl() { try { return localStorage.getItem(TODO_URL_KEY) || ''; } catch (e) { return ''; } }
+  function setTodoUrl(u) {
+    try { if (u) localStorage.setItem(TODO_URL_KEY, u); else { localStorage.removeItem(TODO_URL_KEY); localStorage.removeItem(TODO_CACHE_KEY); } } catch (e) {}
+  }
+  function myName() {
+    try { return localStorage.getItem('dispatchUserName') || ''; } catch (e) { return ''; }
+  }
+  function sameName(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+
+  function openTodosFor(type, id) {
+    return todos.filter(function(t) { return !t.done && t.refType === type && t.refId === id; });
+  }
+  function todoBadgeHtml(type, id) {
+    if (!getTodoUrl()) return '';
+    var open = openTodosFor(type, id);
+    if (!open.length) return '';
+    var who = open.map(function(t) { return t.owner || '?'; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ');
+    return '<span class="dash-todo-badge" title="' + escHtml(open.map(function(t) { return '• ' + t.text + ' (' + (t.owner || '?') + ')'; }).join('\n')) + '">☑ ' + open.length + ' To-do' + (open.length > 1 ? 's' : '') + ' · ' + escHtml(who) + '</span>';
+  }
+  function todoAddBtnHtml(type, id, title, url) {
+    if (!getTodoUrl()) return '';
+    return '<button type="button" class="dash-todo-add" data-ref-type="' + type + '" data-ref-id="' + escHtml(id) + '" data-ref-title="' + escHtml(title) + '" data-ref-url="' + escHtml(url || '') + '">+ To-do</button>';
+  }
+
+  function todoRequest(method, payload) {
+    var url = getTodoUrl();
+    if (!url) return Promise.reject(new Error('Keine To-do-Liste verbunden'));
+    var opts = method === 'GET'
+      ? { cache: 'no-store' }
+      : { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) };
+    return fetch(url, opts).then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function(data) {
+      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error);
+      return data;
+    });
+  }
+
+  function loadTodos() {
+    if (!getTodoUrl() || todoLoading) { renderTodoPanel(); return; }
+    todoLoading = true;
+    todoRequest('GET').then(function(data) {
+      todos = Array.isArray(data.todos) ? data.todos : [];
+      todoLoaded = true;
+      todoError = '';
+      try { localStorage.setItem(TODO_CACHE_KEY, JSON.stringify(todos)); } catch (e) {}
+    }).catch(function(err) {
+      console.warn('To-dos konnten nicht geladen werden:', err);
+      todoError = 'To-dos konnten nicht geladen werden (' + err.message + ').';
+    }).then(function() {
+      todoLoading = false;
+      if (currentView === 'dashboard') { renderTodoPanel(); renderDashTable(); renderMailPanel(); }
+    });
+  }
+
+  function knownPeople() {
+    var set = {};
+    var me = myName(); if (me) set[me] = 1;
+    todos.forEach(function(t) { if (t.owner) set[t.owner] = 1; if (t.createdBy) set[t.createdBy] = 1; });
+    return Object.keys(set).sort(function(a, b) { return a.localeCompare(b, 'de'); });
+  }
+
+  function renderTodoPanel() {
+    if (!dashEl || currentView !== 'dashboard') return;
+    var setup = document.getElementById('dash-todo-setup');
+    var filters = document.getElementById('dash-todo-filters');
+    var list = document.getElementById('dash-todo-list');
+    var countEl = document.getElementById('dash-todo-count');
+    var meEl = document.getElementById('dash-todo-me');
+    var newBtn = document.getElementById('dash-todo-new');
+    if (!getTodoUrl()) {
+      setup.style.display = 'block'; filters.style.display = 'none'; newBtn.style.display = 'none';
+      list.innerHTML = ''; countEl.textContent = ''; meEl.textContent = '';
+      return;
+    }
+    setup.style.display = 'none'; filters.style.display = 'flex'; newBtn.style.display = '';
+    var me = myName();
+    meEl.innerHTML = me ? 'Angemeldet als <b>' + escHtml(me) + '</b> · <button type="button" class="dash-link-btn" id="dash-todo-rename">ändern</button>' : '';
+    var renameBtn = document.getElementById('dash-todo-rename');
+    if (renameBtn) renameBtn.addEventListener('click', function() {
+      var n = (window.prompt('Dein Name (für die To-do-Liste):', myName()) || '').trim();
+      if (n) { try { localStorage.setItem('dispatchUserName', n); } catch (e) {} renderTodoPanel(); }
+    });
+
+    document.querySelectorAll('#dash-todo-filters .dash-seg-btn').forEach(function(b) {
+      b.classList.toggle('active', b.getAttribute('data-scope') === todoScope);
+    });
+    var personSel = document.getElementById('dash-todo-person');
+    personSel.style.display = todoScope === 'all' ? '' : 'none';
+    fillSelect(personSel, knownPeople(), 'Alle Personen');
+
+    var showDone = document.getElementById('dash-todo-showdone').checked;
+    var person = personSel.value;
+    var rows = todos.filter(function(t) {
+      if (!showDone && t.done) return false;
+      if (todoScope === 'mine') return sameName(t.owner, me);
+      if (person && !sameName(t.owner, person)) return false;
+      return true;
+    });
+    rows.sort(function(a, b) {
+      if (a.done !== b.done) return a.done ? 1 : -1;
+      var ad = a.due || '9999', bd = b.due || '9999';
+      if (ad !== bd) return ad < bd ? -1 : 1;
+      return String(a.createdAt).localeCompare(String(b.createdAt));
+    });
+
+    var openAll = todos.filter(function(t) { return !t.done; }).length;
+    var openMine = todos.filter(function(t) { return !t.done && sameName(t.owner, me); }).length;
+    countEl.textContent = openMine + ' meine · ' + openAll + ' offen im Team';
+
+    if (todoError && !todoLoaded) { list.innerHTML = '<div class="dash-error">' + escHtml(todoError) + '</div>'; return; }
+    if (!todoLoaded) { list.innerHTML = '<div class="dash-empty">To-dos werden geladen…</div>'; return; }
+    if (!rows.length) {
+      list.innerHTML = '<div class="dash-empty">' + (todoScope === 'mine' ? 'Keine offenen To-dos für dich. Lege eins über „+ To-do“ an einer Karte oder E-Mail an.' : 'Keine To-dos.') + '</div>';
+      return;
+    }
+    var today = new Date().toISOString().slice(0, 10);
+    list.innerHTML = (todoError ? '<div class="dash-error">' + escHtml(todoError) + '</div>' : '') + rows.map(function(t) {
+      var ref = '';
+      if (t.refType === 'card' || t.refType === 'mail') {
+        ref = '<a class="dash-todo-ref" href="' + escHtml(t.refUrl || '#') + '" target="_blank" rel="noopener">' +
+          (t.refType === 'card' ? '🗂️ ' : '✉️ ') + escHtml(t.refTitle || '') + '</a>';
+      }
+      var dueCls = t.due && !t.done && t.due < today ? ' dash-overdue' : '';
+      var due = t.due ? '<span class="dash-todo-due' + dueCls + '">bis ' + fmtDate(t.due) + '</span>' : '';
+      var meta = [];
+      if (todoScope === 'all' || !sameName(t.owner, me)) meta.push('für <b>' + escHtml(t.owner || '–') + '</b>');
+      if (t.createdBy && !sameName(t.createdBy, t.owner)) meta.push('von ' + escHtml(t.createdBy));
+      if (t.done) meta.push('erledigt ' + relTime(t.doneAt) + (t.doneBy ? ' von ' + escHtml(t.doneBy) : ''));
+      return '<div class="dash-todo-item' + (t.done ? ' dash-todo-done' : '') + '">' +
+        '<input type="checkbox" class="dash-todo-check" data-id="' + escHtml(t.id) + '"' + (t.done ? ' checked' : '') + ' aria-label="Erledigt" />' +
+        '<div class="dash-todo-main">' +
+          '<div class="dash-todo-text">' + escHtml(t.text) + '</div>' +
+          (ref ? '<div>' + ref + '</div>' : '') +
+          '<div class="dash-todo-meta">' + due + (due && meta.length ? ' · ' : '') + meta.join(' · ') + '</div>' +
+        '</div>' +
+        '<button type="button" class="dash-todo-del" data-id="' + escHtml(t.id) + '" title="Löschen" aria-label="Löschen">&times;</button>' +
+      '</div>';
+    }).join('');
+  }
+
+  function todoUpdateLocal(id, fields) {
+    todos = todos.map(function(t) { return t.id === id ? Object.assign({}, t, fields) : t; });
+    try { localStorage.setItem(TODO_CACHE_KEY, JSON.stringify(todos)); } catch (e) {}
+  }
+
+  function openTodoDialog(ref) {
+    if (!myName()) getDispatchUserName(); // fragt einmalig nach dem eigenen Namen
+    todoDialogRef = ref || null;
+    var refEl = document.getElementById('dash-todo-ref');
+    refEl.innerHTML = ref ? (ref.type === 'card' ? '🗂️ Karte: ' : '✉️ E-Mail: ') + escHtml(ref.title) : 'Freies To-do (ohne Karte/E-Mail)';
+    document.getElementById('dash-todo-text').value = '';
+    document.getElementById('dash-todo-owner').value = myName();
+    document.getElementById('dash-todo-due').value = '';
+    document.getElementById('dash-todo-dialog-err').textContent = '';
+    document.getElementById('dash-todo-people').innerHTML = knownPeople().map(function(p) { return '<option value="' + escHtml(p) + '">'; }).join('');
+    document.getElementById('dash-todo-dialog').style.display = 'flex';
+    setTimeout(function() { document.getElementById('dash-todo-text').focus(); }, 30);
+  }
+  function closeTodoDialog() {
+    document.getElementById('dash-todo-dialog').style.display = 'none';
+    todoDialogRef = null;
+  }
+
+  function saveTodoFromDialog() {
+    var text = document.getElementById('dash-todo-text').value.trim();
+    var owner = document.getElementById('dash-todo-owner').value.trim() || myName();
+    var due = document.getElementById('dash-todo-due').value;
+    var errEl = document.getElementById('dash-todo-dialog-err');
+    if (!text) { errEl.textContent = 'Bitte beschreiben, was zu tun ist.'; return; }
+    var saveBtn = document.getElementById('dash-todo-save');
+    saveBtn.disabled = true; saveBtn.textContent = 'Speichert…';
+    var ref = todoDialogRef;
+    todoRequest('POST', {
+      action: 'add',
+      todo: {
+        text: text, owner: owner, due: due, createdBy: myName(),
+        refType: ref ? ref.type : '', refId: ref ? ref.id : '', refTitle: ref ? ref.title : '', refUrl: ref ? ref.url : ''
+      }
+    }).then(function(data) {
+      if (data && data.todo) todos.push(data.todo);
+      try { localStorage.setItem(TODO_CACHE_KEY, JSON.stringify(todos)); } catch (e) {}
+      closeTodoDialog();
+      renderTodoPanel(); renderDashTable(); renderMailPanel();
+    }).catch(function(err) {
+      errEl.textContent = 'Konnte nicht gespeichert werden: ' + err.message;
+    }).then(function() {
+      saveBtn.disabled = false; saveBtn.textContent = 'Speichern';
+    });
+  }
+
+  // Ein zentraler Klick-Handler im Dashboard für alle To-do-Buttons
+  if (dashEl) dashEl.addEventListener('click', function(e) {
+    var add = e.target.closest('.dash-todo-add');
+    if (add) {
+      e.preventDefault(); e.stopPropagation();
+      openTodoDialog({ type: add.getAttribute('data-ref-type'), id: add.getAttribute('data-ref-id'), title: add.getAttribute('data-ref-title'), url: add.getAttribute('data-ref-url') });
+      return;
+    }
+    if (e.target.closest('.dash-todo-badge')) { e.preventDefault(); e.stopPropagation(); todoScope = 'all'; renderTodoPanel(); document.getElementById('dash-todo-panel').scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+    var seg = e.target.closest('#dash-todo-filters .dash-seg-btn');
+    if (seg) {
+      todoScope = seg.getAttribute('data-scope');
+      try { localStorage.setItem(TODO_SCOPE_KEY, todoScope); } catch (err) {}
+      renderTodoPanel();
+      return;
+    }
+    var del = e.target.closest('.dash-todo-del');
+    if (del) {
+      if (!confirm('Dieses To-do löschen?')) return;
+      var id = del.getAttribute('data-id');
+      var backup = todos.slice();
+      todos = todos.filter(function(t) { return t.id !== id; });
+      renderTodoPanel(); renderDashTable(); renderMailPanel();
+      todoRequest('POST', { action: 'delete', id: id }).catch(function(err) {
+        todos = backup; todoError = 'Löschen fehlgeschlagen: ' + err.message; renderTodoPanel();
+      });
+    }
+  });
+  if (dashEl) dashEl.addEventListener('change', function(e) {
+    if (!e.target.classList.contains('dash-todo-check')) return;
+    var id = e.target.getAttribute('data-id');
+    var done = e.target.checked;
+    todoUpdateLocal(id, { done: done, doneAt: done ? new Date().toISOString() : '', doneBy: done ? myName() : '' });
+    setTimeout(function() { renderTodoPanel(); renderDashTable(); renderMailPanel(); }, done ? 350 : 0);
+    todoRequest('POST', { action: 'update', id: id, fields: { done: done, by: myName() } }).catch(function(err) {
+      todoUpdateLocal(id, { done: !done });
+      todoError = 'Änderung konnte nicht gespeichert werden: ' + err.message;
+      renderTodoPanel();
+    });
+  });
+  document.getElementById('dash-todo-person').addEventListener('change', renderTodoPanel);
+  document.getElementById('dash-todo-showdone').addEventListener('change', renderTodoPanel);
+  document.getElementById('dash-todo-new').addEventListener('click', function() { openTodoDialog(null); });
+  document.getElementById('dash-todo-save').addEventListener('click', saveTodoFromDialog);
+  document.getElementById('dash-todo-cancel').addEventListener('click', closeTodoDialog);
+  document.getElementById('dash-todo-cancel-x').addEventListener('click', closeTodoDialog);
+  document.getElementById('dash-todo-dialog').addEventListener('click', function(e) { if (e.target.id === 'dash-todo-dialog') closeTodoDialog(); });
+  document.getElementById('dash-todo-text').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) saveTodoFromDialog();
+  });
+  document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && document.getElementById('dash-todo-dialog').style.display !== 'none') closeTodoDialog();
+  });
+  document.getElementById('dash-todo-connect').addEventListener('click', function() {
+    var u = document.getElementById('dash-todo-url').value.trim();
+    if (!/^https:\/\//.test(u) || u.indexOf('token=') === -1) { alert('Bitte die vollständige Web-App-URL inkl. ?token=… einfügen.'); return; }
+    setTodoUrl(u);
+    if (!myName()) getDispatchUserName();
+    todos = []; todoLoaded = false; todoError = '';
+    renderDashboard();
+    loadTodos();
+  });
+  document.getElementById('dash-todo-disconnect').addEventListener('click', function() {
+    if (!confirm('Verbindung zur To-do-Liste in diesem Browser entfernen?')) return;
+    setTodoUrl('');
+    todos = []; todoLoaded = false; todoError = '';
+    renderDashboard();
+  });
+  setInterval(function() { if (currentView === 'dashboard') loadTodos(); }, TODO_REFRESH_MS);
+
   function onTrelloDataUpdated() {
     if (currentView === 'dashboard') renderDashboard();
   }
@@ -4936,6 +5356,7 @@
   if (dashRefresh) dashRefresh.addEventListener('click', function() {
     refreshTrelloData(true);
     loadMailData(true);
+    loadTodos();
     document.getElementById('dash-updated').textContent = 'Wird aktualisiert…';
   });
   var mailSaveBtn = document.getElementById('dash-mail-save');
