@@ -1680,7 +1680,7 @@
   .tk-done .tk-vis { background: var(--surface); }
   .dash-vis-opt-private:has(input:checked) { border-color: #7A4FBF; background: #EFE7FB; color: #5B3B99; }
   .dash-opt-disabled { opacity: 0.45; cursor: not-allowed; }
-  .dash-dialog input[type="text"]:disabled { opacity: 0.6; }
+  .dash-dialog input[type="text"]:disabled, .dash-dialog select:disabled { opacity: 0.6; cursor: not-allowed; }
   .dash-todo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px; }
   .dash-todo-add { background: none; border: 1px dashed var(--border); border-radius: 6px; padding: 2px 8px; font-family: var(--font-body); font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: pointer; }
   .dash-todo-add:hover { border-color: var(--accent); color: var(--accent); }
@@ -1977,8 +1977,7 @@
           <div class="dash-dialog-row">
             <div>
               <label class="dash-field-label" for="dash-todo-owner">F&uuml;r wen?</label>
-              <input type="text" id="dash-todo-owner" list="dash-todo-people" />
-              <datalist id="dash-todo-people"></datalist>
+              <select id="dash-todo-owner"></select>
             </div>
             <div>
               <label class="dash-field-label" for="dash-todo-due">Bis wann? (optional)</label>
@@ -5303,9 +5302,10 @@
 
   function knownPeople() {
     var set = {};
-    var me = myName(); if (me) set[me] = 1;
     // Nur interne Mitarbeiter*innen (@alpha-mobil.com) zur Auswahl anbieten – Partner/Werkstätten aus den Boards nicht
     (TEAM_MEMBERS.length ? TEAM_MEMBERS : Object.keys(trelloMemberNames || {})).forEach(function(n) { set[n] = 1; });
+    var me = myName();
+    if (me && !Object.keys(set).some(function(k) { return sameName(k, me); })) set[me] = 1;
     todos.forEach(function(t) {
       [t.owner, t.createdBy].forEach(function(n) {
         if (!n) return;
@@ -5436,7 +5436,12 @@
     var refEl = document.getElementById('dash-todo-ref');
     refEl.innerHTML = ref ? (ref.type === 'card' ? '🗂️ Karte: ' : '✉️ E-Mail: ') + escHtml(ref.title) : 'Freies To-do (ohne Karte/E-Mail)';
     document.getElementById('dash-todo-text').value = '';
-    document.getElementById('dash-todo-owner').value = myName();
+    // Dropdown mit dem Team füllen und dich selbst vorauswählen
+    var ownerSel = document.getElementById('dash-todo-owner');
+    ownerSel.innerHTML = knownPeople().map(function(p) {
+      return '<option value="' + escHtml(p) + '">' + escHtml(p) + (sameName(p, myName()) ? ' (ich)' : '') + '</option>';
+    }).join('');
+    ownerSel.value = (knownPeople().filter(function(p) { return sameName(p, myName()); })[0]) || ownerSel.value;
     document.getElementById('dash-todo-due').value = '';
     document.querySelector('input[name="dash-todo-prio"][value="normal"]').checked = true;
     var canPrivate = !!trelloUserToken();
@@ -5446,7 +5451,6 @@
     document.querySelector('input[name="dash-todo-vis"][value="' + (canPrivate && todoScope === 'private' ? 'private' : 'team') + '"]').checked = true;
     syncTodoVisibility();
     document.getElementById('dash-todo-dialog-err').textContent = '';
-    document.getElementById('dash-todo-people').innerHTML = knownPeople().map(function(p) { return '<option value="' + escHtml(p) + '">'; }).join('');
     document.getElementById('dash-todo-dialog').style.display = 'flex';
     setTimeout(function() { document.getElementById('dash-todo-text').focus(); }, 30);
   }
@@ -5454,7 +5458,7 @@
     var priv = (document.querySelector('input[name="dash-todo-vis"]:checked') || {}).value === 'private';
     var ownerEl = document.getElementById('dash-todo-owner');
     ownerEl.disabled = priv;
-    if (priv) ownerEl.value = myName();
+    if (priv) ownerEl.value = (knownPeople().filter(function(p) { return sameName(p, myName()); })[0]) || ownerEl.value;
     var hint = document.getElementById('dash-todo-vis-hint');
     if (!trelloUserToken()) { hint.style.display = 'block'; hint.textContent = 'Private To-dos sind mit Trello-Verbindung möglich (Button über der Kartentabelle).'; }
     else if (priv) { hint.style.display = 'block'; hint.textContent = 'Nur du siehst dieses Ticket – auf allen deinen Geräten, solange du mit Trello verbunden bist.'; }
