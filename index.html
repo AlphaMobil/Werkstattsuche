@@ -6459,7 +6459,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function(data) {
-      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error === 'private_needs_trello' ? 'Das Google-Skript konnte deine Trello-Anmeldung nicht prüfen. Im Apps-Script einmal die Funktion „setup“ ausführen, Zugriff erlauben und danach eine neue Version bereitstellen.' : data.error);
+      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error === 'private_needs_trello' ? 'Das Google-Skript konnte deine Trello-Anmeldung nicht prüfen' + (data.detail ? ' (Grund: ' + data.detail + ')' : '') + '. Im Apps-Script einmal die Funktion „setup“ ausführen, Zugriff erlauben und danach eine neue Version bereitstellen.' : data.error);
       return data;
     });
   }
