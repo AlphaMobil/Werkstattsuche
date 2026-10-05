@@ -1884,6 +1884,37 @@
     body.view-tour .tp-card { padding: 18px 16px 20px; min-height: 0; }
     #tp-map-chip { display: none !important; }
   }
+
+  /* ================================================================
+     Dashboard auf dem Handy: keine seitliche Verschiebung mehr,
+     die Karten-Tabelle wird zu untereinander stehenden Kacheln
+     ================================================================ */
+  .dash-mobile-only { display: none; }
+  .dash-td-name a { overflow-wrap: anywhere; }
+  @media (max-width: 760px) {
+    html, body { overflow-x: hidden; max-width: 100%; }
+    #dashboard { overflow-x: hidden; }
+    #dashboard * { max-width: 100%; }
+    .dash-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .dash-grid { grid-template-columns: minmax(0, 1fr); }
+    .dash-tickets { grid-template-columns: minmax(0, 1fr); }
+    .dash-panel { padding: 14px 12px; }
+    .dash-panel-title { flex-wrap: wrap; gap: 6px; }
+    .dash-filters input[type="search"], .dash-filters select { max-width: none; flex: 1 1 100%; font-size: 16px; }
+    .dash-mobile-only { display: block; }
+    .dash-table-wrap { overflow-x: visible; }
+    .dash-table, .dash-table tbody, .dash-table tr, .dash-table td { display: block; width: 100%; }
+    .dash-table thead { display: none; }
+    .dash-table tbody tr { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; background: var(--surface); }
+    .dash-table tbody tr.dash-row-overdue { border-left: 4px solid var(--danger); }
+    .dash-table tbody tr.dash-row-overdue td:first-child { box-shadow: none; }
+    .dash-table td { border: none; padding: 3px 0; white-space: normal; overflow-wrap: anywhere; }
+    .dash-table td.dash-td-name { font-size: 14px; padding-bottom: 6px; }
+    .dash-table td[data-l] { display: flex; gap: 8px; font-size: 12.5px; }
+    .dash-table td[data-l]::before { content: attr(data-l); flex: 0 0 104px; color: var(--text-muted); font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.4px; text-transform: uppercase; padding-top: 2px; }
+    .dash-table td.dash-empty { text-align: center; }
+    .dash-todo-actions { flex-wrap: wrap; }
+  }
 </style>
 </head>
 <body>
@@ -2143,6 +2174,14 @@
             <select id="dash-f-partner"></select>
             <label class="dash-check"><input type="checkbox" id="dash-f-overdue" /> nur &uuml;berf&auml;llig</label>
             <label class="dash-check"><input type="checkbox" id="dash-f-stale" /> nur ohne Bewegung</label>
+            <select id="dash-f-sort" class="dash-mobile-only" aria-label="Sortierung">
+              <option value="lastActivity|asc">Sortieren: l&auml;ngste ohne Aktivit&auml;t</option>
+              <option value="created|asc">Sortieren: am l&auml;ngsten im System</option>
+              <option value="due|asc">Sortieren: F&auml;lligkeit</option>
+              <option value="name|asc">Sortieren: Karte A&ndash;Z</option>
+              <option value="partner|asc">Sortieren: Partner</option>
+              <option value="listName|asc">Sortieren: Liste</option>
+            </select>
             <button id="dash-f-reset" class="dash-link-btn" type="button">Filter zur&uuml;cksetzen</button>
           </div>
           <div class="dash-table-wrap"><table id="dash-table" class="dash-table"></table></div>
@@ -5951,6 +5990,13 @@
   var mailError = '';
   var dashSort = { field: 'lastActivity', dir: 'asc' };
 
+  var dashSortSel = document.getElementById('dash-f-sort');
+  if (dashSortSel) dashSortSel.addEventListener('change', function() {
+    var p = dashSortSel.value.split('|');
+    dashSort = { field: p[0], dir: p[1] };
+    renderDashTable();
+  });
+
   try {
     var cachedMail = JSON.parse(localStorage.getItem(MAIL_CACHE_KEY) || 'null');
     if (cachedMail && Array.isArray(cachedMail.threads)) mailData = cachedMail;
@@ -6190,12 +6236,12 @@
       return '<tr' + (isOverdue(c) ? ' class="dash-row-overdue"' : '') + '>' +
         '<td class="dash-td-name"><a href="' + escHtml(c.url) + '" target="_blank" rel="noopener">' + escHtml(c.name) + '</a>' + (labels ? '<div class="dash-labels">' + labels + '</div>' : '') + members +
           '<div class="dash-todo-actions">' + todoBadgeHtml('card', c.id) + todoAddBtnHtml('card', c.id, c.name, c.url) + trelloCardBtnsHtml(c) + '</div></td>' +
-        '<td>' + escHtml(c.listName) + '</td>' +
-        '<td class="dash-td-muted">' + escHtml(c.boardName) + '</td>' +
-        '<td>' + (pColor ? '<span class="dash-pdot" style="background:' + pColor + '"></span>' : '') + escHtml(partner) + (c.plz ? '<div class="dash-td-muted">PLZ ' + c.plz + '</div>' : '') + '</td>' +
-        '<td class="dash-td-nowrap' + ageCls + '" title="' + (created ? 'erstellt am ' + fmtDate(new Date(created).toISOString()) : '') + '">' + fmtAge(cardAgeDays(c)) + (isAgeOverdue(c) ? ' ⚠' : '') + '</td>' +
-        '<td class="dash-td-nowrap' + dueCls + '">' + (c.due ? fmtDate(c.due) + (c.dueComplete ? ' ✓' : '') : '–') + '</td>' +
-        '<td class="dash-td-nowrap' + staleCls + '">' + relTime(c.lastActivity) + '</td>' +
+        '<td data-l="Liste">' + escHtml(c.listName) + '</td>' +
+        '<td class="dash-td-muted" data-l="Board">' + escHtml(c.boardName) + '</td>' +
+        '<td data-l="Partner">' + (pColor ? '<span class="dash-pdot" style="background:' + pColor + '"></span>' : '') + escHtml(partner) + (c.plz ? '<div class="dash-td-muted">PLZ ' + c.plz + '</div>' : '') + '</td>' +
+        '<td data-l="Im System" class="dash-td-nowrap' + ageCls + '" title="' + (created ? 'erstellt am ' + fmtDate(new Date(created).toISOString()) : '') + '">' + fmtAge(cardAgeDays(c)) + (isAgeOverdue(c) ? ' ⚠' : '') + '</td>' +
+        '<td data-l="Fällig" class="dash-td-nowrap' + dueCls + '">' + (c.due ? fmtDate(c.due) + (c.dueComplete ? ' ✓' : '') : '–') + '</td>' +
+        '<td data-l="Letzte Aktivität" class="dash-td-nowrap' + staleCls + '">' + relTime(c.lastActivity) + '</td>' +
       '</tr>';
     }).join('');
 
