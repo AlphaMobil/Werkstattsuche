@@ -6459,7 +6459,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function(data) {
-      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error === 'private_needs_trello' ? 'Private To-dos gehen nur mit Trello-Verbindung (oder das Google-Skript ist noch nicht aktualisiert).' : data.error);
+      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error === 'private_needs_trello' ? 'Das Google-Skript konnte deine Trello-Anmeldung nicht prüfen. Im Apps-Script einmal die Funktion „setup“ ausführen, Zugriff erlauben und danach eine neue Version bereitstellen.' : data.error);
       return data;
     });
   }
@@ -6704,6 +6704,11 @@
     var priority = prioEl ? prioEl.value : 'normal';
     var errEl = document.getElementById('dash-todo-dialog-err');
     if (!text) { errEl.textContent = 'Bitte beschreiben, was zu tun ist.'; return; }
+    if (visibility === 'private' && !trelloUserToken()) {
+      errEl.innerHTML = 'Private To-dos brauchen die Trello-Anmeldung (damit nur du sie siehst). <button type="button" class="dash-link-btn" id="dash-todo-connect-trello">Jetzt mit Trello verbinden</button> – oder als Team-To-do speichern.';
+      document.getElementById('dash-todo-connect-trello').addEventListener('click', connectTrello);
+      return;
+    }
     var saveBtn = document.getElementById('dash-todo-save');
     saveBtn.disabled = true; saveBtn.textContent = 'Speichert…';
     var ref = todoDialogRef;
