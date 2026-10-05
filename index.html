@@ -53,96 +53,72 @@
 
   ::selection { background: var(--accent-dim); color: var(--accent); }
 
-  /* ---------- Lock screen ---------- */
+  /* ---------- Lock screen (Startseite: geteilter Bildschirm) ---------- */
   #lock-screen {
-    position: fixed;
-    inset: 0;
-    z-index: 5000;
-    background:
-      radial-gradient(circle at 20% 15%, rgba(0,65,119,0.10), transparent 45%),
-      radial-gradient(circle at 85% 80%, rgba(0,34,62,0.08), transparent 45%),
-      var(--bg);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
+    position: fixed; inset: 0; z-index: 5000;
+    display: flex; background: var(--surface); overflow: auto;
   }
-  .lock-card {
-    width: 100%;
-    max-width: 380px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 16px;
-    padding: 36px 32px 32px;
-    box-shadow: 0 20px 40px -16px rgba(20,30,50,0.14);
+  .lock-hero {
+    position: relative; flex: 0 0 46%; max-width: 640px; min-height: 100%;
+    box-sizing: border-box; padding: 56px 64px;
+    background: var(--navy); color: #fff;
+    display: flex; flex-direction: column; overflow: hidden;
   }
-  .lock-eyebrow {
-    font-family: var(--font-mono);
-    font-size: 11px;
-    letter-spacing: 2px;
-    color: var(--accent);
-    text-transform: uppercase;
-    margin-bottom: 10px;
+  .lock-hero img { height: 30px; width: auto; align-self: flex-start; position: relative; z-index: 1; }
+  .lock-hero-text { margin-top: auto; margin-bottom: auto; padding: 40px 0; display: flex; flex-direction: column; gap: 18px; position: relative; z-index: 1; max-width: 420px; }
+  .lock-hero-eyebrow { font-family: var(--font-mono); font-size: 12px; letter-spacing: 2px; text-transform: uppercase; color: #7c93aa; }
+  .lock-hero h1 { margin: 0; font-family: var(--font-display); font-size: clamp(34px, 3.6vw, 48px); line-height: 1.08; font-weight: 700; letter-spacing: -0.5px; }
+  .lock-hero p { margin: 0; font-size: 15px; line-height: 1.6; color: #c7d3df; }
+  .lock-stats { display: flex; gap: 40px; position: relative; z-index: 1; }
+  .lock-stats div { display: flex; flex-direction: column; gap: 4px; }
+  .lock-stats b { font-family: var(--font-mono); font-size: 28px; font-weight: 600; }
+  .lock-stats span { font-size: 12.5px; color: #9fb3c6; }
+  .lock-dots { position: absolute; right: -40px; top: 120px; width: 300px; height: 420px; opacity: 0.9; pointer-events: none; }
+  .lock-dots i { position: absolute; width: 9px; height: 9px; border-radius: 50%; }
+  .lock-main { flex: 1; display: flex; align-items: center; justify-content: center; padding: 40px 24px; box-sizing: border-box; }
+  .lock-card { width: 100%; max-width: 380px; display: flex; flex-direction: column; gap: 18px; }
+  .lock-card h2 { margin: 0; font-family: var(--font-display); font-size: 28px; font-weight: 700; }
+  .lock-sub { margin: 4px 0 6px; font-size: 14px; color: var(--text-muted); }
+  .lock-field { display: flex; flex-direction: column; gap: 6px; }
+  .lock-field label { font-family: var(--font-mono); font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; color: var(--text-muted); }
+  .lock-input-wrap { position: relative; }
+  .lock-input {
+    width: 100%; height: 48px; box-sizing: border-box; padding: 0 14px;
+    border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2);
+    font-family: var(--font-body); font-size: 15px; color: var(--text); outline: none;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
   }
-  .lock-title {
-    font-family: var(--font-display);
-    font-size: 24px;
-    font-weight: 700;
-    margin: 0 0 6px;
-    letter-spacing: -0.2px;
-  }
-  .lock-sub {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin: 0 0 26px;
-    line-height: 1.5;
-  }
-  .lock-field {
-    position: relative;
-    margin-bottom: 14px;
-  }
-  #password-input {
-    width: 100%;
-    background: var(--surface-2);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: var(--font-mono);
-    font-size: 16px;
-    letter-spacing: 3px;
-    padding: 14px 16px;
-    border-radius: 8px;
-    outline: none;
-    transition: border-color 0.15s ease;
-  }
-  #password-input:focus {
-    border-color: var(--accent);
-  }
-  #password-input::placeholder {
-    color: var(--text-dim);
-    letter-spacing: normal;
-    font-family: var(--font-body);
-  }
+  .lock-input:focus { border-color: var(--accent); background: #fff; box-shadow: 0 0 0 3px rgba(0,65,119,0.1); }
+  #password-input { padding-right: 48px; }
+  #lock-eye { position: absolute; right: 6px; top: 6px; width: 36px; height: 36px; border: none; border-radius: 8px; background: transparent; color: var(--text-muted); display: flex; align-items: center; justify-content: center; cursor: pointer; }
+  #lock-eye:hover { background: var(--surface-2); }
+  .lock-row { display: flex; align-items: center; justify-content: space-between; font-size: 13px; }
+  .lock-row label { display: flex; align-items: center; gap: 8px; cursor: pointer; }
+  .lock-row input { width: 16px; height: 16px; accent-color: var(--accent); }
+  .lock-link { background: none; border: none; padding: 0; color: var(--accent); font: inherit; font-weight: 500; cursor: pointer; }
+  .lock-link:hover { color: var(--navy); }
+  #lock-help { display: none; font-size: 13px; line-height: 1.5; color: var(--text-muted); background: var(--surface-2); border-radius: 10px; padding: 10px 12px; }
   #unlock-btn {
-    width: 100%;
-    background: var(--accent);
-    color: #FFFFFF;
-    border: none;
-    font-family: var(--font-display);
-    font-weight: 600;
-    font-size: 14px;
-    padding: 13px 16px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: filter 0.15s ease, transform 0.05s ease;
+    height: 48px; border: none; border-radius: 10px; background: var(--accent); color: #fff;
+    font-family: var(--font-display); font-size: 15px; font-weight: 600; cursor: pointer;
+    transition: filter .15s ease, transform .05s ease;
   }
-  #unlock-btn:hover { filter: brightness(1.08); }
+  #unlock-btn:hover { filter: brightness(1.1); }
   #unlock-btn:active { transform: scale(0.99); }
-  #lock-error {
-    color: var(--danger);
-    font-size: 12px;
-    margin-top: 10px;
-    min-height: 16px;
-    font-family: var(--font-mono);
+  .lock-or { display: flex; align-items: center; gap: 12px; color: var(--text-dim); font-family: var(--font-mono); font-size: 11px; letter-spacing: 1px; text-transform: uppercase; }
+  .lock-or::before, .lock-or::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+  #lock-trello-btn {
+    height: 48px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); color: var(--text);
+    font-family: var(--font-body); font-size: 14px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 10px; cursor: pointer;
+  }
+  #lock-trello-btn:hover { border-color: #0c66e4; }
+  #lock-error { color: var(--danger); font-size: 12.5px; min-height: 16px; font-family: var(--font-mono); margin-top: -6px; }
+  .lock-foot { margin: 6px 0 0; font-family: var(--font-mono); font-size: 11px; color: var(--text-muted); text-align: center; }
+  @media (max-width: 860px) {
+    #lock-screen { flex-direction: column; }
+    .lock-hero { flex: none; max-width: none; min-height: 0; padding: 22px 20px; }
+    .lock-hero-text, .lock-stats, .lock-dots { display: none; }
+    .lock-main { align-items: flex-start; padding-top: 32px; }
   }
   .shake { animation: shake 0.35s ease; }
   @keyframes shake {
@@ -1711,26 +1687,146 @@
     .dash-dialog textarea, .dash-dialog input[type="text"], .dash-dialog input[type="date"] { font-size: 16px; }
     .dash-todo-del { opacity: 1; }
   }
+
+  /* ---------- Einstellungsseite ---------- */
+  #settings-page { display: none; flex: 1; overflow-y: auto; background: var(--bg); }
+  body.view-settings #settings-page { display: block; }
+  body.view-settings .console, body.view-settings #map-wrap, body.view-settings #error-box, body.view-settings #dashboard { display: none !important; }
+  .set-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin-bottom: 14px; }
+  .set-card { background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--text-dim); border-radius: 12px; padding: 14px 16px; display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  .set-card.set-ok { border-left-color: #2E8B57; }
+  .set-card.set-warn { border-left-color: var(--amber); }
+  .set-card.set-err { border-left-color: var(--danger); }
+  .set-card.set-busy { border-left-color: var(--accent); }
+  .set-card-head { display: flex; align-items: center; gap: 10px; }
+  .set-ico { width: 32px; height: 32px; border-radius: 8px; background: var(--surface-2); display: inline-flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .set-title { font-family: var(--font-display); font-weight: 600; font-size: 14.5px; flex: 1; min-width: 0; }
+  .set-pill { font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 12px; white-space: nowrap; }
+  .set-pill-ok { background: #E3F4EA; color: #1B6B3A; }
+  .set-pill-warn { background: #FDF0DC; color: #8A4B0B; }
+  .set-pill-err { background: #FBE2E2; color: #9B2C2C; }
+  .set-pill-busy { background: var(--accent-dim); color: var(--accent); }
+  .set-rows { display: grid; grid-template-columns: minmax(110px, auto) 1fr; gap: 5px 12px; margin: 0; font-size: 12.5px; }
+  .set-rows dt { color: var(--text-muted); }
+  .set-rows dd { margin: 0; color: var(--text); word-break: break-word; }
+  .set-result { font-size: 12px; border-radius: 8px; padding: 7px 10px; }
+  .set-result-ok { background: #E3F4EA; color: #1B6B3A; }
+  .set-result-err { background: #FBE2E2; color: #9B2C2C; }
+  .set-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: auto; padding-top: 4px; }
+  .set-btn { background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font-family: var(--font-body); font-size: 12.5px; font-weight: 600; color: var(--text); cursor: pointer; }
+  .set-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .set-advanced #settings-panel { margin-top: 0; }
+  @media (max-width: 680px) { .set-cards { grid-template-columns: 1fr; } .set-rows { grid-template-columns: 1fr; } .set-rows dt { margin-top: 4px; } }
+
+  /* ---------- Seitenmenü ---------- */
+  #dashboard-btn, #view-toggle-btn, #tour-planner-btn-header, #settings-toggle-btn { display: none !important; }
+  header { justify-content: space-between !important; }
+  .nav-menu-btn { display: inline-flex; align-items: center; gap: 10px; background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.22); color: #fff; border-radius: var(--radius); padding: 7px 12px 7px 10px; cursor: pointer; font-family: var(--font-display); font-size: 13px; font-weight: 600; position: relative; z-index: 2; }
+  .nav-menu-btn:hover { background: rgba(255,255,255,0.16); border-color: rgba(255,255,255,0.4); }
+  .nav-burger { display: inline-flex; flex-direction: column; justify-content: center; gap: 3px; width: 16px; }
+  .nav-burger span { display: block; height: 2px; border-radius: 2px; background: #fff; transition: transform 0.2s ease, opacity 0.2s ease; }
+  body.nav-open .nav-burger span:nth-child(1) { transform: translateY(5px) rotate(45deg); }
+  body.nav-open .nav-burger span:nth-child(2) { opacity: 0; }
+  body.nav-open .nav-burger span:nth-child(3) { transform: translateY(-5px) rotate(-45deg); }
+  .nav-backdrop { position: fixed; inset: 0; background: rgba(10,20,32,0.45); z-index: 3900; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; }
+  body.nav-open .nav-backdrop { opacity: 1; pointer-events: auto; }
+  .nav-drawer { position: fixed; top: 0; left: 0; bottom: 0; width: 290px; max-width: 86vw; z-index: 3950; background: var(--navy); color: #fff; display: flex; flex-direction: column; padding: 16px 12px; transform: translateX(-105%); transition: transform 0.22s ease; box-shadow: 12px 0 32px -12px rgba(0,0,0,0.45); overflow-y: auto; }
+  body.nav-open .nav-drawer { transform: translateX(0); }
+  .nav-drawer-head { display: flex; align-items: center; justify-content: space-between; padding: 4px 8px 18px; }
+  .nav-drawer-head img { height: 24px; width: auto; }
+  .nav-close { background: none; border: none; color: rgba(255,255,255,0.7); font-size: 24px; line-height: 1; cursor: pointer; padding: 2px 6px; }
+  .nav-close:hover { color: #fff; }
+  .nav-section-label { font-family: var(--font-mono); font-size: 10px; letter-spacing: 1.5px; text-transform: uppercase; color: rgba(255,255,255,0.5); padding: 0 10px 8px; }
+  .nav-item { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: none; color: #fff; border-radius: 10px; padding: 10px; cursor: pointer; font-family: var(--font-body); margin-bottom: 2px; }
+  .nav-item:hover, .nav-item:focus-visible { background: rgba(255,255,255,0.08); outline: none; }
+  .nav-item.active { background: rgba(255,255,255,0.14); box-shadow: inset 3px 0 0 #fff; }
+  .nav-ico { width: 32px; height: 32px; border-radius: 8px; background: rgba(255,255,255,0.1); display: inline-flex; align-items: center; justify-content: center; font-size: 16px; flex-shrink: 0; }
+  .nav-item b { display: block; font-family: var(--font-display); font-size: 14px; font-weight: 600; }
+  .nav-item small { display: block; font-size: 11.5px; color: rgba(255,255,255,0.6); margin-top: 1px; }
+  .nav-divider { height: 1px; background: rgba(255,255,255,0.14); margin: 10px 8px; }
+  .nav-foot { margin-top: auto; display: flex; align-items: center; gap: 8px; padding: 12px 10px 4px; font-size: 12.5px; color: rgba(255,255,255,0.75); }
+  .nav-foot:empty { display: none; }
+  .nav-foot .tk-avatar { background: #fff; color: var(--navy); }
+  .settings-dialog { max-width: 640px; max-height: calc(100vh - 120px); overflow-y: auto; }
+  .settings-dialog #settings-panel { margin-top: 4px; }
+  /* PLZ-Suche mittig */
+  .console-inner { max-width: 520px; margin: 0 auto; text-align: center; }
+  .console-row { justify-content: center; }
+  #plz-input-wrap { flex: 0 1 300px !important; }
+  #plz-input { width: 100%; text-align: center; padding-left: 44px; }
+  #werkstatt-progress { text-align: center; }
+
+  @media (max-width: 600px) {
+    header { flex-wrap: nowrap !important; justify-content: space-between !important; }
+    .brand { order: 0 !important; flex-basis: auto !important; position: static !important; transform: none !important; }
+    #map-status { display: none; }
+  }
+  .nav-refresh .nav-ico { font-size: 18px; }
+  .app-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%) translateY(20px); background: var(--navy); color: #fff; padding: 10px 16px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: 0 10px 28px rgba(10,25,35,0.35); z-index: 6000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; }
+  .app-toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+  .set-inline { display: flex; flex-direction: column; gap: 8px; }
+  .set-inline input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); font-family: var(--font-body); font-size: 12.5px; color: var(--text); }
+  .set-inline .dash-btn-ms { align-self: flex-start; }
+  .set-inline .dash-btn-ms:disabled { opacity: 0.5; cursor: not-allowed; }
 </style>
 </head>
 <body>
 
   <div id="lock-screen">
-    <div class="lock-card">
-      <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" style="height:26px; width:auto; background:var(--navy); padding:8px 14px; border-radius:8px; margin-bottom:18px;" />
-      <div class="lock-eyebrow">Zugang gesichert</div>
-      <h1 class="lock-title">Einsatzleitzentrale</h1>
-      <p class="lock-sub">Bitte Zugangscode eingeben, um die Partner- und Werkst&auml;tten-&Uuml;bersicht zu &ouml;ffnen.</p>
-      <div class="lock-field">
-        <input type="password" id="password-input" placeholder="Zugangscode" autocomplete="off" />
+    <section class="lock-hero">
+      <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" />
+      <div class="lock-hero-text">
+        <div class="lock-hero-eyebrow">Einsatzleitzentrale</div>
+        <h1>Jeder Fall.<br>Jeder Partner.<br>Eine &Uuml;bersicht.</h1>
+        <p>PLZ pr&uuml;fen, zust&auml;ndigen Partner finden, Werkst&auml;tten in der N&auml;he sehen und Touren planen &ndash; f&uuml;r das ganze Team an einem Ort.</p>
       </div>
-      <button id="unlock-btn">Entsperren</button>
-      <div id="lock-error"></div>
-    </div>
+      <div class="lock-stats">
+        <div><b id="lock-stat-ws">&ndash;</b><span>Werkst&auml;tten</span></div>
+        <div><b>7</b><span>Service-Partner</span></div>
+        <div><b>DE</b><span>bundesweit</span></div>
+      </div>
+      <div class="lock-dots" id="lock-dots" aria-hidden="true"></div>
+    </section>
+    <section class="lock-main">
+      <form class="lock-card" id="lock-form" autocomplete="on" onsubmit="return false;">
+        <div>
+          <h2>Anmelden</h2>
+          <p class="lock-sub">Mit deinem Team-Zugang der Einsatzleitzentrale.</p>
+        </div>
+        <div class="lock-field">
+          <label for="username-input">Benutzername</label>
+          <input class="lock-input" type="text" id="username-input" name="username" placeholder="z. B. Nick Nellessen" autocomplete="username" autocapitalize="off" spellcheck="false" />
+        </div>
+        <div class="lock-field">
+          <label for="password-input">Passwort</label>
+          <div class="lock-input-wrap">
+            <input class="lock-input" type="password" id="password-input" name="password" placeholder="Passwort" autocomplete="current-password" />
+            <button type="button" id="lock-eye" aria-label="Passwort anzeigen"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+          </div>
+        </div>
+        <div class="lock-row">
+          <label><input type="checkbox" id="lock-remember" checked /> Angemeldet bleiben</label>
+          <button type="button" class="lock-link" id="lock-help-btn">Zugang anfragen</button>
+        </div>
+        <div id="lock-help">Benutzername ist dein Name aus dem Team (z.&nbsp;B. <b>Nick Nellessen</b> oder nur <b>Nick</b>). Das Passwort bekommst du intern von der Einsatzleitung.</div>
+        <button type="submit" id="unlock-btn">Anmelden</button>
+        <div id="lock-error"></div>
+        <div class="lock-or">oder</div>
+        <button type="button" id="lock-trello-btn">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#0c66e4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"></rect><rect x="7" y="7" width="4" height="9" rx="1"></rect><rect x="13" y="7" width="4" height="5" rx="1"></rect></svg>
+          Mit Trello anmelden
+        </button>
+        <p class="lock-foot">Intern &middot; Alpha-Mobil Vertriebsges. mbH</p>
+      </form>
+    </section>
   </div>
 
   <div id="app">
     <header>
+      <button class="nav-menu-btn" id="nav-menu-btn" type="button" aria-label="Menü öffnen" aria-expanded="false" aria-controls="nav-drawer">
+        <span class="nav-burger" aria-hidden="true"><span></span><span></span><span></span></span>
+        <span class="nav-current" id="nav-current">Men&uuml;</span>
+      </button>
       <div class="brand">
         <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" />
       </div>
@@ -1776,7 +1872,7 @@
             </div>
           </div>
           <div id="werkstatt-update-status"></div>
-          <button class="settings-link-btn" id="trello-toggle" type="button">Trello verbinden</button>
+          <button class="settings-link-btn" id="trello-toggle" type="button">Trello-Zugang f&uuml;r Boards (Lesen) &auml;ndern</button>
           <div id="trello-panel" class="trello-panel" style="display:none;">
             <div class="trello-hint">
               API-Key &amp; Token erstellst du unter <a href="https://trello.com/power-ups/admin" target="_blank" rel="noopener">trello.com/power-ups/admin</a> &rarr; eigenes Power-Up anlegen &rarr; &bdquo;API key&ldquo; kopieren &rarr; daneben auf &bdquo;Token generieren&ldquo; klicken. Die Board-ID findest du in der Board-URL oder h&auml;ngst &bdquo;.json&ldquo; an die Board-URL an (Feld &bdquo;id&ldquo; oben).<br/>Mehrere Board-IDs mit Komma trennen. PLZ werden aus dem Kartentitel gelesen (5-stellige Zahl).
@@ -1993,6 +2089,30 @@
       </div>
     </section>
 
+    <!-- Einstellungsseite: Übersicht aller Verbindungen -->
+    <section id="settings-page">
+      <div class="dash-inner">
+        <div class="dash-head">
+          <div>
+            <div class="dash-eyebrow">Einstellungen</div>
+            <h2 class="dash-title">Verbindungen &amp; Datenquellen</h2>
+          </div>
+          <div class="dash-head-right">
+            <span id="set-summary" class="dash-updated"></span>
+            <button id="set-test-all" class="set-btn" type="button">Verbindungen testen</button>
+            <button id="set-refresh-all" class="dash-btn" type="button">&#8635; Alles aktualisieren</button>
+          </div>
+        </div>
+        <div id="set-cards" class="set-cards"></div>
+
+        <div class="dash-panel set-advanced">
+          <div class="dash-panel-title">Erweiterte Einstellungen</div>
+          <p class="dash-hint">Werkst&auml;tten-Liste aktualisieren, eigene Trello-Zugangsdaten und die geteilte PLZ-Zuordnung.</p>
+          <div id="set-advanced-body"></div>
+        </div>
+      </div>
+    </section>
+
     <div id="error-box"></div>
     <div id="map-wrap">
       <div id="map"></div>
@@ -2020,6 +2140,36 @@
         <div class="case-legend-row"><span class="case-legend-dot" style="background:#C2760F;"></span>2&ndash;3 F&auml;lle</div>
         <div class="case-legend-row"><span class="case-legend-dot" style="background:#D14343;"></span>4+ F&auml;lle</div>
       </div>
+    </div>
+  </div>
+
+  <!-- Seitenmenü -->
+  <div id="nav-backdrop" class="nav-backdrop"></div>
+  <nav id="nav-drawer" class="nav-drawer" aria-label="Hauptmenü" aria-hidden="true">
+    <div class="nav-drawer-head">
+      <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" />
+      <button type="button" class="nav-close" id="nav-close" aria-label="Menü schließen">&times;</button>
+    </div>
+    <div class="nav-section-label">Einsatzleitzentrale</div>
+    <button type="button" class="nav-item" data-nav="plz"><span class="nav-ico">🗺️</span><span><b>PLZ-Karte</b><small>Partner &amp; Werkst&auml;tten finden</small></span></button>
+    <button type="button" class="nav-item" data-nav="dashboard"><span class="nav-ico">📊</span><span><b>Dashboard</b><small>Offene Karten, E-Mails, To-dos</small></span></button>
+    <button type="button" class="nav-item" data-nav="cases"><span class="nav-ico">📍</span><span><b>Fall&uuml;bersicht</b><small>Alle F&auml;lle auf der Karte</small></span></button>
+    <button type="button" class="nav-item" data-nav="tour"><span class="nav-ico">🚐</span><span><b>Tourenplaner</b><small>Route f&uuml;r mehrere Adressen</small></span></button>
+    <div class="nav-divider"></div>
+    <button type="button" class="nav-item" data-nav="settings"><span class="nav-ico">⚙️</span><span><b>Einstellungen</b><small>Werkst&auml;tten, Trello, PLZ-Zuordnung</small></span></button>
+    <button type="button" class="nav-item nav-refresh" id="nav-refresh-all"><span class="nav-ico">&#8635;</span><span><b>Alles aktualisieren</b><small>Trello, E-Mails, To-dos, Werkst&auml;tten, PLZ</small></span></button>
+    <button type="button" class="nav-item" id="nav-logout"><span class="nav-ico">&#x21AA;</span><span><b>Abmelden</b><small>Startseite wieder anzeigen</small></span></button>
+    <div class="nav-foot" id="nav-foot"></div>
+  </nav>
+
+  <!-- Einstellungen als eigenes Fenster (Inhalt wird beim Öffnen hierher verschoben) -->
+  <div id="settings-modal" class="dash-dialog-backdrop" style="display:none;">
+    <div class="dash-dialog settings-dialog" role="dialog" aria-modal="true" aria-labelledby="settings-modal-title">
+      <div class="dash-dialog-head">
+        <div id="settings-modal-title" class="dash-panel-title" style="margin:0;">⚙️ Einstellungen</div>
+        <button type="button" class="tp-close" id="settings-modal-close" aria-label="Schlie&szlig;en">&times;</button>
+      </div>
+      <div id="settings-modal-body"></div>
     </div>
   </div>
 
@@ -2066,36 +2216,130 @@
     if (Array.isArray(storedList) && storedList.length > 0) werkstaetten = storedList;
   } catch (e) {}
 
-  /* ---------- Password gate ---------- */
+  /* ---------- Anmeldung (Startseite) ----------
+     Benutzername = Name aus dem Team (TEAM_MEMBERS, Vorname reicht), Passwort = APP_PASSWORD.
+     Alternativ "Mit Trello anmelden": der persönliche Trello-Zugang gilt dann auch als Anmeldung.
+     Hinweis: Das ist eine Zugangssperre im Browser, kein serverseitiger Schutz. */
   var APP_PASSWORD = "AlpMob2026#";
   var AUTH_KEY = "alpinMobilAuthed";
 
+  var usernameInput = document.getElementById('username-input');
   var passwordInput = document.getElementById('password-input');
   var unlockBtn = document.getElementById('unlock-btn');
   var lockError = document.getElementById('lock-error');
   var lockCard = document.querySelector('.lock-card');
+  var lockRemember = document.getElementById('lock-remember');
+
+  function normLoginName(v) {
+    return String(v || '').toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/[^a-z]/g, '');
+  }
+  // Findet zum eingegebenen Benutzernamen die Person aus dem Team (voller Name, "vorname.nachname" oder Vorname)
+  function matchTeamLogin(input) {
+    var n = normLoginName(input);
+    if (!n) return '';
+    var team = (typeof TEAM_MEMBERS !== 'undefined' && TEAM_MEMBERS) || [];
+    var hit = '';
+    team.forEach(function(full) {
+      if (hit) return;
+      var pretty = full.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, '$1 $2');
+      var first = pretty.split(' ')[0];
+      if (normLoginName(full) === n) hit = pretty;
+      else if (normLoginName(first) === n) {
+        var sameFirst = team.filter(function(o) { return normLoginName(o.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, '$1 $2').split(' ')[0]) === n; });
+        if (sameFirst.length === 1) hit = pretty;
+      }
+    });
+    return hit;
+  }
+
+  function markAuthed(remember) {
+    try {
+      if (remember) localStorage.setItem(AUTH_KEY, '1');
+      else localStorage.removeItem(AUTH_KEY);
+      sessionStorage.setItem(AUTH_KEY, '1');
+    } catch (e) {}
+    document.body.classList.add('authed');
+  }
+
+  function lockFail(msg) {
+    lockError.textContent = msg;
+    lockCard.classList.remove('shake');
+    void lockCard.offsetWidth;
+    lockCard.classList.add('shake');
+  }
 
   function tryUnlock() {
-    if (passwordInput.value === APP_PASSWORD) {
-      try { sessionStorage.setItem(AUTH_KEY, '1'); } catch (e) {}
-      document.body.classList.add('authed');
-      initMapIfNeeded();
-    } else {
-      lockError.textContent = 'Falscher Zugangscode.';
-      lockCard.classList.remove('shake');
-      void lockCard.offsetWidth;
-      lockCard.classList.add('shake');
-    }
+    var who = matchTeamLogin(usernameInput.value);
+    if (!usernameInput.value.trim()) { lockFail('Bitte Benutzernamen eingeben.'); usernameInput.focus(); return; }
+    if (!who) { lockFail('Benutzername unbekannt.'); usernameInput.focus(); return; }
+    if (passwordInput.value !== APP_PASSWORD) { lockFail('Falsches Passwort.'); passwordInput.focus(); return; }
+    lockError.textContent = '';
+    try { localStorage.setItem('dispatchUserName', who); } catch (e) {}
+    markAuthed(lockRemember.checked);
+    passwordInput.value = '';
+    initMapIfNeeded();
   }
   unlockBtn.addEventListener('click', tryUnlock);
-  passwordInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') tryUnlock();
+  [usernameInput, passwordInput].forEach(function(el) {
+    el.addEventListener('keydown', function(e) { if (e.key === 'Enter') { e.preventDefault(); tryUnlock(); } });
+    el.addEventListener('input', function() { lockError.textContent = ''; });
+  });
+  document.getElementById('lock-eye').addEventListener('click', function() {
+    var show = passwordInput.type === 'password';
+    passwordInput.type = show ? 'text' : 'password';
+    this.setAttribute('aria-label', show ? 'Passwort verbergen' : 'Passwort anzeigen');
+    this.style.color = show ? 'var(--accent)' : '';
+  });
+  document.getElementById('lock-help-btn').addEventListener('click', function() {
+    var h = document.getElementById('lock-help');
+    h.style.display = h.style.display === 'block' ? 'none' : 'block';
+  });
+  document.getElementById('lock-trello-btn').addEventListener('click', function() {
+    try { localStorage.setItem('trelloLoginRemember', lockRemember.checked ? '1' : ''); } catch (e) {}
+    connectTrello();
   });
 
+  // Dekoration links: Punktmuster in den Partnerfarben, Anzahl Werkstätten
+  (function renderLockHero() {
+    var palette = ['#7f77dd', '#1d9e75', '#d85a30', '#b8862e', '#378add', '#ef9f27', '#d6478b'];
+    var html = '';
+    for (var r = 0; r < 16; r++) {
+      for (var c = 0; c < 11; c++) {
+        var k = (r * 7 + c * 3 + (r % 3) * 5) % 13;
+        var col = k < 7 && (r + c) % 3 !== 0 ? palette[k] : 'rgba(255,255,255,0.12)';
+        html += '<i style="left:' + (c * 26) + 'px;top:' + (r * 26) + 'px;background:' + col + '"></i>';
+      }
+    }
+    document.getElementById('lock-dots').innerHTML = html;
+    var n = (werkstaetten && werkstaetten.length) || 0;
+    document.getElementById('lock-stat-ws').textContent = n ? n.toLocaleString('de-DE') : '–';
+  })();
+
+  // Bereits angemeldet? (dauerhaft, in dieser Sitzung oder per Trello-Anmeldung)
   var alreadyAuthed = false;
-  try { alreadyAuthed = sessionStorage.getItem(AUTH_KEY) === '1'; } catch (e) {}
+  try {
+    var trelloReturn = /[#&]token=[0-9a-zA-Z]+/.test(window.location.hash || '');
+    if (trelloReturn) {
+      alreadyAuthed = true;
+      if (localStorage.getItem('trelloLoginRemember') !== '') localStorage.setItem(AUTH_KEY, '1');
+      localStorage.removeItem('trelloLoginRemember');
+      sessionStorage.setItem(AUTH_KEY, '1');
+    } else {
+      alreadyAuthed = sessionStorage.getItem(AUTH_KEY) === '1' || localStorage.getItem(AUTH_KEY) === '1';
+    }
+  } catch (e) {}
   if (alreadyAuthed) {
     document.body.classList.add('authed');
+  } else {
+    setTimeout(function() { try { usernameInput.focus(); } catch (e) {} }, 50);
+  }
+
+  function logout() {
+    if (!confirm('Abmelden? Beim nächsten Öffnen wird wieder die Anmeldung angezeigt.')) return;
+    try { localStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(AUTH_KEY); } catch (e) {}
+    window.location.reload();
   }
 
   /* ---------- Partner / zone reference data ---------- */
@@ -3196,7 +3440,7 @@
       trelloStatusEl.textContent = 'Trello-Karten werden abgerufen…';
     }
     var promises = cfg.boardIds.map(function(id) { return fetchTrelloBoard(cfg, id); });
-    Promise.all(promises).then(function(results) {
+    return Promise.all(promises).then(function(results) {
       var newIndex = {};
       var boards = [];
       var allOpen = [];
@@ -4600,6 +4844,7 @@
   });
 
   function switchToCasesView() {
+    leaveSettingsView();
     currentView = 'cases';
     document.body.classList.remove('view-dashboard');
     document.body.classList.add('view-cases');
@@ -4612,9 +4857,11 @@
     // Falls die statische PLZ-Koordinatentabelle noch lädt, nach dem Laden erneut zeichnen.
     if (staticPlzCoordsPromise) { staticPlzCoordsPromise.then(function() { if (currentView === 'cases') renderCasePins(); }); }
     setTimeout(function() { caseMap.invalidateSize(); }, 50);
+    updateNavActive();
   }
 
   function switchToPlzView() {
+    leaveSettingsView();
     currentView = 'plz';
     document.body.classList.remove('view-cases');
     document.body.classList.remove('view-dashboard');
@@ -4624,9 +4871,11 @@
     caseLegend.style.display = 'none';
     initMapIfNeeded();
     setTimeout(function() { if (map) map.invalidateSize(); }, 50);
+    updateNavActive();
   }
 
   function switchToDashboardView() {
+    leaveSettingsView();
     currentView = 'dashboard';
     document.body.classList.remove('view-cases');
     document.body.classList.add('view-dashboard');
@@ -4639,7 +4888,410 @@
     loadMailData(false);
     if (getTodoUrl() && !myName()) getDispatchUserName();
     loadTodos();
+    updateNavActive();
   }
+
+
+  /* =========================================================================
+     Einstellungsseite: alle Verbindungen der Seite auf einen Blick
+     ========================================================================= */
+  var setResults = {}; // key -> { state: 'ok'|'warn'|'err'|'busy', msg }
+  var settingsPanelHome = null;
+
+  function leaveSettingsView() {
+    document.body.classList.remove('view-settings');
+    var panel = document.getElementById('settings-panel');
+    if (panel && settingsPanelHome && panel.parentNode !== settingsPanelHome) {
+      panel.style.display = 'none';
+      settingsPanelHome.appendChild(panel);
+    }
+  }
+
+  function switchToSettingsView() {
+    currentView = 'settings';
+    document.body.classList.remove('view-cases', 'view-dashboard');
+    document.body.classList.add('view-settings');
+    caseSearchPanel.style.display = 'none';
+    caseLegend.style.display = 'none';
+    var panel = document.getElementById('settings-panel');
+    if (panel) {
+      if (!settingsPanelHome) settingsPanelHome = panel.parentNode;
+      document.getElementById('set-advanced-body').appendChild(panel);
+      panel.style.display = 'block';
+    }
+    renderSettingsPage();
+    updateNavActive();
+    document.getElementById('settings-page').scrollTop = 0;
+  }
+
+  function fmtTime(ts) {
+    return ts ? new Date(ts).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr' : '–';
+  }
+
+  // Beschreibung aller Verbindungen. state = Grundzustand ohne Test.
+  function settingsItems() {
+    var cfg = getTrelloConfig();
+    var boardNames = Object.keys(trelloBoardLists || {}).map(function(id) { return trelloBoardLists[id].name; });
+    var provider = getMailProvider();
+    var mailbox = getMsMailbox();
+    var wDone = werkstattCoordCount(), wFail = werkstattFailedCount(), wTotal = werkstaetten.length;
+    var coordsCount = staticPlzCoords ? Object.keys(staticPlzCoords).length : 0;
+    var items = [];
+
+    items.push({
+      key: 'trello-read', icon: '🗂️', title: 'Trello – Boards lesen',
+      state: cfg && cfg.boardIds.length ? (trelloLastFetch ? 'ok' : 'warn') : 'err',
+      label: cfg && cfg.boardIds.length ? (trelloLastFetch ? 'Verbunden' : 'Noch nicht geladen') : 'Nicht eingerichtet',
+      rows: [
+        ['Zugang', isCustomTrelloConfig() ? 'eigene Zugangsdaten (nur dieser Browser)' : 'voreingestellt für alle'],
+        ['Boards', (cfg ? cfg.boardIds.length : 0) + (boardNames.length ? ' – ' + boardNames.join(', ') : '')],
+        ['Offene Karten', String((trelloOpenCards || []).length)],
+        ['Letzter Abruf', fmtTime(trelloLastFetch) + ' (automatisch alle 10 Min.)']
+      ],
+      actions: [{ id: 'trello-refresh', label: 'Jetzt aktualisieren' }, { id: 'open-trello-cfg', label: 'Zugang ändern', subtle: true }],
+      test: function() {
+        var before = trelloLastFetch;
+        return Promise.resolve(refreshTrelloData(true)).then(function() {
+          if (trelloLastFetch === before) throw new Error('Trello-Boards konnten nicht geladen werden (Zugangsdaten/Board-IDs prüfen oder Netzwerkfehler).');
+          return 'Boards erreichbar, ' + (trelloOpenCards || []).length + ' offene Karten geladen.';
+        });
+      }
+    });
+
+    var tName = trelloUserName();
+    items.push({
+      key: 'trello-user', icon: '👤', title: 'Trello – deine Anmeldung',
+      state: trelloUserToken() ? 'ok' : 'warn',
+      label: trelloUserToken() ? 'Verbunden' : 'Nicht verbunden',
+      rows: [
+        ['Konto', trelloUserToken() ? (tName || 'verbunden') : '–'],
+        ['Wofür', 'Kommentieren, Verschieben, Karten anlegen, private To-dos, dein Name in den Tickets'],
+        ['Gültig', trelloUserToken() ? 'unbefristet, in diesem Browser gespeichert' : '–']
+      ],
+      actions: trelloUserToken() ? [{ id: 'trello-disconnect', label: 'Trennen', subtle: true }] : [{ id: 'trello-connect', label: 'Mit Trello verbinden', primary: true }],
+      test: trelloUserToken() ? function() { return trelloWrite('GET', '/members/me', { fields: 'fullName' }).then(function(me) { return 'Angemeldet als ' + (me.fullName || 'unbekannt') + '.'; }); } : null
+    });
+
+    var mailState, mailLabel, mailRows;
+    if (provider === 'outlook') {
+      mailState = mailError ? 'err' : (mailNeedsLogin ? 'warn' : (mailData ? 'ok' : 'warn'));
+      mailLabel = mailError ? 'Fehler' : (mailNeedsLogin ? 'Anmeldung nötig' : (mailData ? 'Verbunden' : 'Noch nicht geladen'));
+      mailRows = [['Dienst', 'Outlook / Microsoft 365'], ['Postfach', mailbox || 'dein eigenes Postfach'], ['Als offen gilt', MS_OPEN_MODE === 'unread' ? 'ungelesen im Posteingang' : 'alles im Posteingang'], ['Letzter Abruf', mailData ? fmtTime(mailData.ts) : '–']];
+    } else if (provider === 'gmail') {
+      mailState = mailError ? 'err' : (mailData ? 'ok' : 'warn');
+      mailLabel = mailError ? 'Fehler' : (mailData ? 'Verbunden' : 'Noch nicht geladen');
+      mailRows = [['Dienst', 'Gmail über Apps-Script'], ['Letzter Abruf', mailData ? fmtTime(mailData.ts) : '–']];
+    } else {
+      mailState = 'warn'; mailLabel = 'Nicht verbunden';
+      mailRows = [['Dienst', 'Outlook / Microsoft 365'], ['Microsoft-App', msConfigured() ? 'freigeschaltet' : 'noch nicht registriert – Admin muss die App einmalig bei Microsoft anlegen (outlook-einrichtung.md)']];
+    }
+    if (provider && mailError) mailRows.push(['Meldung', mailError]);
+    items.push({
+      key: 'mail', icon: '✉️', title: 'E-Mail-Postfach',
+      state: mailState, label: mailLabel, rows: mailRows,
+      actions: provider ? [{ id: 'mail-dashboard', label: 'Im Dashboard öffnen' }, { id: 'mail-disconnect', label: 'Trennen', subtle: true }] : [],
+      extra: provider ? '' : '<div class="set-inline">' +
+        '<input type="text" id="set-ms-mailbox" placeholder="Gemeinsames Postfach, z. B. service@alpha-mobil.com (optional)" value="' + escHtml(getMsMailbox() || '') + '" />' +
+        '<button type="button" class="dash-btn dash-btn-ms" data-set-action="ms-connect"' + (msConfigured() ? '' : ' disabled title="Erst nach der Microsoft-Freischaltung möglich"') + '><span class="dash-ms-logo"></span>Mit Microsoft 365 verbinden</button></div>',
+      test: provider ? function() {
+        return new Promise(function(resolve, reject) {
+          mailData = null; mailError = '';
+          loadMailData(true, false);
+          var tries = 0;
+          (function wait() {
+            if (!mailLoading && (mailData || mailError || mailNeedsLogin)) {
+              if (mailData) resolve((mailData.total != null ? mailData.total : mailData.threads.length) + ' offene E-Mails gefunden.');
+              else reject(new Error(mailNeedsLogin ? 'Anmeldung bei Microsoft nötig (im Dashboard „Bei Microsoft anmelden“).' : mailError));
+            } else if (tries++ > 60) reject(new Error('Keine Antwort'));
+            else setTimeout(wait, 250);
+          })();
+        });
+      } : null
+    });
+
+    items.push({
+      key: 'todo', icon: '☑️', title: 'To-do-Liste (Google Sheet)',
+      state: getTodoUrl() ? (todoError ? 'err' : (todoLoaded ? 'ok' : 'warn')) : 'warn',
+      label: getTodoUrl() ? (todoError ? 'Fehler' : (todoLoaded ? 'Verbunden' : 'Noch nicht geladen')) : 'Nicht verbunden',
+      rows: [
+        ['Quelle', getTodoUrl() ? (isCustomTodoUrl() ? 'eigene URL (nur dieser Browser)' : 'voreingestellt für alle') : '–'],
+        ['To-dos', todoLoaded ? todos.filter(function(t) { return !t.done && !isPrivateTodo(t); }).length + ' offen im Team, ' + todos.filter(function(t) { return !t.done && isPrivateTodo(t); }).length + ' privat' : '–'],
+        ['Private To-dos', trelloUserToken() ? 'möglich' : 'nur mit Trello-Anmeldung']
+      ].concat(todoError ? [['Meldung', todoError]] : []),
+      actions: [],
+      test: getTodoUrl() ? function() {
+        return todoRequest('GET').then(function(data) {
+          todos = Array.isArray(data.todos) ? data.todos : []; todoLoaded = true; todoError = '';
+          return 'Erreichbar, ' + todos.length + ' To-dos gelesen' + (trelloUserToken() ? (data.me ? ', Trello-Anmeldung vom Skript bestätigt.' : ' – Skript kennt die Trello-Prüfung noch nicht (alte Version?).') : '.');
+        });
+      } : null
+    });
+
+    var shUrl = getSharedSheetUrl();
+    items.push({
+      key: 'plz-sheet', icon: '🧭', title: 'Geteilte PLZ-Zuordnung (Google Sheet)',
+      state: shUrl ? 'ok' : 'warn', label: shUrl ? 'Eingerichtet' : 'Nur lokal',
+      rows: [
+        ['Quelle', shUrl ? (isCustomSharedSheetUrl() ? 'eigene URL (nur dieser Browser)' : 'voreingestellt für alle') : 'Umverteilungen bleiben nur in diesem Browser'],
+        ['Umverteilte Gebiete', String(Object.keys(plzOverrides || {}).length)]
+      ],
+      actions: [{ id: 'plz-refresh', label: 'Jetzt aktualisieren' }, { id: 'open-plz-cfg', label: 'Quelle ändern', subtle: true }],
+      test: shUrl ? function() {
+        return fetch(shUrl + (shUrl.indexOf('?') === -1 ? '?' : '&') + 'action=list', { cache: 'no-store' })
+          .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function(d) { return 'Erreichbar, ' + ((d && d.overrides) || []).length + ' geteilte Zuordnungen.'; });
+      } : null
+    });
+
+    var src = getSourceUrl();
+    items.push({
+      key: 'werkstatt', icon: '🔧', title: 'Werkstätten-Daten',
+      state: wFail > 0 ? 'warn' : (wDone >= wTotal ? 'ok' : 'warn'),
+      label: wDone >= wTotal ? (wFail > 0 ? wFail + ' nicht geortet' : 'Vollständig') : 'Wird aufgebaut',
+      rows: [
+        ['Quelle', src ? (isCustomSourceUrl() ? 'eigene URL' : 'Google Sheet (voreingestellt)') : 'Excel-Import / eingebaute Liste'],
+        ['Werkstätten', String(wTotal)],
+        ['Auf der Karte geortet', Math.max(0, wDone - wFail) + ' von ' + wTotal + (wDone < wTotal ? ' (läuft noch …)' : '')]
+      ],
+      actions: (src ? [{ id: 'werkstatt-refresh', label: 'Liste neu laden' }] : []).concat([{ id: 'open-werkstatt-cfg', label: 'Excel hochladen / Quelle ändern', subtle: true }]).concat(wFail ? [{ id: 'werkstatt-retry', label: 'Nicht georteten erneut versuchen', subtle: true }] : []),
+      test: src ? function() {
+        return fetch(src, { cache: 'no-store' }).then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+          .then(function(d) { return 'Erreichbar, ' + (Array.isArray(d) ? d.length : 0) + ' Werkstätten in der Quelle.'; });
+      } : null
+    });
+
+    items.push({
+      key: 'maps', icon: '🗺️', title: 'Karten & Ortung',
+      state: geoLayer && coordsCount ? 'ok' : 'warn',
+      label: geoLayer && coordsCount ? 'Bereit' : 'Teilweise',
+      rows: [
+        ['PLZ-Gebiete', geoLayer ? 'geladen' : 'noch nicht geladen (PLZ-Karte einmal öffnen)'],
+        ['PLZ-Koordinaten', coordsCount ? coordsCount.toLocaleString('de-DE') + ' PLZ (plz-coords.json)' : 'Datei fehlt – Suche langsamer'],
+        ['Adresssuche', LOCATIONIQ_API_KEY ? 'LocationIQ' : 'nicht eingerichtet']
+      ],
+      actions: [],
+      test: null
+    });
+
+    var me = myName();
+    items.push({
+      key: 'profile', icon: '🙋', title: 'Du & dein Team',
+      state: me ? 'ok' : 'warn', label: me ? 'Erkannt' : 'Unbekannt',
+      rows: [
+        ['Dein Name', me ? me + (trelloUserName() ? ' (über Trello)' : '') : '–'],
+        ['Team (Auswahl „Für wen?“)', TEAM_MEMBERS.join(', ')],
+        ['Hinweis', 'Team-Liste wird in der index.html unter TEAM_MEMBERS gepflegt']
+      ],
+      actions: [],
+      test: null
+    });
+
+    items.push({
+      key: 'app', icon: '📱', title: 'App & Zwischenspeicher',
+      state: 'ok', label: ('serviceWorker' in navigator) && navigator.serviceWorker.controller ? 'Als App aktiv' : 'Im Browser',
+      rows: [
+        ['Installierbar', 'serviceWorker' in navigator ? 'ja (über „App installieren“ im Browser)' : 'nein'],
+        ['Zwischenspeicher', 'Trello-, E-Mail- und To-do-Daten werden für schnelles Laden gespeichert']
+      ],
+      actions: [{ id: 'app-clear', label: 'Neueste Version der Seite laden', subtle: true }],
+      test: null
+    });
+    return items;
+  }
+
+  function renderSettingsPage() {
+    if (currentView !== 'settings') return;
+    var items = settingsItems();
+    var html = items.map(function(it) {
+      var r = setResults[it.key];
+      var state = r ? r.state : it.state;
+      var label = r ? ({ ok: 'Test erfolgreich', err: 'Test fehlgeschlagen', busy: 'Wird getestet …', warn: it.label })[r.state] : it.label;
+      return '<article class="set-card set-' + state + '">' +
+        '<div class="set-card-head"><span class="set-ico">' + it.icon + '</span><span class="set-title">' + escHtml(it.title) + '</span>' +
+        '<span class="set-pill set-pill-' + state + '">' + escHtml(label) + '</span></div>' +
+        '<dl class="set-rows">' + it.rows.map(function(row) { return '<dt>' + escHtml(row[0]) + '</dt><dd>' + escHtml(row[1]) + '</dd>'; }).join('') + '</dl>' +
+        (it.extra || '') +
+        (r && r.msg ? '<div class="set-result set-result-' + r.state + '">' + escHtml(r.msg) + '</div>' : '') +
+        '<div class="set-actions">' +
+          it.actions.map(function(a) { return '<button type="button" class="' + (a.primary ? 'dash-btn' : (a.subtle ? 'dash-link-btn' : 'set-btn')) + '" data-set-action="' + a.id + '">' + escHtml(a.label) + '</button>'; }).join('') +
+          (it.test ? '<button type="button" class="set-btn" data-set-test="' + it.key + '">Verbindung testen</button>' : '') +
+        '</div>' +
+      '</article>';
+    }).join('');
+    document.getElementById('set-cards').innerHTML = html;
+    var okCount = items.filter(function(it) { var r = setResults[it.key]; return (r ? r.state : it.state) === 'ok'; }).length;
+    document.getElementById('set-summary').textContent = okCount + ' von ' + items.length + ' bereit';
+  }
+
+  function runSettingsTest(key) {
+    var it = settingsItems().filter(function(x) { return x.key === key; })[0];
+    if (!it || !it.test) return Promise.resolve();
+    setResults[key] = { state: 'busy', msg: '' };
+    renderSettingsPage();
+    var p;
+    try { p = Promise.resolve(it.test()); } catch (e) { p = Promise.reject(e); }
+    return p.then(function(msg) { setResults[key] = { state: 'ok', msg: msg || 'OK' }; })
+      .catch(function(err) { setResults[key] = { state: 'err', msg: (err && (err.message || err.errorMessage)) || String(err) }; })
+      .then(renderSettingsPage);
+  }
+
+  document.getElementById('set-test-all').addEventListener('click', function() {
+    var keys = settingsItems().filter(function(it) { return it.test; }).map(function(it) { return it.key; });
+    keys.reduce(function(p, k) { return p.then(function() { return runSettingsTest(k); }); }, Promise.resolve());
+  });
+  document.getElementById('settings-page').addEventListener('click', function(e) {
+    var t = e.target.closest('[data-set-test]');
+    if (t) { runSettingsTest(t.getAttribute('data-set-test')); return; }
+    var a = e.target.closest('[data-set-action]');
+    if (!a) return;
+    var id = a.getAttribute('data-set-action');
+    if (id === 'trello-refresh') runSettingsTest('trello-read');
+    else if (id === 'plz-refresh') runSettingsTest('plz-sheet');
+    else if (id === 'open-trello-cfg') openAdvanced('trello-toggle', 'trello-panel');
+    else if (id === 'open-plz-cfg') openAdvanced('shared-sheet-toggle', 'shared-sheet-panel');
+    else if (id === 'open-werkstatt-cfg') openAdvanced('werkstatt-update-toggle', 'werkstatt-dropzone');
+    else if (id === 'ms-connect') {
+      if (!msConfigured()) return;
+      var box = (document.getElementById('set-ms-mailbox').value || '').trim();
+      try { if (box) localStorage.setItem(MS_MAILBOX_KEY, box); else localStorage.removeItem(MS_MAILBOX_KEY); } catch (err) {}
+      setMailProvider('outlook');
+      mailData = null; mailError = ''; mailNeedsLogin = false;
+      loadMailData(true, true); // aus dem Klick heraus -> Anmeldefenster darf öffnen
+      setTimeout(renderSettingsPage, 300);
+    }
+    else if (id === 'trello-connect') connectTrello();
+    else if (id === 'trello-disconnect') { disconnectTrello(); delete setResults['trello-user']; renderSettingsPage(); }
+    else if (id === 'mail-dashboard') switchToDashboardView();
+    else if (id === 'mail-disconnect') {
+      if (!confirm('Verbindung zum E-Mail-Postfach in diesem Browser entfernen?')) return;
+      if (getMailProvider() === 'outlook' && msalApp) { try { msalApp.clearCache(); } catch (err) {} }
+      setMailSourceUrl(''); setMailProvider(''); mailData = null; mailError = ''; mailNeedsLogin = false;
+      delete setResults.mail; renderSettingsPage();
+    }
+    else if (id === 'werkstatt-refresh') { var u = getSourceUrl(); if (u) loadFromSourceUrl(u, false).then(renderSettingsPage); }
+    else if (id === 'werkstatt-retry') { var rb = document.getElementById('werkstatt-reset-btn'); if (rb) rb.click(); setTimeout(renderSettingsPage, 300); }
+    else if (id === 'app-clear') {
+      if (!confirm('Zwischengespeicherte Daten löschen und die Seite neu laden? Deine Anmeldungen bleiben erhalten.')) return;
+      [TRELLO_CACHE_KEY, MAIL_CACHE_KEY, TODO_CACHE_KEY].forEach(function(k) { try { localStorage.removeItem(k); } catch (err) {} });
+      var done = function() { window.location.reload(); };
+      if (window.caches && caches.keys) caches.keys().then(function(ks) { return Promise.all(ks.map(function(k) { return caches.delete(k); })); }).then(done, done);
+      else done();
+    }
+  });
+  // Detailbereich unten öffnen und hinscrollen
+  function openAdvanced(toggleId, panelId) {
+    var panel = document.getElementById(panelId);
+    if (panel && panel.style.display === 'none') document.getElementById(toggleId).click();
+    var target = panel || document.getElementById(toggleId);
+    if (target && target.scrollIntoView) target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  }
+
+  function showToast(msg) {
+    var t = document.getElementById('app-toast');
+    if (!t) { t = document.createElement('div'); t.id = 'app-toast'; t.className = 'app-toast'; t.setAttribute('role', 'status'); document.body.appendChild(t); }
+    t.textContent = msg;
+    t.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(function() { t.classList.remove('show'); }, 2600);
+  }
+
+  // Alle Datenquellen der Seite neu laden (Trello, E-Mails, To-dos, PLZ-Zuordnung, Werkstätten)
+  var refreshAllRunning = false;
+  function refreshAll() {
+    if (refreshAllRunning) return Promise.resolve();
+    refreshAllRunning = true;
+    showToast('Alles wird aktualisiert …');
+    var src = getSourceUrl();
+    var jobs = [
+      Promise.resolve(refreshTrelloData(true)),
+      Promise.resolve(src ? loadFromSourceUrl(src, true) : null),
+      Promise.resolve(getSharedSheetUrl() ? reloadSharedOverridesNow(true) : null)
+    ];
+    loadMailData(true, false);
+    if (typeof loadTodos === 'function') loadTodos();
+    return Promise.all(jobs.map(function(j) { return j.catch(function() {}); })).then(function() {
+      return new Promise(function(r) { var n = 0; (function w() { if ((!mailLoading && !todoLoading) || n++ > 40) r(); else setTimeout(w, 250); })(); });
+    }).then(function() {
+      refreshAllRunning = false;
+      if (currentView === 'dashboard') renderDashboard();
+      if (currentView === 'cases') renderCasePins();
+      if (currentView === 'settings') { setResults = {}; renderSettingsPage(); }
+      showToast('✓ Alles auf dem neuesten Stand (' + fmtTime(Date.now()) + ')');
+    });
+  }
+  document.getElementById('set-refresh-all').addEventListener('click', function() {
+    refreshAll().then(function() { document.getElementById('set-test-all').click(); });
+  });
+  document.getElementById('nav-refresh-all').addEventListener('click', function() { closeNav(); refreshAll(); });
+  document.getElementById('nav-logout').addEventListener('click', function() { closeNav(); logout(); });
+
+  // Übersicht aktuell halten, solange die Seite offen ist
+  setInterval(function() { if (currentView === 'settings') renderSettingsPage(); }, 5000);
+
+  /* ---------- Seitenmenü (ersetzt die Buttons oben rechts) ---------- */
+  var navDrawer = document.getElementById('nav-drawer');
+  var navBackdrop = document.getElementById('nav-backdrop');
+  var navMenuBtn = document.getElementById('nav-menu-btn');
+  var NAV_LABELS = { plz: 'PLZ-Karte', dashboard: 'Dashboard', cases: 'Fallübersicht', settings: 'Einstellungen' };
+
+  function openNav() {
+    document.body.classList.add('nav-open');
+    navDrawer.setAttribute('aria-hidden', 'false');
+    navMenuBtn.setAttribute('aria-expanded', 'true');
+    var foot = document.getElementById('nav-foot');
+    var who = (typeof myName === 'function') ? myName() : '';
+    foot.innerHTML = who ? '<span class="tk-avatar">' + escHtml(who.split(/\s+/).map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase()) + '</span>' + escHtml(who) : '';
+    setTimeout(function() { var a = navDrawer.querySelector('.nav-item.active') || navDrawer.querySelector('.nav-item'); if (a) a.focus(); }, 50);
+  }
+  function closeNav() {
+    document.body.classList.remove('nav-open');
+    navDrawer.setAttribute('aria-hidden', 'true');
+    navMenuBtn.setAttribute('aria-expanded', 'false');
+  }
+  function updateNavActive() {
+    document.querySelectorAll('#nav-drawer .nav-item').forEach(function(b) {
+      b.classList.toggle('active', b.getAttribute('data-nav') === currentView);
+    });
+    // Button-Beschriftung bleibt immer "Menü"; die aktuelle Ansicht ist im Menü markiert
+  }
+
+  var settingsPanelEl = document.getElementById('settings-panel');
+  var settingsHome = settingsPanelEl ? settingsPanelEl.parentNode : null;
+  function openSettingsModal() {
+    if (!settingsPanelEl) return;
+    document.getElementById('settings-modal-body').appendChild(settingsPanelEl);
+    settingsPanelEl.style.display = 'block';
+    document.getElementById('settings-modal').style.display = 'flex';
+  }
+  function closeSettingsModal() {
+    document.getElementById('settings-modal').style.display = 'none';
+    if (settingsPanelEl && settingsHome) { settingsPanelEl.style.display = 'none'; settingsHome.appendChild(settingsPanelEl); }
+  }
+
+  navMenuBtn.addEventListener('click', function() {
+    if (document.body.classList.contains('nav-open')) closeNav(); else openNav();
+  });
+  navBackdrop.addEventListener('click', closeNav);
+  document.getElementById('nav-close').addEventListener('click', closeNav);
+  document.querySelectorAll('#nav-drawer .nav-item').forEach(function(b) {
+    b.addEventListener('click', function() {
+      var target = b.getAttribute('data-nav');
+      closeNav();
+      if (target === 'plz') switchToPlzView();
+      else if (target === 'dashboard') switchToDashboardView();
+      else if (target === 'cases') switchToCasesView();
+      else if (target === 'tour') { if (currentView !== 'plz') switchToPlzView(); openTourPlanner(); }
+      else if (target === 'settings') switchToSettingsView();
+    });
+  });
+  document.getElementById('settings-modal-close').addEventListener('click', closeSettingsModal);
+  document.getElementById('settings-modal').addEventListener('click', function(e) { if (e.target.id === 'settings-modal') closeSettingsModal(); });
+  document.addEventListener('keydown', function(e) {
+    if (e.key !== 'Escape') return;
+    if (document.body.classList.contains('nav-open')) closeNav();
+    else if (document.getElementById('settings-modal').style.display !== 'none') closeSettingsModal();
+  });
+  updateNavActive();
 
   if (viewToggleBtn) {
     viewToggleBtn.addEventListener('click', function() {
