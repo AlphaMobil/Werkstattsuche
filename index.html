@@ -1671,6 +1671,16 @@
   .dash-mention-chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 3px 9px; font-family: var(--font-body); font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
   .dash-mention-chip:hover { border-color: #0C66E4; color: #0C66E4; }
   .dash-mention-chip-group { font-family: var(--font-mono); color: #0C66E4; background: #E9F2FF; border-color: #CCE0FF; }
+  .tk-vis { font-size: 10.5px; font-weight: 600; padding: 1px 7px; border-radius: 10px; background: var(--surface-2); color: var(--text-muted); white-space: nowrap; }
+  .dash-ticket.tk-private { border-style: dashed; border-left-style: solid; border-left-color: #7A4FBF; background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(122,79,191,0.04) 10px 20px); }
+  .dash-ticket.tk-private .tk-vis { background: #EFE7FB; color: #5B3B99; }
+  .dash-ticket.tk-private.tk-low { border-left-color: #A98BD6; }
+  .dash-ticket.tk-high.tk-private { background-image: repeating-linear-gradient(135deg, transparent 0 10px, rgba(255,255,255,0.07) 10px 20px); border-color: var(--danger); }
+  .tk-high .tk-vis { background: rgba(255,255,255,0.22); color: #fff; }
+  .tk-done .tk-vis { background: var(--surface); }
+  .dash-vis-opt-private:has(input:checked) { border-color: #7A4FBF; background: #EFE7FB; color: #5B3B99; }
+  .dash-opt-disabled { opacity: 0.45; cursor: not-allowed; }
+  .dash-dialog input[type="text"]:disabled { opacity: 0.6; }
   .dash-todo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px; }
   .dash-todo-add { background: none; border: 1px dashed var(--border); border-radius: 6px; padding: 2px 8px; font-family: var(--font-body); font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: pointer; }
   .dash-todo-add:hover { border-color: var(--accent); color: var(--accent); }
@@ -1900,6 +1910,7 @@
             <div class="dash-seg" role="group">
               <button type="button" class="dash-seg-btn active" data-scope="all">Alle (Team)</button>
               <button type="button" class="dash-seg-btn" data-scope="mine">Meine</button>
+              <button type="button" class="dash-seg-btn" data-scope="private">&#128274; Privat</button>
             </div>
             <select id="dash-todo-person"></select>
             <label class="dash-check"><input type="checkbox" id="dash-todo-showdone" /> Erledigte zeigen</label>
@@ -1951,6 +1962,12 @@
           <div id="dash-todo-ref" class="dash-todo-ref-preview"></div>
           <label class="dash-field-label" for="dash-todo-text">Was ist zu tun?</label>
           <textarea id="dash-todo-text" rows="3" placeholder="z.&nbsp;B. Kunde zur&uuml;ckrufen, Ersatzteil bestellen &hellip;"></textarea>
+          <span class="dash-field-label">Sichtbar f&uuml;r</span>
+          <div class="dash-prio-pick" role="radiogroup" aria-label="Sichtbarkeit">
+            <label class="dash-prio-opt"><input type="radio" name="dash-todo-vis" value="team" checked /> &#128101; Team (alle)</label>
+            <label class="dash-prio-opt dash-vis-opt-private" id="dash-todo-vis-private-label"><input type="radio" name="dash-todo-vis" value="private" /> &#128274; Privat (nur ich)</label>
+          </div>
+          <div id="dash-todo-vis-hint" class="dash-tr-hint" style="display:none;"></div>
           <span class="dash-field-label">Priorit&auml;t</span>
           <div class="dash-prio-pick" role="radiogroup" aria-label="Priorit&auml;t">
             <label class="dash-prio-opt dash-prio-opt-high"><input type="radio" name="dash-todo-prio" value="high" /> &#9650; Hoch</label>
@@ -5190,6 +5207,7 @@
   var PRIO_RANK = { high: 0, normal: 1, low: 2 };
   var PRIO_LABEL = { high: 'Hoch', normal: 'Normal', low: 'Niedrig' };
   var PRIO_ICON = { high: '▲', normal: '■', low: '▼' };
+  function isPrivateTodo(t) { return !!t && t.visibility === 'private'; }
   function prioOf(t) { return PRIO_RANK.hasOwnProperty(t && t.priority) ? t.priority : 'normal'; }
 
   function openTodosFor(type, id) {
@@ -5199,7 +5217,7 @@
     if (!getTodoUrl()) return '';
     var open = openTodosFor(type, id);
     if (!open.length) return '';
-    var who = open.map(function(t) { return t.owner || '?'; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ');
+    var who = open.map(function(t) { return displayName(t.owner) || '?'; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ');
     var hasHigh = open.some(function(t) { return prioOf(t) === 'high'; });
     return '<span class="dash-todo-badge' + (hasHigh ? ' dash-todo-badge-high' : '') + '" title="' + escHtml(open.map(function(t) { return '• ' + t.text + ' (' + (t.owner || '?') + ')'; }).join('\n')) + '">☑ ' + open.length + ' To-do' + (open.length > 1 ? 's' : '') + ' · ' + escHtml(who) + '</span>';
   }
@@ -5211,14 +5229,16 @@
   function todoRequest(method, payload) {
     var url = getTodoUrl();
     if (!url) return Promise.reject(new Error('Keine To-do-Liste verbunden'));
+    var tt = (typeof trelloUserToken === 'function') ? trelloUserToken() : '';
+    if (method === 'GET' && tt) url += (url.indexOf('?') === -1 ? '?' : '&') + 'tt=' + encodeURIComponent(tt);
     var opts = method === 'GET'
       ? { cache: 'no-store' }
-      : { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) };
+      : { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({}, payload, tt ? { tt: tt } : {})) };
     return fetch(url, opts).then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function(data) {
-      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error);
+      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error === 'private_needs_trello' ? 'Private To-dos gehen nur mit Trello-Verbindung (oder das Google-Skript ist noch nicht aktualisiert).' : data.error);
       return data;
     });
   }
@@ -5228,6 +5248,7 @@
     todoLoading = true;
     todoRequest('GET').then(function(data) {
       todos = Array.isArray(data.todos) ? data.todos : [];
+      migrateMyTodoNames();
       todoLoaded = true;
       todoError = '';
       try { localStorage.setItem(TODO_CACHE_KEY, JSON.stringify(todos)); } catch (e) {}
@@ -5237,6 +5258,31 @@
     }).then(function() {
       todoLoading = false;
       if (currentView === 'dashboard') { renderTodoPanel(); renderDashTable(); renderMailPanel(); }
+    });
+  }
+
+  // Vorname -> voller Trello-Name, wenn eindeutig (z. B. "Nick" -> "Nick Nellessen")
+  function displayName(n) {
+    if (!n) return '';
+    if (String(n).trim().indexOf(' ') !== -1) return n;
+    var me = myName();
+    if (me && sameName(n, me)) return me;
+    var hits = Object.keys(trelloMemberNames || {}).filter(function(full) { return sameName(n, full); });
+    return hits.length === 1 ? hits[0] : n;
+  }
+  // Eigene ältere To-dos, die nur mit Vornamen gespeichert sind, im Sheet auf den Trello-Namen umstellen
+  var todoNameMigrationDone = false;
+  function migrateMyTodoNames() {
+    var me = myName();
+    if (todoNameMigrationDone || !trelloUserName() || !me || me.indexOf(' ') === -1) return;
+    todoNameMigrationDone = true;
+    todos.forEach(function(t) {
+      if (t.owner && t.owner !== me && sameName(t.owner, me)) {
+        t.owner = me;
+        todoRequest('POST', { action: 'update', id: t.id, fields: { owner: me } }).catch(function(err) {
+          console.warn('Name im To-do konnte nicht aktualisiert werden:', err);
+        });
+      }
     });
   }
 
@@ -5290,7 +5336,10 @@
     var person = personSel.value;
     var rows = todos.filter(function(t) {
       if (!showDone && t.done) return false;
-      if (todoScope === 'mine') return sameName(t.owner, me);
+      var priv = isPrivateTodo(t);
+      if (todoScope === 'private') return priv;
+      if (todoScope === 'mine') return priv || sameName(t.owner, me);
+      if (priv) return false; // Team-Ansicht zeigt nur Team-Tickets
       if (person && !sameName(t.owner, person)) return false;
       return true;
     });
@@ -5303,13 +5352,18 @@
       return String(a.createdAt).localeCompare(String(b.createdAt));
     });
 
-    var openAll = todos.filter(function(t) { return !t.done; }).length;
-    var openMine = todos.filter(function(t) { return !t.done && sameName(t.owner, me); }).length;
+    var openAll = todos.filter(function(t) { return !t.done && !isPrivateTodo(t); }).length;
+    var openMine = todos.filter(function(t) { return !t.done && (isPrivateTodo(t) || sameName(t.owner, me)); }).length;
+    var openPriv = todos.filter(function(t) { return !t.done && isPrivateTodo(t); }).length;
     var openHigh = todos.filter(function(t) { return !t.done && prioOf(t) === 'high'; }).length;
-    countEl.textContent = openMine + ' meine · ' + openAll + ' offen im Team' + (openHigh ? ' · ' + openHigh + ' hohe Prio' : '');
+    countEl.textContent = openMine + ' meine · ' + openAll + ' offen im Team' + (openPriv ? ' · ' + openPriv + ' privat' : '') + (openHigh ? ' · ' + openHigh + ' hohe Prio' : '');
 
     if (todoError && !todoLoaded) { list.innerHTML = '<div class="dash-error">' + escHtml(todoError) + '</div>'; return; }
     if (!todoLoaded) { list.innerHTML = '<div class="dash-empty">To-dos werden geladen…</div>'; return; }
+    if (!rows.length && todoScope === 'private') {
+      list.innerHTML = '<div class="dash-empty">' + (trelloUserName() ? 'Keine privaten To-dos. Beim Anlegen „🔒 Privat“ wählen – dann siehst nur du das Ticket.' : 'Private To-dos gibt es mit Trello-Verbindung (Button über der Kartentabelle).') + '</div>';
+      return;
+    }
     if (!rows.length) {
       list.innerHTML = '<div class="dash-empty">' + (todoScope === 'mine' ? 'Keine offenen To-dos für dich. Lege eins über „+ To-do“ an einer Karte oder E-Mail an.' : 'Keine To-dos.') + '</div>';
       return;
@@ -5328,16 +5382,18 @@
       var overdue = t.due && !t.done && t.due < today;
       var chips = [];
       if (t.due) chips.push('<span class="tk-chip' + (overdue ? ' tk-chip-alert' : '') + '">' + (overdue ? '⚠ ' : '') + 'bis ' + fmtDate(t.due) + '</span>');
-      chips.push('<span class="tk-chip tk-chip-muted">erstellt ' + relTime(t.createdAt) + (t.createdBy && !sameName(t.createdBy, t.owner) ? ' von ' + escHtml(t.createdBy) : '') + '</span>');
-      if (t.done) chips.push('<span class="tk-chip tk-chip-muted">✓ erledigt ' + relTime(t.doneAt) + (t.doneBy ? ' von ' + escHtml(t.doneBy) : '') + '</span>');
-      var owner = t.owner || '–';
+      chips.push('<span class="tk-chip tk-chip-muted">erstellt ' + relTime(t.createdAt) + (t.createdBy && !sameName(t.createdBy, t.owner) ? ' von ' + escHtml(displayName(t.createdBy)) : '') + '</span>');
+      if (t.done) chips.push('<span class="tk-chip tk-chip-muted">✓ erledigt ' + relTime(t.doneAt) + (t.doneBy ? ' von ' + escHtml(displayName(t.doneBy)) : '') + '</span>');
+      var owner = displayName(t.owner) || '–';
       var initials = owner.split(/\s+/).filter(Boolean).map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase() || '?';
       var prioOptions = ['high', 'normal', 'low'].map(function(k) {
         return '<option value="' + k + '"' + (k === prio ? ' selected' : '') + '>' + PRIO_LABEL[k] + '</option>';
       }).join('');
-      return '<article class="dash-ticket tk-' + prio + (t.done ? ' tk-done' : '') + (overdue ? ' tk-overdue' : '') + '">' +
+      var priv = isPrivateTodo(t);
+      return '<article class="dash-ticket tk-' + prio + (priv ? ' tk-private' : ' tk-team') + (t.done ? ' tk-done' : '') + (overdue ? ' tk-overdue' : '') + '">' +
         '<div class="tk-head">' +
           '<span class="tk-prio">' + PRIO_ICON[prio] + ' ' + PRIO_LABEL[prio] + '</span>' +
+          '<span class="tk-vis">' + (priv ? '🔒 Privat' : '👥 Team') + '</span>' +
           '<span class="tk-id">#' + escHtml(String(t.id || '').replace(/-/g, '').slice(0, 5).toUpperCase()) + '</span>' +
           '<button type="button" class="dash-todo-del" data-id="' + escHtml(t.id) + '" title="Löschen" aria-label="Löschen">&times;</button>' +
         '</div>' +
@@ -5367,11 +5423,29 @@
     document.getElementById('dash-todo-owner').value = myName();
     document.getElementById('dash-todo-due').value = '';
     document.querySelector('input[name="dash-todo-prio"][value="normal"]').checked = true;
+    var canPrivate = !!trelloUserToken();
+    var privInput = document.querySelector('input[name="dash-todo-vis"][value="private"]');
+    privInput.disabled = !canPrivate;
+    document.getElementById('dash-todo-vis-private-label').classList.toggle('dash-opt-disabled', !canPrivate);
+    document.querySelector('input[name="dash-todo-vis"][value="' + (canPrivate && todoScope === 'private' ? 'private' : 'team') + '"]').checked = true;
+    syncTodoVisibility();
     document.getElementById('dash-todo-dialog-err').textContent = '';
     document.getElementById('dash-todo-people').innerHTML = knownPeople().map(function(p) { return '<option value="' + escHtml(p) + '">'; }).join('');
     document.getElementById('dash-todo-dialog').style.display = 'flex';
     setTimeout(function() { document.getElementById('dash-todo-text').focus(); }, 30);
   }
+  function syncTodoVisibility() {
+    var priv = (document.querySelector('input[name="dash-todo-vis"]:checked') || {}).value === 'private';
+    var ownerEl = document.getElementById('dash-todo-owner');
+    ownerEl.disabled = priv;
+    if (priv) ownerEl.value = myName();
+    var hint = document.getElementById('dash-todo-vis-hint');
+    if (!trelloUserToken()) { hint.style.display = 'block'; hint.textContent = 'Private To-dos sind mit Trello-Verbindung möglich (Button über der Kartentabelle).'; }
+    else if (priv) { hint.style.display = 'block'; hint.textContent = 'Nur du siehst dieses Ticket – auf allen deinen Geräten, solange du mit Trello verbunden bist.'; }
+    else hint.style.display = 'none';
+  }
+  document.querySelectorAll('input[name="dash-todo-vis"]').forEach(function(r) { r.addEventListener('change', syncTodoVisibility); });
+
   function closeTodoDialog() {
     document.getElementById('dash-todo-dialog').style.display = 'none';
     todoDialogRef = null;
@@ -5381,6 +5455,9 @@
     var text = document.getElementById('dash-todo-text').value.trim();
     var owner = document.getElementById('dash-todo-owner').value.trim() || myName();
     var due = document.getElementById('dash-todo-due').value;
+    var visEl = document.querySelector('input[name="dash-todo-vis"]:checked');
+    var visibility = visEl ? visEl.value : 'team';
+    if (visibility === 'private') owner = myName();
     var prioEl = document.querySelector('input[name="dash-todo-prio"]:checked');
     var priority = prioEl ? prioEl.value : 'normal';
     var errEl = document.getElementById('dash-todo-dialog-err');
@@ -5391,11 +5468,14 @@
     todoRequest('POST', {
       action: 'add',
       todo: {
-        text: text, owner: owner, due: due, priority: priority, createdBy: myName(),
+        text: text, owner: owner, due: due, priority: priority, createdBy: myName(), visibility: visibility,
         refType: ref ? ref.type : '', refId: ref ? ref.id : '', refTitle: ref ? ref.title : '', refUrl: ref ? ref.url : ''
       }
     }).then(function(data) {
-      if (data && data.todo) todos.push(Object.assign({ priority: priority }, data.todo, { priority: data.todo.priority || priority }));
+      if (data && data.todo) {
+        if (visibility === 'private' && data.todo.visibility !== 'private') throw new Error('Das Google-Skript kennt private To-dos noch nicht – bitte die neue todo-backend.gs bereitstellen. Das To-do wurde als Team-To-do gespeichert.');
+        todos.push(Object.assign({ priority: priority }, data.todo, { priority: data.todo.priority || priority }));
+      }
       try { localStorage.setItem(TODO_CACHE_KEY, JSON.stringify(todos)); } catch (e) {}
       closeTodoDialog();
       renderTodoPanel(); renderDashTable(); renderMailPanel();
