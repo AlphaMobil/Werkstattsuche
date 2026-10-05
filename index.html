@@ -1661,6 +1661,16 @@
   .dash-dialog select { width: 100%; padding: 9px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); font-family: var(--font-body); font-size: 13px; color: var(--text); margin-bottom: 12px; }
   .dash-tr-ok { font-size: 12.5px; color: #1B6B3A; background: #E3F4EA; border-radius: 8px; padding: 8px 10px; margin-bottom: 10px; }
   .dash-tr-ok a { color: #1B6B3A; font-weight: 600; }
+  .dash-mention-wrap { position: relative; }
+  .dash-mention-wrap textarea { margin-bottom: 8px !important; }
+  .dash-mention-pop { position: absolute; left: 0; right: 0; top: 100%; margin-top: -6px; z-index: 5; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; box-shadow: 0 10px 24px -10px rgba(10,20,32,0.35); overflow: hidden; }
+  .dash-mention-opt { padding: 7px 10px; font-size: 12.5px; cursor: pointer; display: flex; justify-content: space-between; gap: 10px; }
+  .dash-mention-opt span { font-family: var(--font-mono); font-size: 11px; color: var(--text-dim); }
+  .dash-mention-opt.active, .dash-mention-opt:hover { background: var(--accent-dim); }
+  .dash-mention-chips { display: flex; flex-wrap: wrap; align-items: center; gap: 5px; margin-bottom: 10px; }
+  .dash-mention-chip { background: var(--surface-2); border: 1px solid var(--border); border-radius: 12px; padding: 3px 9px; font-family: var(--font-body); font-size: 11.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+  .dash-mention-chip:hover { border-color: #0C66E4; color: #0C66E4; }
+  .dash-mention-chip-group { font-family: var(--font-mono); color: #0C66E4; background: #E9F2FF; border-color: #CCE0FF; }
   .dash-todo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px; }
   .dash-todo-add { background: none; border: 1px dashed var(--border); border-radius: 6px; padding: 2px 8px; font-family: var(--font-body); font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: pointer; }
   .dash-todo-add:hover { border-color: var(--accent); color: var(--accent); }
@@ -1888,8 +1898,8 @@
           </div>
           <div id="dash-todo-filters" class="dash-filters" style="display:none;">
             <div class="dash-seg" role="group">
-              <button type="button" class="dash-seg-btn active" data-scope="mine">Meine</button>
-              <button type="button" class="dash-seg-btn" data-scope="all">Alle</button>
+              <button type="button" class="dash-seg-btn active" data-scope="all">Alle (Team)</button>
+              <button type="button" class="dash-seg-btn" data-scope="mine">Meine</button>
             </div>
             <select id="dash-todo-person"></select>
             <label class="dash-check"><input type="checkbox" id="dash-todo-showdone" /> Erledigte zeigen</label>
@@ -3033,6 +3043,7 @@
   var trelloPlzIndex = {}; // plz (5-stellig, aus Kartentitel) -> [{boardName, listName, cardName, cardUrl}]
   var trelloOpenCards = []; // alle offenen Karten (mit und ohne PLZ) für das Team-Dashboard
   var trelloLastFetch = 0;
+  var trelloMemberNames = {}; // Vollständige Namen aller Board-Mitglieder (Vorschläge bei "Für wen?")
   var trelloBoardLists = {}; // boardId -> { name, lists: [{id, name}] } (für Verschieben / neue Karten)
   // Listen, deren Karten als abgeschlossen gelten und nirgends als "offen" gezählt werden.
   var TRELLO_EXCLUDED_LIST_RE = /erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung|keine\s*reaktion|kb\s*an\s*kd|abgelehnt/i;
@@ -3070,6 +3081,7 @@
         trelloPlzIndex = parsed.index;
         if (Array.isArray(parsed.openCards)) trelloOpenCards = parsed.openCards;
         if (parsed.boardLists) trelloBoardLists = parsed.boardLists;
+        if (parsed.memberNames) trelloMemberNames = parsed.memberNames;
         if (parsed.ts) trelloLastFetch = parsed.ts;
         renderTrelloSummary(parsed.boards || []);
       }
@@ -3078,7 +3090,7 @@
 
   function saveTrelloCache(boards) {
     try {
-      localStorage.setItem(TRELLO_CACHE_KEY, JSON.stringify({ index: trelloPlzIndex, boards: boards, openCards: trelloOpenCards, boardLists: trelloBoardLists, ts: Date.now() }));
+      localStorage.setItem(TRELLO_CACHE_KEY, JSON.stringify({ index: trelloPlzIndex, boards: boards, openCards: trelloOpenCards, boardLists: trelloBoardLists, memberNames: trelloMemberNames, ts: Date.now() }));
     } catch (e) {}
   }
 
@@ -3124,7 +3136,7 @@
       var listNameById = {};
       lists.forEach(function(l) { listNameById[l.id] = l.name; });
       var memberNameById = {};
-      members.forEach(function(m) { memberNameById[m.id] = m.fullName || m.username || ''; });
+      members.forEach(function(m) { memberNameById[m.id] = m.fullName || m.username || ''; if (m.fullName) trelloMemberNames[m.fullName] = 1; });
       var entries = [];
       var openCards = [];
       cards.forEach(function(c) {
@@ -3156,7 +3168,7 @@
           cardUrl: c.shortUrl
         });
       });
-      return { boardName: boardInfo.name || boardId, boardId: boardId, lists: lists.map(function(l) { return { id: l.id, name: l.name }; }), entries: entries, openCards: openCards };
+      return { boardName: boardInfo.name || boardId, boardId: boardId, lists: lists.map(function(l) { return { id: l.id, name: l.name }; }), members: members.filter(function(m) { return m.username; }).map(function(m) { return { id: m.id, fullName: m.fullName || m.username, username: m.username }; }), entries: entries, openCards: openCards };
     });
   }
 
@@ -3175,7 +3187,7 @@
       results.forEach(function(res) {
         boards.push({ name: res.boardName, entries: res.entries });
         allOpen = allOpen.concat(res.openCards || []);
-        if (res.boardId) trelloBoardLists[res.boardId] = { name: res.boardName, lists: res.lists || [] };
+        if (res.boardId) trelloBoardLists[res.boardId] = { name: res.boardName, lists: res.lists || [], members: res.members || [] };
         res.entries.forEach(function(e) {
           if (!newIndex[e.plz]) newIndex[e.plz] = [];
           newIndex[e.plz].push(e);
@@ -5131,15 +5143,15 @@
      ========================================================================= */
   var TODO_URL_KEY = 'todoSourceUrlV1';
   var TODO_CACHE_KEY = 'todoCacheV1';
-  var TODO_SCOPE_KEY = 'todoScopeV1';
+  var TODO_SCOPE_KEY = 'todoScopeV2';
   var TODO_REFRESH_MS = 60 * 1000;
   var todos = [];
   var todoLoaded = false;
   var todoError = '';
   var todoLoading = false;
   var todoDialogRef = null;
-  var todoScope = 'mine';
-  try { todoScope = localStorage.getItem(TODO_SCOPE_KEY) || 'mine'; } catch (e) {}
+  var todoScope = 'all'; // Standard: alle Tickets des Teams sichtbar
+  try { todoScope = localStorage.getItem(TODO_SCOPE_KEY) || 'all'; } catch (e) {}
   try {
     var cachedTodos = JSON.parse(localStorage.getItem(TODO_CACHE_KEY) || 'null');
     if (Array.isArray(cachedTodos)) { todos = cachedTodos; todoLoaded = true; }
@@ -5161,10 +5173,19 @@
   function setTodoUrl(u) {
     try { if (u) localStorage.setItem(TODO_URL_KEY, u); else { localStorage.removeItem(TODO_URL_KEY); localStorage.removeItem(TODO_CACHE_KEY); } } catch (e) {}
   }
+  // Wer bin ich? Mit Trello verbunden -> Trello-Name, sonst der einmal eingegebene Name.
   function myName() {
-    try { return localStorage.getItem('dispatchUserName') || ''; } catch (e) { return ''; }
+    try { return localStorage.getItem('trelloUserNameV1') || localStorage.getItem('dispatchUserName') || ''; } catch (e) { return ''; }
   }
-  function sameName(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
+  function sameName(a, b) {
+    var x = String(a || '').trim().toLowerCase(), y = String(b || '').trim().toLowerCase();
+    if (!x || !y) return false;
+    if (x === y) return true;
+    // Nur Vorname vs. voller Name: "nick" == "nick nellessen"
+    if (x.indexOf(' ') === -1 && y.split(/\s+/)[0] === x) return true;
+    if (y.indexOf(' ') === -1 && x.split(/\s+/)[0] === y) return true;
+    return false;
+  }
 
   var PRIO_RANK = { high: 0, normal: 1, low: 2 };
   var PRIO_LABEL = { high: 'Hoch', normal: 'Normal', low: 'Niedrig' };
@@ -5222,7 +5243,15 @@
   function knownPeople() {
     var set = {};
     var me = myName(); if (me) set[me] = 1;
-    todos.forEach(function(t) { if (t.owner) set[t.owner] = 1; if (t.createdBy) set[t.createdBy] = 1; });
+    Object.keys(trelloMemberNames || {}).forEach(function(n) { set[n] = 1; });
+    todos.forEach(function(t) {
+      [t.owner, t.createdBy].forEach(function(n) {
+        if (!n) return;
+        // Vornamen nicht doppelt aufführen, wenn der volle Name schon bekannt ist
+        if (Object.keys(set).some(function(k) { return sameName(k, n); })) return;
+        set[n] = 1;
+      });
+    });
     return Object.keys(set).sort(function(a, b) { return a.localeCompare(b, 'de'); });
   }
 
@@ -5242,7 +5271,8 @@
     setup.style.display = 'none'; filters.style.display = 'flex'; newBtn.style.display = '';
     document.getElementById('dash-todo-disconnect').style.display = isCustomTodoUrl() ? '' : 'none';
     var me = myName();
-    meEl.innerHTML = me ? 'Angemeldet als <b>' + escHtml(me) + '</b> · <button type="button" class="dash-link-btn" id="dash-todo-rename">ändern</button>' : '';
+    var viaTrello = !!trelloUserName();
+    meEl.innerHTML = me ? 'Du bist <b>' + escHtml(me) + '</b>' + (viaTrello ? ' <span class="dash-meta">(über Trello)</span>' : ' · <button type="button" class="dash-link-btn" id="dash-todo-rename">ändern</button>') : '';
     var renameBtn = document.getElementById('dash-todo-rename');
     if (renameBtn) renameBtn.addEventListener('click', function() {
       var n = (window.prompt('Dein Name (für die To-do-Liste):', myName()) || '').trim();
@@ -5551,6 +5581,89 @@
     return '<button type="button" class="dash-tr-btn" data-tr="create" data-mail="' + escHtml(t.id) + '">＋ Trello-Karte</button>';
   }
 
+  /* ---------- @-Erwähnungen in Trello-Kommentaren ----------
+     Trello benachrichtigt jede Person, die mit @benutzername erwähnt wird;
+     @board erreicht alle Board-Mitglieder, @card alle Mitglieder der Karte. */
+  function mentionTargets(boardId) {
+    var b = trelloBoardLists[boardId];
+    var people = (b && b.members ? b.members : []).slice().sort(function(x, y) { return x.fullName.localeCompare(y.fullName, 'de'); });
+    var list = [
+      { handle: 'board', label: 'Alle auf dem Board', group: true },
+      { handle: 'card', label: 'Alle Mitglieder dieser Karte', group: true }
+    ];
+    people.forEach(function(m) { list.push({ handle: m.username, label: m.fullName }); });
+    return list;
+  }
+  function mentionChipsHtml(boardId) {
+    var targets = mentionTargets(boardId);
+    var people = targets.filter(function(t) { return !t.group; });
+    return '<div class="dash-mention-chips"><span class="dash-field-label" style="margin:0 4px 0 0;">Markieren:</span>' +
+      targets.filter(function(t) { return t.group; }).map(function(t) {
+        return '<button type="button" class="dash-mention-chip dash-mention-chip-group" data-handle="' + escHtml(t.handle) + '" title="' + escHtml(t.label) + '">@' + escHtml(t.handle) + '</button>';
+      }).join('') +
+      people.map(function(t) {
+        return '<button type="button" class="dash-mention-chip" data-handle="' + escHtml(t.handle) + '" title="@' + escHtml(t.handle) + '">' + escHtml(t.label) + '</button>';
+      }).join('') +
+      (people.length ? '' : '<span class="dash-tr-hint" style="margin:0;">Board-Mitglieder werden nach der nächsten Trello-Aktualisierung angezeigt.</span>') +
+    '</div>';
+  }
+  function insertMention(textarea, handle, replaceFrom) {
+    var v = textarea.value;
+    var pos = textarea.selectionStart != null ? textarea.selectionStart : v.length;
+    var start = replaceFrom != null ? replaceFrom : pos;
+    var before = v.slice(0, start);
+    var needsSpace = before && !/\s$/.test(before);
+    var insert = (needsSpace ? ' ' : '') + '@' + handle + ' ';
+    textarea.value = before + insert + v.slice(pos);
+    var caret = (before + insert).length;
+    textarea.focus();
+    try { textarea.setSelectionRange(caret, caret); } catch (e) {}
+  }
+  function wireMentions(boardId) {
+    var ta = document.getElementById('dash-tr-text');
+    var pop = document.getElementById('dash-mention-pop');
+    if (!ta || !pop) return;
+    var targets = mentionTargets(boardId);
+    var active = 0, matches = [], atPos = -1;
+    document.querySelectorAll('#dash-trello-dialog .dash-mention-chip').forEach(function(btn) {
+      btn.addEventListener('click', function() { insertMention(ta, btn.getAttribute('data-handle')); pop.style.display = 'none'; });
+    });
+    function close() { pop.style.display = 'none'; matches = []; atPos = -1; }
+    function choose(i) { if (!matches[i]) return; insertMention(ta, matches[i].handle, atPos); close(); }
+    function update() {
+      var pos = ta.selectionStart;
+      var m = ta.value.slice(0, pos).match(/(^|\s)@([\wäöüß.\-]*)$/i);
+      if (!m) return close();
+      atPos = pos - m[2].length - 1;
+      var q = m[2].toLowerCase();
+      matches = targets.filter(function(t) {
+        return !q || t.handle.toLowerCase().indexOf(q) === 0 || t.label.toLowerCase().split(/\s+/).some(function(w) { return w.indexOf(q) === 0; });
+      }).slice(0, 7);
+      if (!matches.length) return close();
+      active = 0;
+      render();
+    }
+    function render() {
+      pop.innerHTML = matches.map(function(t, i) {
+        return '<div class="dash-mention-opt' + (i === active ? ' active' : '') + '" data-i="' + i + '"><b>' + escHtml(t.label) + '</b> <span>@' + escHtml(t.handle) + '</span></div>';
+      }).join('');
+      pop.style.display = 'block';
+      pop.querySelectorAll('.dash-mention-opt').forEach(function(el) {
+        el.addEventListener('mousedown', function(e) { e.preventDefault(); choose(+el.getAttribute('data-i')); });
+      });
+    }
+    ta.addEventListener('input', update);
+    ta.addEventListener('click', update);
+    ta.addEventListener('blur', function() { setTimeout(close, 150); });
+    ta.addEventListener('keydown', function(e) {
+      if (pop.style.display === 'none') return;
+      if (e.key === 'ArrowDown') { e.preventDefault(); active = (active + 1) % matches.length; render(); }
+      else if (e.key === 'ArrowUp') { e.preventDefault(); active = (active - 1 + matches.length) % matches.length; render(); }
+      else if (e.key === 'Enter' || e.key === 'Tab') { e.preventDefault(); choose(active); }
+      else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+    });
+  }
+
   function findOpenCard(id) { return (trelloOpenCards || []).filter(function(c) { return c.id === id; })[0]; }
   function findMail(id) { return mailData && mailData.threads ? mailData.threads.filter(function(t) { return t.id === id; })[0] : null; }
 
@@ -5576,9 +5689,10 @@
       save.textContent = 'Kommentar senden';
       body.innerHTML = '<div class="dash-todo-ref-preview">🗂️ ' + escHtml(ref.name) + '</div>' +
         '<label class="dash-field-label" for="dash-tr-text">Kommentar</label>' +
-        '<textarea id="dash-tr-text" rows="4" placeholder="z.&nbsp;B. Kunde erreicht, Termin für Donnerstag vereinbart"></textarea>' +
-        '<div class="dash-tr-hint">Erscheint in Trello unter deinem Namen (' + escHtml(trelloUserName() || 'dein Konto') + ').</div>';
-      setTimeout(function() { document.getElementById('dash-tr-text').focus(); }, 30);
+        '<div class="dash-mention-wrap"><textarea id="dash-tr-text" rows="4" placeholder="z.&nbsp;B. @lisa Kunde erreicht, Termin für Donnerstag vereinbart"></textarea><div id="dash-mention-pop" class="dash-mention-pop" style="display:none;"></div></div>' +
+        mentionChipsHtml(ref.boardId) +
+        '<div class="dash-tr-hint">Erscheint in Trello unter deinem Namen (' + escHtml(trelloUserName() || 'dein Konto') + '). Markierte Personen werden von Trello benachrichtigt.</div>';
+      setTimeout(function() { wireMentions(ref.boardId); document.getElementById('dash-tr-text').focus(); }, 0);
     } else if (action === 'move') {
       title.textContent = 'Karte verschieben';
       save.textContent = 'Verschieben';
@@ -5587,7 +5701,9 @@
         '<label class="dash-field-label" for="dash-tr-list">Neue Liste</label>' +
         '<select id="dash-tr-list">' + listOptions(ref.boardId, null, ref.idList) + '</select>' +
         '<label class="dash-field-label" for="dash-tr-text">Kommentar dazu (optional)</label>' +
-        '<textarea id="dash-tr-text" rows="2" placeholder="z.&nbsp;B. Reparatur abgeschlossen"></textarea>';
+        '<div class="dash-mention-wrap"><textarea id="dash-tr-text" rows="2" placeholder="z.&nbsp;B. @board Reparatur abgeschlossen"></textarea><div id="dash-mention-pop" class="dash-mention-pop" style="display:none;"></div></div>' +
+        mentionChipsHtml(ref.boardId);
+      setTimeout(function() { wireMentions(ref.boardId); }, 0);
     } else if (action === 'create') {
       title.textContent = 'Neue Trello-Karte aus E-Mail';
       save.textContent = 'Karte anlegen';
