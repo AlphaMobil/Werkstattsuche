@@ -5261,6 +5261,21 @@
     });
   }
 
+  /* Interne Mitarbeiter*innen mit @alpha-mobil.com-Adresse, so wie ihr Name in Trello steht.
+     Nur diese Personen erscheinen bei "Für wen?" und im Personenfilter der To-dos.
+     (Trello gibt die E-Mail-Adressen anderer Mitglieder nicht heraus, daher diese feste Liste.)
+     Neue Kolleg*innen einfach hier ergänzen. */
+  var TEAM_MEMBERS = [
+    'Alexander Schönfuß',
+    'HeikoHeuer',
+    'Lasse Bobis',
+    'MandyLuckow',
+    'Miguel Siercke',
+    'Nick Nellessen',
+    'Oliver Forquignon',
+    'Ulla Rahe'
+  ];
+
   // Vorname -> voller Trello-Name, wenn eindeutig (z. B. "Nick" -> "Nick Nellessen")
   function displayName(n) {
     if (!n) return '';
@@ -5289,7 +5304,8 @@
   function knownPeople() {
     var set = {};
     var me = myName(); if (me) set[me] = 1;
-    Object.keys(trelloMemberNames || {}).forEach(function(n) { set[n] = 1; });
+    // Nur interne Mitarbeiter*innen (@alpha-mobil.com) zur Auswahl anbieten – Partner/Werkstätten aus den Boards nicht
+    (TEAM_MEMBERS.length ? TEAM_MEMBERS : Object.keys(trelloMemberNames || {})).forEach(function(n) { set[n] = 1; });
     todos.forEach(function(t) {
       [t.owner, t.createdBy].forEach(function(n) {
         if (!n) return;
