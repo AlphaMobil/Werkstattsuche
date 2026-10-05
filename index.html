@@ -3361,7 +3361,7 @@
       return r && typeof r === 'object' && typeof r.name === 'string' && r.name.trim() !== '';
     });
     if (!ok) return null;
-    return data.map(function(r) {
+    return dedupeWerkstaetten(data.map(function(r) {
       return {
         name: String(r.name || '').trim(),
         phone: String(r.phone || '').trim(),
@@ -3375,7 +3375,27 @@
         lat: typeof r.lat === 'number' && isFinite(r.lat) ? r.lat : null,
         lon: typeof r.lon === 'number' && isFinite(r.lon) ? r.lon : null
       };
+    }));
+  }
+
+  // Doppelte Einträge (gleicher Name + gleiche Adresse) nur einmal behalten;
+  // fehlende Angaben (Telefon, E-Mail, Koordinaten …) aus dem Duplikat ergänzen.
+  function werkstattKey(w) {
+    var norm = function(v) { return String(v || '').toLowerCase().replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss').replace(/str\.?(?=\s|\d|$)/g, 'strasse').replace(/[^a-z0-9]/g, ''); };
+    return norm(w.name) + '|' + norm(w.street) + '|' + String(w.plz || '');
+  }
+  function dedupeWerkstaetten(list) {
+    var seen = {};
+    var out = [];
+    list.forEach(function(w) {
+      var k = werkstattKey(w);
+      var prev = seen[k];
+      if (!prev) { seen[k] = w; out.push(w); return; }
+      Object.keys(w).forEach(function(f) {
+        if ((prev[f] === '' || prev[f] == null) && w[f] !== '' && w[f] != null) prev[f] = w[f];
+      });
     });
+    return out;
   }
 
   // Vom Skript bereits ermittelte Standorte direkt übernehmen – dann muss der Browser
@@ -4086,9 +4106,13 @@
       return;
     }
     var withDist = [];
+    var shownKeys = {};
     for (var i = 0; i < werkstaetten.length; i++) {
       var c = werkstattCoords[i];
       if (!c) continue;
+      var wk = werkstattKey(werkstaetten[i]);
+      if (shownKeys[wk]) continue; // Duplikat nicht doppelt anzeigen
+      shownKeys[wk] = 1;
       var km = haversineKm(customerCoord.lat, customerCoord.lon, c.lat, c.lon);
       withDist.push({ w: werkstaetten[i], km: km, coord: c });
     }
