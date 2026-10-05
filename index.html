@@ -1606,6 +1606,52 @@
   .dash-todo-del { background: none; border: none; color: var(--text-dim); font-size: 18px; line-height: 1; cursor: pointer; padding: 0 4px; opacity: 0; }
   .dash-todo-item:hover .dash-todo-del, .dash-todo-del:focus { opacity: 1; }
   .dash-todo-del:hover { color: var(--danger); }
+  .dash-tickets { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; }
+  .dash-ticket { position: relative; display: flex; flex-direction: column; gap: 8px; background: var(--surface); border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 12px; padding: 12px 14px 12px; box-shadow: 0 1px 3px rgba(20,30,50,0.06); animation: fadeUp 0.2s ease; min-width: 0; }
+  .dash-ticket.tk-low { border-left-color: var(--text-dim); }
+  .dash-ticket.tk-high { background: var(--danger); border-color: var(--danger); color: #fff; box-shadow: 0 8px 20px -8px rgba(209,67,67,0.6); }
+  .dash-ticket.tk-done { opacity: 0.55; background: var(--surface-2); border-left-color: var(--border); color: var(--text); box-shadow: none; }
+  .dash-ticket.tk-done .tk-text { text-decoration: line-through; }
+  .tk-head { display: flex; align-items: center; gap: 8px; }
+  .tk-prio { font-family: var(--font-mono); font-size: 10.5px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--accent); }
+  .tk-low .tk-prio { color: var(--text-dim); }
+  .tk-high .tk-prio { color: #fff; }
+  .tk-done .tk-prio { color: var(--text-dim); }
+  .tk-id { font-family: var(--font-mono); font-size: 10.5px; color: var(--text-dim); margin-left: auto; }
+  .tk-high .tk-id { color: rgba(255,255,255,0.75); }
+  .dash-ticket .dash-todo-del { opacity: 0.5; }
+  .dash-ticket:hover .dash-todo-del { opacity: 1; }
+  .tk-high .dash-todo-del { color: rgba(255,255,255,0.85); }
+  .tk-high .dash-todo-del:hover { color: #fff; }
+  .tk-text { font-family: var(--font-display); font-size: 14.5px; font-weight: 600; line-height: 1.35; white-space: pre-wrap; word-break: break-word; }
+  .tk-ref { display: block; font-size: 12px; color: var(--accent); text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; background: var(--surface-2); border-radius: 6px; padding: 5px 8px; }
+  .tk-ref:hover { text-decoration: underline; }
+  .tk-high .tk-ref { color: #fff; background: rgba(255,255,255,0.16); }
+  .tk-chips { display: flex; flex-wrap: wrap; gap: 5px; }
+  .tk-chip { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 10px; background: var(--accent-dim); color: var(--accent); font-variant-numeric: tabular-nums; }
+  .tk-chip-muted { background: var(--surface-2); color: var(--text-muted); font-weight: 500; }
+  .tk-chip-alert { background: #FBE2E2; color: var(--danger); }
+  .tk-high .tk-chip { background: rgba(255,255,255,0.2); color: #fff; }
+  .tk-high .tk-chip-alert { background: #fff; color: var(--danger); }
+  .tk-foot { display: flex; align-items: center; gap: 8px; margin-top: auto; padding-top: 8px; border-top: 1px solid var(--border); }
+  .tk-high .tk-foot { border-top-color: rgba(255,255,255,0.3); }
+  .tk-owner { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; }
+  .tk-avatar { width: 22px; height: 22px; border-radius: 50%; background: var(--navy); color: #fff; font-size: 10px; font-weight: 700; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .tk-high .tk-avatar { background: #fff; color: var(--danger); }
+  .tk-prio-sel { font-family: var(--font-body); font-size: 11.5px; padding: 3px 4px; border: 1px solid var(--border); border-radius: 6px; background: var(--surface-2); color: var(--text); cursor: pointer; }
+  .tk-high .tk-prio-sel { background: rgba(255,255,255,0.18); border-color: rgba(255,255,255,0.4); color: #fff; }
+  .tk-high .tk-prio-sel option { color: var(--text); }
+  .tk-done-toggle { display: inline-flex; align-items: center; gap: 4px; font-size: 11.5px; font-weight: 600; cursor: pointer; white-space: nowrap; }
+  .tk-done-toggle .dash-todo-check { margin: 0; }
+  .tk-high .tk-done-toggle .dash-todo-check { accent-color: #fff; }
+  .dash-todo-badge-high { background: var(--danger); color: #fff; }
+  .dash-prio-pick { display: flex; gap: 8px; margin-bottom: 12px; }
+  .dash-prio-opt { flex: 1; display: flex; align-items: center; justify-content: center; gap: 5px; padding: 8px 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); font-size: 12.5px; font-weight: 600; color: var(--text-muted); cursor: pointer; }
+  .dash-prio-opt input { position: absolute; opacity: 0; pointer-events: none; }
+  .dash-prio-opt:has(input:checked) { border-color: var(--accent); background: var(--accent-dim); color: var(--accent); }
+  .dash-prio-opt-high:has(input:checked) { border-color: var(--danger); background: var(--danger); color: #fff; }
+  .dash-prio-opt-low:has(input:checked) { border-color: var(--text-dim); background: var(--surface-2); color: var(--text); }
+  .dash-prio-opt:has(input:focus-visible) { outline: 2px solid var(--accent); outline-offset: 2px; }
   .dash-todo-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin-top: 5px; }
   .dash-todo-add { background: none; border: 1px dashed var(--border); border-radius: 6px; padding: 2px 8px; font-family: var(--font-body); font-size: 11px; font-weight: 600; color: var(--text-dim); cursor: pointer; }
   .dash-todo-add:hover { border-color: var(--accent); color: var(--accent); }
@@ -1869,6 +1915,12 @@
           <div id="dash-todo-ref" class="dash-todo-ref-preview"></div>
           <label class="dash-field-label" for="dash-todo-text">Was ist zu tun?</label>
           <textarea id="dash-todo-text" rows="3" placeholder="z.&nbsp;B. Kunde zur&uuml;ckrufen, Ersatzteil bestellen &hellip;"></textarea>
+          <span class="dash-field-label">Priorit&auml;t</span>
+          <div class="dash-prio-pick" role="radiogroup" aria-label="Priorit&auml;t">
+            <label class="dash-prio-opt dash-prio-opt-high"><input type="radio" name="dash-todo-prio" value="high" /> &#9650; Hoch</label>
+            <label class="dash-prio-opt"><input type="radio" name="dash-todo-prio" value="normal" checked /> &#9632; Normal</label>
+            <label class="dash-prio-opt dash-prio-opt-low"><input type="radio" name="dash-todo-prio" value="low" /> &#9660; Niedrig</label>
+          </div>
           <div class="dash-dialog-row">
             <div>
               <label class="dash-field-label" for="dash-todo-owner">F&uuml;r wen?</label>
@@ -5082,6 +5134,11 @@
   }
   function sameName(a, b) { return String(a || '').trim().toLowerCase() === String(b || '').trim().toLowerCase(); }
 
+  var PRIO_RANK = { high: 0, normal: 1, low: 2 };
+  var PRIO_LABEL = { high: 'Hoch', normal: 'Normal', low: 'Niedrig' };
+  var PRIO_ICON = { high: '▲', normal: '■', low: '▼' };
+  function prioOf(t) { return PRIO_RANK.hasOwnProperty(t && t.priority) ? t.priority : 'normal'; }
+
   function openTodosFor(type, id) {
     return todos.filter(function(t) { return !t.done && t.refType === type && t.refId === id; });
   }
@@ -5090,7 +5147,8 @@
     var open = openTodosFor(type, id);
     if (!open.length) return '';
     var who = open.map(function(t) { return t.owner || '?'; }).filter(function(v, i, a) { return a.indexOf(v) === i; }).join(', ');
-    return '<span class="dash-todo-badge" title="' + escHtml(open.map(function(t) { return '• ' + t.text + ' (' + (t.owner || '?') + ')'; }).join('\n')) + '">☑ ' + open.length + ' To-do' + (open.length > 1 ? 's' : '') + ' · ' + escHtml(who) + '</span>';
+    var hasHigh = open.some(function(t) { return prioOf(t) === 'high'; });
+    return '<span class="dash-todo-badge' + (hasHigh ? ' dash-todo-badge-high' : '') + '" title="' + escHtml(open.map(function(t) { return '• ' + t.text + ' (' + (t.owner || '?') + ')'; }).join('\n')) + '">☑ ' + open.length + ' To-do' + (open.length > 1 ? 's' : '') + ' · ' + escHtml(who) + '</span>';
   }
   function todoAddBtnHtml(type, id, title, url) {
     if (!getTodoUrl()) return '';
@@ -5176,6 +5234,8 @@
     });
     rows.sort(function(a, b) {
       if (a.done !== b.done) return a.done ? 1 : -1;
+      var pa = PRIO_RANK[prioOf(a)], pb = PRIO_RANK[prioOf(b)];
+      if (pa !== pb) return pa - pb;
       var ad = a.due || '9999', bd = b.due || '9999';
       if (ad !== bd) return ad < bd ? -1 : 1;
       return String(a.createdAt).localeCompare(String(b.createdAt));
@@ -5183,7 +5243,8 @@
 
     var openAll = todos.filter(function(t) { return !t.done; }).length;
     var openMine = todos.filter(function(t) { return !t.done && sameName(t.owner, me); }).length;
-    countEl.textContent = openMine + ' meine · ' + openAll + ' offen im Team';
+    var openHigh = todos.filter(function(t) { return !t.done && prioOf(t) === 'high'; }).length;
+    countEl.textContent = openMine + ' meine · ' + openAll + ' offen im Team' + (openHigh ? ' · ' + openHigh + ' hohe Prio' : '');
 
     if (todoError && !todoLoaded) { list.innerHTML = '<div class="dash-error">' + escHtml(todoError) + '</div>'; return; }
     if (!todoLoaded) { list.innerHTML = '<div class="dash-empty">To-dos werden geladen…</div>'; return; }
@@ -5192,28 +5253,42 @@
       return;
     }
     var today = new Date().toISOString().slice(0, 10);
-    list.innerHTML = (todoError ? '<div class="dash-error">' + escHtml(todoError) + '</div>' : '') + rows.map(function(t) {
+    list.innerHTML = (todoError ? '<div class="dash-error">' + escHtml(todoError) + '</div>' : '') +
+      '<div class="dash-tickets">' + rows.map(ticketHtml).join('') + '</div>';
+
+    function ticketHtml(t) {
+      var prio = prioOf(t);
       var ref = '';
       if (t.refType === 'card' || t.refType === 'mail') {
-        ref = '<a class="dash-todo-ref" href="' + escHtml(t.refUrl || '#') + '" target="_blank" rel="noopener">' +
+        ref = '<a class="tk-ref" href="' + escHtml(t.refUrl || '#') + '" target="_blank" rel="noopener" title="' + escHtml(t.refTitle || '') + '">' +
           (t.refType === 'card' ? '🗂️ ' : '✉️ ') + escHtml(t.refTitle || '') + '</a>';
       }
-      var dueCls = t.due && !t.done && t.due < today ? ' dash-overdue' : '';
-      var due = t.due ? '<span class="dash-todo-due' + dueCls + '">bis ' + fmtDate(t.due) + '</span>' : '';
-      var meta = [];
-      if (todoScope === 'all' || !sameName(t.owner, me)) meta.push('für <b>' + escHtml(t.owner || '–') + '</b>');
-      if (t.createdBy && !sameName(t.createdBy, t.owner)) meta.push('von ' + escHtml(t.createdBy));
-      if (t.done) meta.push('erledigt ' + relTime(t.doneAt) + (t.doneBy ? ' von ' + escHtml(t.doneBy) : ''));
-      return '<div class="dash-todo-item' + (t.done ? ' dash-todo-done' : '') + '">' +
-        '<input type="checkbox" class="dash-todo-check" data-id="' + escHtml(t.id) + '"' + (t.done ? ' checked' : '') + ' aria-label="Erledigt" />' +
-        '<div class="dash-todo-main">' +
-          '<div class="dash-todo-text">' + escHtml(t.text) + '</div>' +
-          (ref ? '<div>' + ref + '</div>' : '') +
-          '<div class="dash-todo-meta">' + due + (due && meta.length ? ' · ' : '') + meta.join(' · ') + '</div>' +
+      var overdue = t.due && !t.done && t.due < today;
+      var chips = [];
+      if (t.due) chips.push('<span class="tk-chip' + (overdue ? ' tk-chip-alert' : '') + '">' + (overdue ? '⚠ ' : '') + 'bis ' + fmtDate(t.due) + '</span>');
+      chips.push('<span class="tk-chip tk-chip-muted">erstellt ' + relTime(t.createdAt) + (t.createdBy && !sameName(t.createdBy, t.owner) ? ' von ' + escHtml(t.createdBy) : '') + '</span>');
+      if (t.done) chips.push('<span class="tk-chip tk-chip-muted">✓ erledigt ' + relTime(t.doneAt) + (t.doneBy ? ' von ' + escHtml(t.doneBy) : '') + '</span>');
+      var owner = t.owner || '–';
+      var initials = owner.split(/\s+/).filter(Boolean).map(function(w) { return w[0]; }).join('').slice(0, 2).toUpperCase() || '?';
+      var prioOptions = ['high', 'normal', 'low'].map(function(k) {
+        return '<option value="' + k + '"' + (k === prio ? ' selected' : '') + '>' + PRIO_LABEL[k] + '</option>';
+      }).join('');
+      return '<article class="dash-ticket tk-' + prio + (t.done ? ' tk-done' : '') + (overdue ? ' tk-overdue' : '') + '">' +
+        '<div class="tk-head">' +
+          '<span class="tk-prio">' + PRIO_ICON[prio] + ' ' + PRIO_LABEL[prio] + '</span>' +
+          '<span class="tk-id">#' + escHtml(String(t.id || '').replace(/-/g, '').slice(0, 5).toUpperCase()) + '</span>' +
+          '<button type="button" class="dash-todo-del" data-id="' + escHtml(t.id) + '" title="Löschen" aria-label="Löschen">&times;</button>' +
         '</div>' +
-        '<button type="button" class="dash-todo-del" data-id="' + escHtml(t.id) + '" title="Löschen" aria-label="Löschen">&times;</button>' +
-      '</div>';
-    }).join('');
+        '<div class="tk-text">' + escHtml(t.text) + '</div>' +
+        ref +
+        '<div class="tk-chips">' + chips.join('') + '</div>' +
+        '<div class="tk-foot">' +
+          '<span class="tk-owner" title="Zuständig: ' + escHtml(owner) + '"><span class="tk-avatar">' + escHtml(initials) + '</span>' + escHtml(owner) + '</span>' +
+          '<select class="tk-prio-sel" data-id="' + escHtml(t.id) + '" aria-label="Priorität ändern">' + prioOptions + '</select>' +
+          '<label class="tk-done-toggle"><input type="checkbox" class="dash-todo-check" data-id="' + escHtml(t.id) + '"' + (t.done ? ' checked' : '') + ' /> Erledigt</label>' +
+        '</div>' +
+      '</article>';
+    }
   }
 
   function todoUpdateLocal(id, fields) {
@@ -5229,6 +5304,7 @@
     document.getElementById('dash-todo-text').value = '';
     document.getElementById('dash-todo-owner').value = myName();
     document.getElementById('dash-todo-due').value = '';
+    document.querySelector('input[name="dash-todo-prio"][value="normal"]').checked = true;
     document.getElementById('dash-todo-dialog-err').textContent = '';
     document.getElementById('dash-todo-people').innerHTML = knownPeople().map(function(p) { return '<option value="' + escHtml(p) + '">'; }).join('');
     document.getElementById('dash-todo-dialog').style.display = 'flex';
@@ -5243,6 +5319,8 @@
     var text = document.getElementById('dash-todo-text').value.trim();
     var owner = document.getElementById('dash-todo-owner').value.trim() || myName();
     var due = document.getElementById('dash-todo-due').value;
+    var prioEl = document.querySelector('input[name="dash-todo-prio"]:checked');
+    var priority = prioEl ? prioEl.value : 'normal';
     var errEl = document.getElementById('dash-todo-dialog-err');
     if (!text) { errEl.textContent = 'Bitte beschreiben, was zu tun ist.'; return; }
     var saveBtn = document.getElementById('dash-todo-save');
@@ -5251,11 +5329,11 @@
     todoRequest('POST', {
       action: 'add',
       todo: {
-        text: text, owner: owner, due: due, createdBy: myName(),
+        text: text, owner: owner, due: due, priority: priority, createdBy: myName(),
         refType: ref ? ref.type : '', refId: ref ? ref.id : '', refTitle: ref ? ref.title : '', refUrl: ref ? ref.url : ''
       }
     }).then(function(data) {
-      if (data && data.todo) todos.push(data.todo);
+      if (data && data.todo) todos.push(Object.assign({ priority: priority }, data.todo, { priority: data.todo.priority || priority }));
       try { localStorage.setItem(TODO_CACHE_KEY, JSON.stringify(todos)); } catch (e) {}
       closeTodoDialog();
       renderTodoPanel(); renderDashTable(); renderMailPanel();
@@ -5295,6 +5373,19 @@
     }
   });
   if (dashEl) dashEl.addEventListener('change', function(e) {
+    if (e.target.classList.contains('tk-prio-sel')) {
+      var pid = e.target.getAttribute('data-id');
+      var newPrio = e.target.value;
+      var oldPrio = prioOf(todos.filter(function(t) { return t.id === pid; })[0]);
+      todoUpdateLocal(pid, { priority: newPrio });
+      renderTodoPanel(); renderDashTable(); renderMailPanel();
+      todoRequest('POST', { action: 'update', id: pid, fields: { priority: newPrio } }).catch(function(err) {
+        todoUpdateLocal(pid, { priority: oldPrio });
+        todoError = 'Priorität konnte nicht gespeichert werden: ' + err.message;
+        renderTodoPanel();
+      });
+      return;
+    }
     if (!e.target.classList.contains('dash-todo-check')) return;
     var id = e.target.getAttribute('data-id');
     var done = e.target.checked;
