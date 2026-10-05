@@ -1756,6 +1756,16 @@
   #plz-input { width: 100%; text-align: center; padding-left: 44px; }
   #werkstatt-progress { text-align: center; }
 
+  /* Handy: PLZ-Feld ohne großen Leerraum darunter (flex-basis wirkte sonst als Höhe) */
+  @media (max-width: 760px) {
+    .console { padding: 12px 14px 10px !important; }
+    .console-label { margin-bottom: 8px; }
+    .console-row { flex-direction: row !important; flex-wrap: wrap; }
+    #plz-input-wrap { flex: 1 1 100% !important; height: auto !important; min-height: 0 !important; }
+    #werkstatt-progress { margin-top: 6px; }
+    #werkstatt-progress:empty { display: none; }
+    #partner-overlay:empty, #werkstatt-overlay:empty { display: none !important; }
+  }
   @media (max-width: 600px) {
     header { flex-wrap: nowrap !important; justify-content: space-between !important; }
     .brand { order: 0 !important; flex-basis: auto !important; position: static !important; transform: none !important; }
