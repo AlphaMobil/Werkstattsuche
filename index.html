@@ -1768,6 +1768,87 @@
   .set-inline input { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); font-family: var(--font-body); font-size: 12.5px; color: var(--text); }
   .set-inline .dash-btn-ms { align-self: flex-start; }
   .set-inline .dash-btn-ms:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  /* ================================================================
+     Tourenplaner als eigene Seite (Eingabe links, Karte rechts)
+     ================================================================ */
+  body.view-tour .console,
+  body.view-tour #partner-overlay,
+  body.view-tour #werkstatt-overlay,
+  body.view-tour #case-map,
+  body.view-tour .case-search-panel { display: none !important; }
+  body.view-tour #map { display: block; }
+  body.view-tour #tour-planner-modal {
+    display: flex;
+    position: relative;
+    inset: auto;
+    z-index: 800;
+    flex: 0 0 420px;
+    width: 420px;
+    padding: 0;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    align-items: stretch;
+  }
+  body.view-tour .tp-card {
+    max-width: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 22px 24px 24px;
+    display: flex;
+    flex-direction: column;
+  }
+  body.view-tour .tp-close { display: none; }
+  body.view-tour .tp-title { font-size: 22px; }
+  .tp-section-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    margin-bottom: 8px;
+  }
+  .tp-chip-count { font-family: var(--font-mono); font-size: 11px; }
+  .tp-chip-count:empty { display: none; }
+  .tp-addr-row .tp-addr-num.tp-start { background: #1d9e75; color: #fff; }
+  .tp-addr-row .tp-addr-num { background: var(--accent); color: #fff; width: 24px; height: 24px; }
+  .tp-stats {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    border-radius: 12px;
+    background: var(--surface-2);
+    margin-bottom: 14px;
+  }
+  .tp-stats div { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+  .tp-stats b { font-family: var(--font-mono); font-size: 20px; font-weight: 600; color: var(--text); }
+  .tp-stats span { font-size: 12px; color: var(--text-muted); }
+  #tp-map-chip {
+    display: none;
+    position: absolute;
+    left: 436px;
+    top: 16px;
+    z-index: 750;
+    padding: 8px 12px;
+    border-radius: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    box-shadow: 0 6px 16px -8px rgba(20,30,50,0.25);
+    font-size: 12.5px;
+    color: var(--text);
+    align-items: center;
+    gap: 8px;
+  }
+  #tp-map-chip i { width: 18px; height: 4px; border-radius: 2px; background: var(--accent); }
+  body.view-tour #tp-map-chip.show { display: flex; }
+  @media (max-width: 820px) {
+    body.view-tour #map-wrap { flex-direction: column; overflow-y: auto; }
+    body.view-tour #tour-planner-modal { flex: none; width: 100%; border-right: none; border-bottom: 1px solid var(--border); overflow: visible; }
+    body.view-tour #map { flex: none; height: 65vh; min-height: 360px; }
+    body.view-tour .tp-card { padding: 18px 16px 20px; min-height: 0; }
+    #tp-map-chip { display: none !important; }
+  }
 </style>
 </head>
 <body>
@@ -2116,6 +2197,7 @@
     <div id="error-box"></div>
     <div id="map-wrap">
       <div id="map"></div>
+      <div id="tp-map-chip"><i></i><span id="tp-map-chip-text"></span></div>
       <div id="partner-overlay"></div>
       <div id="werkstatt-overlay"></div>
 
@@ -2176,11 +2258,13 @@
   <div id="tour-planner-modal">
     <div class="tp-card">
       <div class="tp-header">
-        <div class="tp-title">Tourenplaner</div>
+        <div class="tp-title">Neue Tour</div>
         <button class="tp-close" id="tp-close-btn" type="button" aria-label="Schlie&szlig;en">&times;</button>
       </div>
-      <div class="tp-sub">Adressen eintragen &ndash; die g&uuml;nstigste Reihenfolge f&uuml;r die Tour wird automatisch berechnet. Die erste Adresse gilt als Startpunkt.</div>
+      <div class="tp-sub">Adressen eintragen &ndash; die g&uuml;nstigste Reihenfolge wird automatisch berechnet. Die erste Adresse (S) ist der Startpunkt.</div>
+      <div class="tp-section-label">Partner-Adressen &middot; Klick f&uuml;gt die Adresse als Stopp hinzu (auch mehrfach)</div>
       <div class="tp-partner-quick" id="tp-partner-quick"></div>
+      <div class="tp-section-label">Stopps</div>
       <div class="tp-addr-list" id="tp-addr-list"></div>
       <div class="tp-btn-row">
         <button class="tp-add-btn" id="tp-add-addr-btn" type="button">+ Adresse hinzuf&uuml;gen</button>
@@ -2189,6 +2273,11 @@
       <button class="tp-calc-btn" id="tp-calc-btn" type="button">Route berechnen</button>
       <div class="tp-status" id="tp-status"></div>
       <div class="tp-results" id="tp-results">
+        <div class="tp-stats">
+          <div><b id="tp-stat-km">&ndash;</b><span>Strecke (ca.)</span></div>
+          <div><b id="tp-stat-time">&ndash;</b><span>Fahrzeit (ca.)</span></div>
+          <div><b id="tp-stat-stops">&ndash;</b><span>Stopps</span></div>
+        </div>
         <div class="tp-results-title">Empfohlene Reihenfolge</div>
         <div id="tp-stops"></div>
         <div class="tp-total" id="tp-total"></div>
@@ -4130,7 +4219,10 @@
 
   function tpRenumberRows() {
     tpAddrList.querySelectorAll('.tp-addr-row').forEach(function(row, i) {
-      row.querySelector('.tp-addr-num').textContent = String(i + 1);
+      var num = row.querySelector('.tp-addr-num');
+      num.textContent = i === 0 ? 'S' : String(i + 1);
+      num.classList.toggle('tp-start', i === 0);
+      num.title = i === 0 ? 'Startpunkt' : '';
     });
     var rows = tpAddrList.querySelectorAll('.tp-addr-row');
     rows.forEach(function(row) {
@@ -4151,8 +4243,10 @@
     );
     container.querySelectorAll('.tp-partner-chip').forEach(function(chip) {
       var addr = chip.getAttribute('data-address') || '';
-      if (addr && values.indexOf(addr) !== -1) chip.classList.add('tp-chip-active');
-      else chip.classList.remove('tp-chip-active');
+      var n = addr ? values.filter(function(v) { return v === addr; }).length : 0;
+      chip.classList.toggle('tp-chip-active', n > 0);
+      var badge = chip.querySelector('.tp-chip-count');
+      if (badge) badge.textContent = n > 1 ? '×' + n : '';
     });
   }
 
@@ -4186,6 +4280,8 @@
     tpCalcBtn.disabled = false;
     tpCalcBtn.textContent = 'Route berechnen';
     if (tourRouteLayer) { tourRouteLayer.clearLayers(); }
+    var chip = document.getElementById('tp-map-chip');
+    if (chip) chip.classList.remove('show');
     tpLastStops = [];
     tpLastTotalKm = 0;
     tpLastGmapsUrl = '#';
@@ -4193,12 +4289,12 @@
     if (tpWhatsappLink) tpWhatsappLink.href = '#';
   }
 
+  // Der Tourenplaner ist eine eigene Seite (Eingabe links, Karte rechts) statt eines Pop-ups.
   function openTourPlanner() {
-    if (!tpAddrList.children.length) tpResetForm();
-    tpModal.classList.add('open');
+    switchToTourView();
   }
   function closeTourPlanner() {
-    tpModal.classList.remove('open');
+    if (currentView === 'tour') switchToPlzView();
   }
 
   // Schnellauswahl: Partner als Chips, mehrfach anklickbar für eine Rundtour.
@@ -4218,14 +4314,27 @@
       chip.style.setProperty('--pcolor', partnerColors[partner] || '#5C6577');
       chip.title = base.address;
       chip.setAttribute('data-address', base.address);
-      chip.innerHTML = '<span class="tp-chip-dot"></span>' + escapeAttr(partner);
+      chip.title = base.address + ' – Klick fügt die Adresse als Stopp hinzu';
+      chip.innerHTML = '<span class="tp-chip-dot"></span>' + escapeAttr(partner) + '<span class="tp-chip-count"></span>';
       chip.addEventListener('click', function() {
-        tpToggleQuickAddress(base.address);
+        tpAddQuickAddress(base.address);
       });
       container.appendChild(chip);
     });
   }
   tpPopulatePartnerQuick();
+
+
+  // Partner-Kachel: Adresse als weiteren Stopp hinzufügen (beliebig oft). Entfernen über das × der Zeile.
+  function tpAddQuickAddress(address) {
+    if (!tpAddrList.children.length) tpResetForm();
+    var emptyInput = Array.prototype.filter.call(tpAddrList.querySelectorAll('.tp-addr-input'), function(el) {
+      return el.value.trim() === '';
+    })[0];
+    if (emptyInput) emptyInput.value = address;
+    else tpAddAddressRow(address);
+    tpSyncPartnerChipStates();
+  }
 
   function tpToggleQuickAddress(address) {
     if (!tpAddrList.children.length) tpResetForm();
@@ -4263,7 +4372,7 @@
   if (tpBtnHeader) tpBtnHeader.addEventListener('click', openTourPlanner);
   tpCloseBtn.addEventListener('click', closeTourPlanner);
   tpModal.addEventListener('click', function(e) {
-    if (e.target === tpModal) closeTourPlanner();
+    if (e.target === tpModal && currentView !== 'tour') closeTourPlanner();
   });
   tpAddAddrBtn.addEventListener('click', function() { tpAddAddressRow(''); });
   var tpResetBtn = document.getElementById('tp-reset-btn');
@@ -4420,7 +4529,7 @@
       var stopDiv = document.createElement('div');
       stopDiv.className = 'tp-stop';
       stopDiv.innerHTML =
-        '<div class="tp-stop-num">' + (pos + 1) + '</div>' +
+        '<div class="tp-stop-num"' + (pos === 0 ? ' style="background:#1d9e75;color:#fff"' : '') + '>' + (pos === 0 ? 'S' : (pos + 1)) + '</div>' +
         '<div class="tp-stop-info">' +
           '<div class="tp-stop-addr">' + escapeAttr(addresses[idx]) + '</div>' +
           '<div class="tp-stop-leg">' + (pos === 0 ? 'Startpunkt' : ('+' + legKm.toFixed(1) + ' km Luftlinie ab vorherigem Stopp')) + '</div>' +
@@ -4430,15 +4539,27 @@
       L.marker([pt.lat, pt.lon], {
         icon: L.divIcon({
           className: 'tp-route-marker',
-          html: '<div style="background:#004177;color:#fff;border:2px solid #fff;border-radius:50%;width:26px;height:26px;display:flex;align-items:center;justify-content:center;font-family:Inter,sans-serif;font-size:12px;font-weight:700;box-shadow:0 2px 5px rgba(0,0,0,0.35);">' + (pos + 1) + '</div>',
-          iconSize: [26, 26],
-          iconAnchor: [13, 13]
+          html: '<div style="background:' + (pos === 0 ? '#1d9e75' : '#004177') + ';color:#fff;border:3px solid #fff;border-radius:50%;width:30px;height:30px;box-sizing:border-box;display:flex;align-items:center;justify-content:center;font-family:\'JetBrains Mono\',monospace;font-size:12px;font-weight:600;box-shadow:0 2px 6px rgba(0,0,0,0.3);">' + (pos === 0 ? 'S' : (pos + 1)) + '</div>',
+          iconSize: [30, 30],
+          iconAnchor: [15, 15]
         })
       }).addTo(tourRouteLayer).bindTooltip(addresses[idx]);
     });
 
-    L.polyline(latlngs, { color: '#004177', weight: 3, dashArray: '6,6', opacity: 0.85 }).addTo(tourRouteLayer);
-    map.fitBounds(L.latLngBounds(latlngs), { padding: [40, 40] });
+    L.polyline(latlngs, { color: '#ffffff', weight: 9, opacity: 0.9 }).addTo(tourRouteLayer);
+    L.polyline(latlngs, { color: '#004177', weight: 4, opacity: 0.95 }).addTo(tourRouteLayer);
+    map.invalidateSize();
+    map.fitBounds(L.latLngBounds(latlngs), { padding: [50, 50] });
+
+    // Kennzahlen: Straßenkilometer grob aus der Luftlinie geschätzt (Faktor 1,3), Fahrzeit bei ca. 70 km/h
+    var roadKm = totalKm * 1.3;
+    var mins = Math.round(roadKm / 70 * 60);
+    document.getElementById('tp-stat-km').textContent = Math.round(roadKm) + ' km';
+    document.getElementById('tp-stat-time').textContent = Math.floor(mins / 60) + ':' + String(mins % 60).padStart(2, '0') + ' h';
+    document.getElementById('tp-stat-stops').textContent = String(order.length);
+    var chip = document.getElementById('tp-map-chip');
+    document.getElementById('tp-map-chip-text').textContent = 'Optimierte Reihenfolge · ca. ' + Math.round(roadKm) + ' km';
+    chip.classList.add('show');
 
     tpTotalEl.textContent = 'Geschätzte Gesamtstrecke: ca. ' + totalKm.toFixed(1) + ' km Luftlinie (Richtwert zur Reihenfolge)';
 
@@ -4874,6 +4995,22 @@
     updateNavActive();
   }
 
+  function switchToTourView() {
+    leaveSettingsView();
+    currentView = 'tour';
+    document.body.classList.remove('view-cases', 'view-dashboard');
+    document.body.classList.add('view-tour');
+    caseSearchPanel.style.display = 'none';
+    caseLegend.style.display = 'none';
+    var wrap = document.getElementById('map-wrap');
+    if (tpModal.parentNode !== wrap) wrap.insertBefore(tpModal, wrap.firstChild);
+    tpModal.classList.remove('open');
+    if (!tpAddrList.children.length) tpResetForm();
+    initMapIfNeeded();
+    setTimeout(function() { if (map) map.invalidateSize(); }, 50);
+    updateNavActive();
+  }
+
   function switchToDashboardView() {
     leaveSettingsView();
     currentView = 'dashboard';
@@ -4900,6 +5037,10 @@
 
   function leaveSettingsView() {
     document.body.classList.remove('view-settings');
+    if (document.body.classList.contains('view-tour')) {
+      document.body.classList.remove('view-tour');
+      setTimeout(function() { if (map) map.invalidateSize(); }, 50);
+    }
     var panel = document.getElementById('settings-panel');
     if (panel && settingsPanelHome && panel.parentNode !== settingsPanelHome) {
       panel.style.display = 'none';
@@ -4909,7 +5050,7 @@
 
   function switchToSettingsView() {
     currentView = 'settings';
-    document.body.classList.remove('view-cases', 'view-dashboard');
+    document.body.classList.remove('view-cases', 'view-dashboard', 'view-tour');
     document.body.classList.add('view-settings');
     caseSearchPanel.style.display = 'none';
     caseLegend.style.display = 'none';
@@ -5280,7 +5421,7 @@
       if (target === 'plz') switchToPlzView();
       else if (target === 'dashboard') switchToDashboardView();
       else if (target === 'cases') switchToCasesView();
-      else if (target === 'tour') { if (currentView !== 'plz') switchToPlzView(); openTourPlanner(); }
+      else if (target === 'tour') switchToTourView();
       else if (target === 'settings') switchToSettingsView();
     });
   });
