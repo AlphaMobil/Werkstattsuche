@@ -2742,7 +2742,12 @@
     setTimeout(function() {
       var srcUrl = getSourceUrl();
       if (srcUrl) {
-        loadFromSourceUrl(srcUrl, true).then(function() {
+        loadFromSourceUrl(srcUrl, true).then(function(ok) {
+          // Kennt das Team-Skript die Werkstätten noch nicht, auf die bisherige Quelle ausweichen
+          if (!ok && srcUrl !== DEFAULT_WERKSTATT_SOURCE_URL && DEFAULT_WERKSTATT_SOURCE_URL && !isCustomSourceUrl()) {
+            return loadFromSourceUrl(DEFAULT_WERKSTATT_SOURCE_URL, true);
+          }
+        }).then(function() {
           startWerkstattGeocoding();
         });
       } else {
@@ -3309,12 +3314,18 @@
   var sourceRefreshBtn = document.getElementById('werkstatt-source-refresh');
   var sourceRemoveBtn = document.getElementById('werkstatt-source-remove');
 
+  // Standard: die Werkstattliste kommt aus derselben Google-Tabelle wie To-dos und Touren
+  // (Blatt mit den Werkstätten, Standorte vom Skript bereits ermittelt).
+  function teamSheetWerkstattUrl() {
+    var u = (typeof getTodoUrl === 'function') ? getTodoUrl() : '';
+    return u ? u + (u.indexOf('?') === -1 ? '?' : '&') + 'type=werkstaetten' : '';
+  }
   function getSourceUrl() {
     try {
       var custom = localStorage.getItem(WERKSTATT_SOURCE_KEY);
       if (custom) return custom;
     } catch (e) {}
-    return DEFAULT_WERKSTATT_SOURCE_URL || '';
+    return teamSheetWerkstattUrl() || DEFAULT_WERKSTATT_SOURCE_URL || '';
   }
 
   function isCustomSourceUrl() {
@@ -3344,6 +3355,7 @@
   }
 
   function validateWerkstattRecords(data) {
+    if (data && !Array.isArray(data) && Array.isArray(data.werkstaetten)) data = data.werkstaetten;
     if (!Array.isArray(data) || data.length === 0) return null;
     var ok = data.every(function(r) {
       return r && typeof r === 'object' && typeof r.name === 'string' && r.name.trim() !== '';
@@ -3356,9 +3368,25 @@
         street: String(r.street || '').trim(),
         plz: padPlz(r.plz),
         city: String(r.city || '').trim(),
-        label: String(r.label || '').trim()
+        label: String(r.label || '').trim(),
+        email: String(r.email || '').trim(),
+        contact: String(r.contact || '').trim(),
+        mobile: String(r.mobile || '').trim(),
+        lat: typeof r.lat === 'number' && isFinite(r.lat) ? r.lat : null,
+        lon: typeof r.lon === 'number' && isFinite(r.lon) ? r.lon : null
       };
     });
+  }
+
+  // Vom Skript bereits ermittelte Standorte direkt übernehmen – dann muss der Browser
+  // nur noch die (wenigen) Werkstätten ohne Koordinaten selbst suchen.
+  function applyServerWerkstattCoords() {
+    var n = 0;
+    werkstaetten.forEach(function(w, i) {
+      if (w.lat != null && w.lon != null) { werkstattCoords[i] = { lat: w.lat, lon: w.lon }; n++; }
+    });
+    if (n) saveWerkstattCache();
+    return n;
   }
 
   function loadFromSourceUrl(url, silent) {
@@ -3376,7 +3404,7 @@
         if (!records) {
           updateStatusEl.className = 'err';
           updateStatusEl.textContent = 'Die Datenquelle liefert kein gültiges Werkstätten-Format.';
-          return;
+          return false;
         }
         var changed = JSON.stringify(records) !== JSON.stringify(werkstaetten);
         werkstaetten = records;
@@ -3385,14 +3413,16 @@
         if (changed) {
           werkstattCoords = {};
           try { localStorage.removeItem(WERKSTATT_CACHE_KEY); } catch (e) {}
-          updateWerkstattProgress();
-          startWerkstattGeocoding();
         }
+        applyServerWerkstattCoords();
+        updateWerkstattProgress();
+        startWerkstattGeocoding();
 
         if (!silent) {
           updateStatusEl.className = 'ok';
           updateStatusEl.textContent = records.length + ' Werkstätten von der Datenquelle geladen' + (changed ? ', Standorte werden aktualisiert…' : ' (keine Änderung).');
         }
+        return true;
       })
       .catch(function(err) {
         console.error(err);
@@ -3400,6 +3430,7 @@
           updateStatusEl.className = 'err';
           updateStatusEl.textContent = 'Datenquelle konnte nicht geladen werden (CORS oder Netzwerkfehler).';
         }
+        return false;
       });
   }
 
@@ -4082,7 +4113,7 @@
         ? '<a class="wc-phone" href="tel:' + phoneDigits + '"><span>&#9742;</span>' + item.w.phone + '</a>'
         : '<span class="wc-phone-empty">keine Nummer hinterlegt</span>';
       var copyText = item.w.name + '\n' + item.w.street + '\n' + item.w.plz + ' ' + item.w.city +
-        (item.w.phone ? '\n' + item.w.phone : '');
+        (item.w.phone ? '\n' + item.w.phone : '') + (item.w.mobile ? '\n' + item.w.mobile : '') + (item.w.email ? '\n' + item.w.email : '');
       var labelHtml = item.w.label
         ? '<span class="wc-label">' + item.w.label + '</span>'
         : '';
@@ -4093,8 +4124,11 @@
           labelHtml +
         '</div>' +
         '<div class="wc-name">' + item.w.name + '</div>' +
+        (item.w.contact ? '<div class="wc-addr">' + escapeAttr(item.w.contact) + '</div>' : '') +
         '<div class="wc-addr">' + item.w.street + '<br>' + item.w.plz + ' ' + item.w.city + '</div>' +
         phoneHtml +
+        (item.w.mobile ? '<a class="wc-phone" href="tel:' + item.w.mobile.replace(/[^\d+]/g, '') + '"><span>&#128241;</span>' + escapeAttr(item.w.mobile) + '</a>' : '') +
+        (item.w.email ? '<a class="wc-phone" href="mailto:' + escapeAttr(item.w.email) + '"><span>&#9993;</span>' + escapeAttr(item.w.email) + '</a>' : '') +
         '</div>';
       L.marker([item.coord.lat, item.coord.lon], { icon: pinIcon })
         .addTo(werkstattPinLayer)
