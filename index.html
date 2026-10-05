@@ -1838,6 +1838,14 @@
   .tp-save-btn:hover { background: rgba(0,65,119,0.06); }
   .tp-save-btn:disabled { opacity: 0.5; cursor: wait; }
   .tp-del-btn { background: none; border: 1px solid var(--border); color: var(--danger); border-radius: 10px; padding: 10px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .tp-import { margin: 0 0 14px; padding: 12px; border: 1px dashed #c3c9d2; border-radius: 12px; }
+  .tp-import-row { display: flex; gap: 8px; }
+  .tp-import-row select { flex: 1; min-width: 0; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; font-family: var(--font-body); font-size: 13px; color: var(--text); }
+  .tp-import-row .tp-mini-btn { padding: 6px 12px; font-size: 13px; }
+  .tp-import-info { font-size: 12px; line-height: 1.5; color: var(--text-muted); margin-top: 6px; }
+  .tp-import-info:empty { display: none; }
+  .tp-import-info .warn { color: #b25e09; }
+  .tp-stop-card { font-size: 11.5px; color: var(--text-muted); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
   .tp-addr-row .tp-addr-num.tp-start { background: #1d9e75; color: #fff; }
   .tp-addr-row .tp-addr-num { background: var(--accent); color: #fff; width: 24px; height: 24px; }
   .tp-stats {
@@ -2297,14 +2305,23 @@
           <button type="button" data-f="upcoming" class="active">Kommende</button>
           <button type="button" data-f="mine">Meine</button>
           <button type="button" data-f="all">Alle</button>
+          <button type="button" data-f="archive">Archiv <span id="tp-archive-count"></span></button>
         </div>
         <div class="tp-saved-list" id="tp-saved-list"></div>
+      </div>
+      <div class="tp-import">
+        <div class="tp-section-label" style="margin-bottom:6px">Aus Trello &uuml;bernehmen &middot; Board Norderstedt</div>
+        <div class="tp-import-row">
+          <select id="tp-trello-list"><option value="">Trello wird geladen &hellip;</option></select>
+          <button type="button" class="tp-mini-btn" id="tp-trello-import">&Uuml;bernehmen</button>
+        </div>
+        <div class="tp-import-info" id="tp-import-info"></div>
       </div>
       <div class="tp-meta">
         <input type="text" id="tp-tour-name" placeholder="Tourname, z. B. Kasparek Nord" maxlength="120" />
         <div class="tp-meta-row">
           <input type="date" id="tp-tour-date" />
-          <select id="tp-tour-driver"><option value="">Zust&auml;ndig: &ndash;</option></select>
+          <select id="tp-tour-driver"><option value="">Service-Partner: &ndash;</option></select>
         </div>
       </div>
       <div class="tp-sub">Adressen eintragen &ndash; die g&uuml;nstigste Reihenfolge wird automatisch berechnet. Die erste Adresse (S) ist der Startpunkt.</div>
@@ -4266,6 +4283,7 @@
   var tpLastTotalKm = 0;
   var tpLastGmapsUrl = '#';
   var tpLastRouteText = '';
+  var tpAddrLabels = {}; // Adresse -> Trello-Kartenname (für die Anzeige in der Reihenfolge)
 
   function tpRenumberRows() {
     tpAddrList.querySelectorAll('.tp-addr-row').forEach(function(row, i) {
@@ -4582,6 +4600,7 @@
         '<div class="tp-stop-num"' + (pos === 0 ? ' style="background:#1d9e75;color:#fff"' : '') + '>' + (pos === 0 ? 'S' : (pos + 1)) + '</div>' +
         '<div class="tp-stop-info">' +
           '<div class="tp-stop-addr">' + escapeAttr(addresses[idx]) + '</div>' +
+          (tpAddrLabels[addresses[idx]] ? '<div class="tp-stop-card">' + escapeAttr(tpAddrLabels[addresses[idx]]) + '</div>' : '') +
           '<div class="tp-stop-leg">' + (pos === 0 ? 'Startpunkt' : ('+' + legKm.toFixed(1) + ' km Luftlinie ab vorherigem Stopp')) + '</div>' +
         '</div>';
       tpStopsEl.appendChild(stopDiv);
@@ -4881,12 +4900,31 @@
     var d = new Date(+p[0], +p[1] - 1, +p[2]);
     return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
   }
+  // Touren wandern 7 Tage nach ihrem Datum ins Archiv (ohne Datum: 7 Tage nach der letzten Änderung)
+  var TOUR_ARCHIVE_DAYS = 7;
+  function isArchivedTour(t) {
+    var limit = Date.now() - TOUR_ARCHIVE_DAYS * 86400000;
+    if (t.date) {
+      var p = t.date.split('-');
+      var end = new Date(+p[0], +p[1] - 1, +p[2], 23, 59, 59).getTime();
+      return !isNaN(end) && end < limit;
+    }
+    var changed = new Date(t.updatedAt || t.createdAt || '').getTime();
+    return !isNaN(changed) && changed < limit;
+  }
+
   function renderSavedTours() {
     var list = document.getElementById('tp-saved-list');
     if (!list) return;
     var today = tourTodayStr();
     var me = (typeof myName === 'function') ? myName() : '';
+    var archivedCount = tours.filter(isArchivedTour).length;
+    var ac = document.getElementById('tp-archive-count');
+    if (ac) ac.textContent = archivedCount ? '(' + archivedCount + ')' : '';
     var shown = tours.filter(function(t) {
+      var arch = isArchivedTour(t);
+      if (tourFilter === 'archive') return arch;
+      if (arch && t.id !== currentTourId) return false;
       if (tourFilter === 'upcoming') return !t.date || t.date >= today;
       if (tourFilter === 'mine') return me && (sameName(t.driver, me) || sameName(t.createdBy, me));
       return true;
@@ -4896,7 +4934,8 @@
       var da = a.date || '9999', db = b.date || '9999';
       return fa ? da.localeCompare(db) : db.localeCompare(da);
     });
-    document.getElementById('tp-saved-count').textContent = tours.length ? '(' + tours.length + ')' : '';
+    var activeCount = tours.length - archivedCount;
+    document.getElementById('tp-saved-count').textContent = activeCount ? '(' + activeCount + ')' : '';
     var html = shown.map(function(t) {
       var bits = [fmtTourDate(t.date)];
       if (t.driver) bits.push(t.driver);
@@ -4908,7 +4947,7 @@
     }).join('');
     if (!html) {
       html = '<div class="tp-saved-empty">' + escHtml(toursError || (toursLoading && !toursLoaded ? 'Touren werden geladen …' :
-        (tourFilter === 'upcoming' ? 'Keine kommenden Touren.' : tourFilter === 'mine' ? 'Noch keine eigenen Touren.' : 'Noch keine Touren gespeichert.'))) + '</div>';
+        (tourFilter === 'upcoming' ? 'Keine kommenden Touren.' : tourFilter === 'mine' ? 'Noch keine eigenen Touren.' : tourFilter === 'archive' ? 'Das Archiv ist leer. Touren landen hier 7 Tage nach ihrem Datum.' : 'Keine aktuellen Touren.'))) + '</div>';
     } else if (toursError) {
       html = '<div class="tp-saved-empty">' + escHtml(toursError) + '</div>' + html;
     }
@@ -4924,10 +4963,8 @@
   function fillTourDriverOptions() {
     var sel = document.getElementById('tp-tour-driver');
     if (!sel || sel.options.length > 1) return;
-    var team = (typeof TEAM_MEMBERS !== 'undefined' ? TEAM_MEMBERS : []).map(function(n) { return n.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, '$1 $2'); });
-    var html = '<option value="">Zuständig: –</option><optgroup label="Team">' +
-      team.map(function(n) { return '<option>' + escHtml(n) + '</option>'; }).join('') + '</optgroup><optgroup label="Service-Partner">' +
-      Object.keys(defaultBases).map(function(n) { return '<option>' + escHtml(n) + '</option>'; }).join('') + '</optgroup>';
+    var html = '<option value="">Service-Partner: –</option>' +
+      Object.keys(defaultBases).map(function(n) { return '<option>' + escHtml(n) + '</option>'; }).join('');
     sel.innerHTML = html;
   }
   function setTourDriver(v) {
@@ -5029,6 +5066,141 @@
     });
   });
   setInterval(function() { if (currentView === 'tour') loadTours(); }, 2 * 60 * 1000);
+
+  /* ---------- Tour aus einer Trello-Liste übernehmen (Board Norderstedt, Listen "KW …") ----------
+     Liest die Karten der gewählten Liste, holt die Adresse aus der Beschreibung
+     (Felder "Strasse:", "PLZ:", "Ort:" – Wert in derselben oder der nächsten Zeile)
+     und legt daraus eine Tour an. Start ist der Standort Norderstedt (Partner Alex). */
+  var TOUR_TRELLO_BOARD_RE = /norderstedt/i;
+  var TOUR_TRELLO_LIST_RE = /^\s*KW\s*\d+/i;
+  var TOUR_START_PARTNER = 'Alex';
+
+  function tourTrelloBoard() {
+    var ids = Object.keys(trelloBoardLists || {});
+    for (var i = 0; i < ids.length; i++) if (TOUR_TRELLO_BOARD_RE.test(trelloBoardLists[ids[i]].name || '')) return { id: ids[i], board: trelloBoardLists[ids[i]] };
+    return null;
+  }
+  function fillTrelloTourLists() {
+    var sel = document.getElementById('tp-trello-list');
+    if (!sel) return;
+    var b = tourTrelloBoard();
+    if (!b) {
+      sel.innerHTML = '<option value="">' + (Object.keys(trelloBoardLists || {}).length ? 'Board „Norderstedt“ nicht gefunden' : 'Trello wird geladen …') + '</option>';
+      return;
+    }
+    var prev = sel.value;
+    var kw = (b.board.lists || []).filter(function(l) { return TOUR_TRELLO_LIST_RE.test(l.name || ''); });
+    var tourLike = kw.filter(function(l) { return /tour|montag|dienstag|mittwoch|donnerstag|freitag|samstag|\d{1,2}\.\d{1,2}/i.test(l.name); });
+    var others = kw.filter(function(l) { return tourLike.indexOf(l) === -1; });
+    var opt = function(l) { return '<option value="' + escHtml(l.id) + '">' + escHtml(l.name) + '</option>'; };
+    sel.innerHTML = '<option value="">KW-Liste wählen …</option>' +
+      (tourLike.length ? '<optgroup label="Touren">' + tourLike.map(opt).join('') + '</optgroup>' : '') +
+      (others.length ? '<optgroup label="Weitere KW-Listen">' + others.map(opt).join('') + '</optgroup>' : '');
+    if (prev) sel.value = prev;
+  }
+
+  // Wert zu einem Feld in der Beschreibung: "Strasse: Musterweg 1" oder "Strasse:\nMusterweg 1"
+  function cardField(lines, re) {
+    for (var i = 0; i < lines.length; i++) {
+      var m = lines[i].match(re);
+      if (!m) continue;
+      if (m[1] && m[1].trim()) return m[1].trim();
+      for (var j = i + 1; j < lines.length && j <= i + 2; j++) {
+        var v = lines[j].trim();
+        if (!v) continue;
+        if (/^[A-Za-zÄÖÜäöüß.\- ]{2,30}:\s*$/.test(v)) return '';
+        return v;
+      }
+      return '';
+    }
+    return '';
+  }
+  function parseCardAddress(card) {
+    var desc = String(card.desc || '').replace(/\*\*/g, '').replace(/\\/g, '');
+    var lines = desc.split(/\r?\n/);
+    var street = cardField(lines, /^\s*(?:stra(?:ss|ß)e|str\.|anschrift|adresse)\s*(?:\/\s*nr\.?)?\s*:\s*(.*)$/i);
+    var plz = (cardField(lines, /^\s*(?:plz|postleitzahl)\s*:\s*(.*)$/i).match(/\d{5}/) || [''])[0];
+    var ort = cardField(lines, /^\s*(?:ort|stadt|wohnort)\s*:\s*(.*)$/i);
+    var title = String(card.name || '');
+    var tm = title.match(/^\s*(\d{5})\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-]+)/);
+    if (!plz && tm) plz = tm[1];
+    if (!ort && tm && tm[1] === plz) ort = tm[2];
+    if (street && plz) return { address: street + ', ' + plz + (ort ? ' ' + ort : ''), exact: true };
+    // Adresse irgendwo im Fließtext ("Musterweg 1, 12345 Ort")
+    var free = desc.match(/([A-ZÄÖÜ][A-Za-zÄÖÜäöüß.\-]+(?:\s[A-ZÄÖÜ][A-Za-zÄÖÜäöüß.\-]+)?\s\d{1,4}\s?[a-zA-Z]?)\s*,?\s*(\d{5})\s+([A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-]+(?:\s[A-ZÄÖÜ][A-Za-zÄÖÜäöüß\-]+)?)/);
+    if (free) return { address: free[1].trim() + ', ' + free[2] + ' ' + free[3], exact: true };
+    if (plz) return { address: plz + (ort ? ' ' + ort : ''), exact: false };
+    return null;
+  }
+
+  // Datum aus dem Listennamen: "6.10" bzw. "06.10.2026", sonst KW + Wochentag
+  function tourDateFromListName(name) {
+    var now = new Date();
+    var m = name.match(/(\d{1,2})\.(\d{1,2})\.?(\d{2,4})?/);
+    if (m) {
+      var y = m[3] ? (m[3].length === 2 ? 2000 + +m[3] : +m[3]) : now.getFullYear();
+      var d = new Date(y, +m[2] - 1, +m[1]);
+      if (!m[3] && d.getTime() - now.getTime() < -180 * 86400000) d.setFullYear(y + 1);
+      if (!m[3] && d.getTime() - now.getTime() > 180 * 86400000) d.setFullYear(y - 1);
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+    var kw = name.match(/KW\s*(\d{1,2})/i);
+    var days = ['montag', 'dienstag', 'mittwoch', 'donnerstag', 'freitag', 'samstag', 'sonntag'];
+    var di = -1;
+    days.forEach(function(dn, i) { if (di === -1 && name.toLowerCase().indexOf(dn) !== -1) di = i; });
+    if (kw && di !== -1) {
+      var year = now.getFullYear();
+      var jan4 = new Date(Date.UTC(year, 0, 4));
+      var monday = new Date(jan4.getTime() - ((jan4.getUTCDay() + 6) % 7) * 86400000 + (+kw[1] - 1) * 7 * 86400000);
+      var dd = new Date(monday.getTime() + di * 86400000);
+      return dd.getUTCFullYear() + '-' + String(dd.getUTCMonth() + 1).padStart(2, '0') + '-' + String(dd.getUTCDate()).padStart(2, '0');
+    }
+    return '';
+  }
+
+  function importTourFromTrello() {
+    var sel = document.getElementById('tp-trello-list');
+    var info = document.getElementById('tp-import-info');
+    var listId = sel.value;
+    if (!listId) { info.textContent = 'Bitte zuerst eine KW-Liste wählen.'; return; }
+    var listName = sel.options[sel.selectedIndex].textContent;
+    var cfg = getTrelloConfig();
+    info.textContent = 'Karten werden gelesen …';
+    fetch('https://api.trello.com/1/lists/' + encodeURIComponent(listId) + '/cards?fields=name,desc,shortUrl&key=' +
+      encodeURIComponent(cfg.apiKey) + '&token=' + encodeURIComponent(cfg.token), { cache: 'no-store' })
+      .then(function(r) { if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); })
+      .then(function(cards) {
+        if (!cards.length) { info.textContent = 'In dieser Liste sind keine Karten.'; return; }
+        var stops = [], approx = [], missing = [];
+        cards.forEach(function(c) {
+          var a = parseCardAddress(c);
+          if (!a) { missing.push(c.name); return; }
+          tpAddrLabels[a.address] = c.name;
+          stops.push(a.address);
+          if (!a.exact) approx.push(c.name);
+        });
+        // Gibt es diese Tour schon? Dann diese aktualisieren statt doppelt anzulegen
+        var existing = tours.filter(function(t) { return (t.name || '').trim() === listName.trim(); })[0];
+        currentTourId = existing ? existing.id : '';
+        document.getElementById('tp-tour-name').value = listName;
+        document.getElementById('tp-tour-date').value = tourDateFromListName(listName);
+        setTourDriver(TOUR_START_PARTNER);
+        tpResetForm();
+        tpAddrList.innerHTML = '';
+        var startBase = defaultBases[TOUR_START_PARTNER] && defaultBases[TOUR_START_PARTNER][0];
+        if (startBase) { tpAddrLabels[startBase.address] = 'Start: Standort Norderstedt'; tpAddAddressRow(startBase.address); }
+        stops.forEach(function(a) { tpAddAddressRow(a); });
+        while (tpAddrList.querySelectorAll('.tp-addr-row').length < 2) tpAddAddressRow('');
+        var msg = '✓ ' + stops.length + ' von ' + cards.length + ' Karten übernommen' + (existing ? ' (bestehende Tour wird aktualisiert)' : '') + '. Bitte prüfen und „Tour speichern“.';
+        if (approx.length) msg += '<br><span class="warn">Nur PLZ/Ort gefunden (keine Straße in der Karte): ' + approx.map(escHtml).join('; ') + '</span>';
+        if (missing.length) msg += '<br><span class="warn">Keine Adresse gefunden: ' + missing.map(escHtml).join('; ') + '</span>';
+        info.innerHTML = msg;
+        renderSavedTours();
+        if (tpAddrList.querySelectorAll('.tp-addr-row').length >= 2 && stops.length) tpCalcBtn.click();
+      })
+      .catch(function(err) { info.textContent = 'Trello-Liste konnte nicht gelesen werden (' + err.message + ').'; });
+  }
+  document.getElementById('tp-trello-import').addEventListener('click', importTourFromTrello);
 
   if (alreadyAuthed) {
     initMapIfNeeded();
@@ -5259,6 +5431,7 @@
     tpModal.classList.remove('open');
     if (!tpAddrList.children.length) tpResetForm();
     fillTourDriverOptions();
+    fillTrelloTourLists();
     renderSavedTours();
     loadTours();
     initMapIfNeeded();
@@ -6968,6 +7141,7 @@
   } catch (e) {}
 
   function onTrelloDataUpdated() {
+    if (currentView === 'tour') fillTrelloTourLists();
     if (currentView === 'dashboard') renderDashboard();
   }
 
