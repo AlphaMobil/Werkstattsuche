@@ -1811,6 +1811,33 @@
   }
   .tp-chip-count { font-family: var(--font-mono); font-size: 11px; }
   .tp-chip-count:empty { display: none; }
+  .tp-saved { margin: 4px 0 16px; padding: 12px; border: 1px solid var(--border); border-radius: 12px; background: var(--surface-2); }
+  .tp-saved-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 8px; }
+  #tp-saved-count { color: var(--text-dim); }
+  .tp-mini-btn { background: var(--surface); border: 1px solid var(--border); border-radius: 6px; padding: 4px 9px; font-family: var(--font-body); font-size: 12px; font-weight: 600; color: var(--accent); cursor: pointer; }
+  .tp-mini-btn:hover { border-color: var(--accent); }
+  .tp-saved-filter { display: flex; gap: 4px; margin-bottom: 8px; }
+  .tp-saved-filter button { flex: 1; background: transparent; border: 1px solid transparent; border-radius: 6px; padding: 4px 6px; font-family: var(--font-body); font-size: 12px; color: var(--text-muted); cursor: pointer; }
+  .tp-saved-filter button.active { background: var(--surface); border-color: var(--border); color: var(--text); font-weight: 600; }
+  .tp-saved-list { display: flex; flex-direction: column; gap: 6px; max-height: 210px; overflow-y: auto; }
+  .tp-saved-item { display: flex; flex-direction: column; gap: 2px; text-align: left; width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; cursor: pointer; font-family: var(--font-body); color: var(--text); }
+  .tp-saved-item:hover { border-color: var(--accent); }
+  .tp-saved-item.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,65,119,0.12); }
+  .tp-saved-item.past { opacity: 0.65; }
+  .tp-saved-item b { font-size: 13px; font-weight: 600; }
+  .tp-saved-item small { font-size: 11.5px; color: var(--text-muted); }
+  .tp-saved-empty { font-size: 12.5px; color: var(--text-muted); padding: 4px 2px; }
+  .tp-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+  .tp-meta input, .tp-meta select { width: 100%; box-sizing: border-box; background: var(--surface-2); border: 1px solid var(--border); border-radius: 8px; padding: 9px 12px; font-family: var(--font-body); font-size: 13px; color: var(--text); }
+  .tp-meta input:focus, .tp-meta select:focus { outline: none; border-color: var(--accent); }
+  #tp-tour-name { font-weight: 600; font-size: 14px; }
+  .tp-meta-row { display: flex; gap: 8px; }
+  .tp-meta-row > * { flex: 1; min-width: 0; }
+  .tp-save-row { display: flex; gap: 8px; margin-top: 8px; }
+  .tp-save-btn { flex: 1; background: var(--surface); border: 1px solid var(--accent); color: var(--accent); border-radius: 10px; padding: 10px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; }
+  .tp-save-btn:hover { background: rgba(0,65,119,0.06); }
+  .tp-save-btn:disabled { opacity: 0.5; cursor: wait; }
+  .tp-del-btn { background: none; border: 1px solid var(--border); color: var(--danger); border-radius: 10px; padding: 10px 14px; font-family: var(--font-body); font-size: 13px; font-weight: 600; cursor: pointer; }
   .tp-addr-row .tp-addr-num.tp-start { background: #1d9e75; color: #fff; }
   .tp-addr-row .tp-addr-num { background: var(--accent); color: #fff; width: 24px; height: 24px; }
   .tp-stats {
@@ -2261,6 +2288,25 @@
         <div class="tp-title">Neue Tour</div>
         <button class="tp-close" id="tp-close-btn" type="button" aria-label="Schlie&szlig;en">&times;</button>
       </div>
+      <div class="tp-saved" id="tp-saved">
+        <div class="tp-saved-head">
+          <div class="tp-section-label" style="margin:0">Gespeicherte Touren <span id="tp-saved-count"></span></div>
+          <button type="button" class="tp-mini-btn" id="tp-new-tour">+ Neue Tour</button>
+        </div>
+        <div class="tp-saved-filter" id="tp-saved-filter">
+          <button type="button" data-f="upcoming" class="active">Kommende</button>
+          <button type="button" data-f="mine">Meine</button>
+          <button type="button" data-f="all">Alle</button>
+        </div>
+        <div class="tp-saved-list" id="tp-saved-list"></div>
+      </div>
+      <div class="tp-meta">
+        <input type="text" id="tp-tour-name" placeholder="Tourname, z. B. Kasparek Nord" maxlength="120" />
+        <div class="tp-meta-row">
+          <input type="date" id="tp-tour-date" />
+          <select id="tp-tour-driver"><option value="">Zust&auml;ndig: &ndash;</option></select>
+        </div>
+      </div>
       <div class="tp-sub">Adressen eintragen &ndash; die g&uuml;nstigste Reihenfolge wird automatisch berechnet. Die erste Adresse (S) ist der Startpunkt.</div>
       <div class="tp-section-label">Partner-Adressen &middot; Klick f&uuml;gt die Adresse als Stopp hinzu (auch mehrfach)</div>
       <div class="tp-partner-quick" id="tp-partner-quick"></div>
@@ -2271,6 +2317,10 @@
         <button class="tp-reset-btn" id="tp-reset-btn" type="button">&#8635; Zur&uuml;cksetzen</button>
       </div>
       <button class="tp-calc-btn" id="tp-calc-btn" type="button">Route berechnen</button>
+      <div class="tp-save-row">
+        <button type="button" class="tp-save-btn" id="tp-save-btn">Tour speichern</button>
+        <button type="button" class="tp-del-btn" id="tp-delete-btn" style="display:none">L&ouml;schen</button>
+      </div>
       <div class="tp-status" id="tp-status"></div>
       <div class="tp-results" id="tp-results">
         <div class="tp-stats">
@@ -4778,6 +4828,208 @@
     });
   });
 
+  /* ---------- Gespeicherte Touren (für das ganze Team, im Google-Skript der To-dos) ---------- */
+  var tours = [];
+  var toursLoaded = false, toursLoading = false, toursError = '';
+  var currentTourId = '';
+  var tourFilter = 'upcoming';
+  var TOURS_CACHE_KEY = 'toursCacheV1';
+  try { tours = JSON.parse(localStorage.getItem(TOURS_CACHE_KEY) || '[]') || []; } catch (e) { tours = []; }
+
+  function toursRequest(method, payload) {
+    var url = getTodoUrl();
+    if (!url) return Promise.reject(new Error('Kein Google-Skript verbunden (Einstellungen → To-dos)'));
+    var opts;
+    if (method === 'GET') { url += (url.indexOf('?') === -1 ? '?' : '&') + 'type=tours'; opts = { cache: 'no-store' }; }
+    else opts = { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(payload) };
+    return fetch(url, opts).then(function(res) {
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }).then(function(data) {
+      if (data && data.error) {
+        if (payload && payload.action === 'tour_save' && (data.error === 'not_found' || data.error === 'unknown_action')) throw new Error(TOURS_OUTDATED);
+        throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert' : data.error);
+      }
+      return data;
+    });
+  }
+  var TOURS_OUTDATED = 'Das Google-Skript kennt noch keine Touren – bitte die neue Version des Skripts bereitstellen.';
+  function loadTours() {
+    if (toursLoading) return;
+    toursLoading = true;
+    toursRequest('GET').then(function(data) {
+      if (!data || !Array.isArray(data.tours)) throw new Error(TOURS_OUTDATED);
+      tours = data.tours;
+      toursLoaded = true; toursError = '';
+      try { localStorage.setItem(TOURS_CACHE_KEY, JSON.stringify(tours)); } catch (e) {}
+    }).catch(function(err) {
+      toursError = err.message;
+    }).then(function() {
+      toursLoading = false;
+      renderSavedTours();
+    });
+  }
+
+  function tourTodayStr() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+  }
+  function fmtTourDate(iso) {
+    if (!iso) return 'ohne Datum';
+    var p = iso.split('-');
+    if (p.length !== 3) return iso;
+    var d = new Date(+p[0], +p[1] - 1, +p[2]);
+    return d.toLocaleDateString('de-DE', { weekday: 'short', day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+  function renderSavedTours() {
+    var list = document.getElementById('tp-saved-list');
+    if (!list) return;
+    var today = tourTodayStr();
+    var me = (typeof myName === 'function') ? myName() : '';
+    var shown = tours.filter(function(t) {
+      if (tourFilter === 'upcoming') return !t.date || t.date >= today;
+      if (tourFilter === 'mine') return me && (sameName(t.driver, me) || sameName(t.createdBy, me));
+      return true;
+    }).sort(function(a, b) {
+      var fa = !a.date || a.date >= today, fb = !b.date || b.date >= today;
+      if (fa !== fb) return fa ? -1 : 1;
+      var da = a.date || '9999', db = b.date || '9999';
+      return fa ? da.localeCompare(db) : db.localeCompare(da);
+    });
+    document.getElementById('tp-saved-count').textContent = tours.length ? '(' + tours.length + ')' : '';
+    var html = shown.map(function(t) {
+      var bits = [fmtTourDate(t.date)];
+      if (t.driver) bits.push(t.driver);
+      bits.push((t.stops || []).length + ' Stopps');
+      if (t.totalKm) bits.push('ca. ' + Math.round(t.totalKm) + ' km');
+      var past = t.date && t.date < today;
+      return '<button type="button" class="tp-saved-item' + (t.id === currentTourId ? ' active' : '') + (past ? ' past' : '') + '" data-tour="' + escHtml(t.id) + '">' +
+        '<b>' + escHtml(t.name || 'Tour') + '</b><small>' + escHtml(bits.join(' · ')) + '</small></button>';
+    }).join('');
+    if (!html) {
+      html = '<div class="tp-saved-empty">' + escHtml(toursError || (toursLoading && !toursLoaded ? 'Touren werden geladen …' :
+        (tourFilter === 'upcoming' ? 'Keine kommenden Touren.' : tourFilter === 'mine' ? 'Noch keine eigenen Touren.' : 'Noch keine Touren gespeichert.'))) + '</div>';
+    } else if (toursError) {
+      html = '<div class="tp-saved-empty">' + escHtml(toursError) + '</div>' + html;
+    }
+    list.innerHTML = html;
+    list.querySelectorAll('[data-tour]').forEach(function(b) {
+      b.addEventListener('click', function() { openSavedTour(b.getAttribute('data-tour')); });
+    });
+    document.getElementById('tp-delete-btn').style.display = currentTourId ? '' : 'none';
+    document.getElementById('tp-save-btn').textContent = currentTourId ? 'Änderungen speichern' : 'Tour speichern';
+    document.querySelector('#tour-planner-modal .tp-title').textContent = currentTourId ? (document.getElementById('tp-tour-name').value || 'Tour') : 'Neue Tour';
+  }
+
+  function fillTourDriverOptions() {
+    var sel = document.getElementById('tp-tour-driver');
+    if (!sel || sel.options.length > 1) return;
+    var team = (typeof TEAM_MEMBERS !== 'undefined' ? TEAM_MEMBERS : []).map(function(n) { return n.replace(/([a-zäöüß])([A-ZÄÖÜ])/g, '$1 $2'); });
+    var html = '<option value="">Zuständig: –</option><optgroup label="Team">' +
+      team.map(function(n) { return '<option>' + escHtml(n) + '</option>'; }).join('') + '</optgroup><optgroup label="Service-Partner">' +
+      Object.keys(defaultBases).map(function(n) { return '<option>' + escHtml(n) + '</option>'; }).join('') + '</optgroup>';
+    sel.innerHTML = html;
+  }
+  function setTourDriver(v) {
+    var sel = document.getElementById('tp-tour-driver');
+    fillTourDriverOptions();
+    if (v && !Array.prototype.some.call(sel.options, function(o) { return o.value === v; })) {
+      var o = document.createElement('option'); o.textContent = v; sel.appendChild(o);
+    }
+    sel.value = v || '';
+  }
+
+  function newTour() {
+    currentTourId = '';
+    document.getElementById('tp-tour-name').value = '';
+    document.getElementById('tp-tour-date').value = '';
+    setTourDriver('');
+    tpResetForm();
+    renderSavedTours();
+  }
+
+  function openSavedTour(id) {
+    var t = tours.filter(function(x) { return x.id === id; })[0];
+    if (!t) return;
+    currentTourId = t.id;
+    document.getElementById('tp-tour-name').value = t.name || '';
+    document.getElementById('tp-tour-date').value = t.date || '';
+    setTourDriver(t.driver || '');
+    tpResetForm();
+    tpAddrList.innerHTML = '';
+    var stops = t.stops || [];
+    stops.forEach(function(a) { tpAddAddressRow(a); });
+    while (tpAddrList.querySelectorAll('.tp-addr-row').length < 2) tpAddAddressRow('');
+    renderSavedTours();
+    if (stops.length >= 2) tpCalcBtn.click();
+  }
+
+  function saveCurrentTour() {
+    var name = document.getElementById('tp-tour-name').value.trim();
+    var inputs = Array.prototype.map.call(tpAddrList.querySelectorAll('.tp-addr-input'), function(el) { return el.value.trim(); }).filter(Boolean);
+    if (!inputs.length) { tpStatusEl.textContent = 'Bitte zuerst Adressen eintragen.'; tpStatusEl.classList.add('tp-error'); return; }
+    if (!name) { document.getElementById('tp-tour-name').focus(); tpStatusEl.textContent = 'Bitte einen Tournamen eingeben.'; tpStatusEl.classList.add('tp-error'); return; }
+    // Wurde die Route für genau diese Adressen berechnet, die optimierte Reihenfolge speichern
+    var optimized = tpLastStops.map(function(x) { return x.addr; });
+    var sameSet = optimized.length === inputs.length && optimized.slice().sort().join('\n') === inputs.slice().sort().join('\n');
+    var tour = {
+      id: currentTourId || '',
+      name: name,
+      date: document.getElementById('tp-tour-date').value || '',
+      driver: document.getElementById('tp-tour-driver').value || '',
+      stops: sameSet ? optimized : inputs,
+      totalKm: sameSet ? Math.round(tpLastTotalKm * 1.3) : 0,
+      gmapsUrl: sameSet && tpLastGmapsUrl !== '#' ? tpLastGmapsUrl : ''
+    };
+    var btn = document.getElementById('tp-save-btn');
+    btn.disabled = true; btn.textContent = 'Wird gespeichert …';
+    tpStatusEl.classList.remove('tp-error');
+    var by = (typeof myName === 'function' && myName()) || '';
+    toursRequest('POST', { action: 'tour_save', tour: tour, by: by }).then(function(data) {
+      if (!data || !data.tour) throw new Error(TOURS_OUTDATED);
+      var saved = data.tour;
+      tours = tours.filter(function(x) { return x.id !== saved.id; }).concat([saved]);
+      currentTourId = saved.id;
+      try { localStorage.setItem(TOURS_CACHE_KEY, JSON.stringify(tours)); } catch (e) {}
+      tpStatusEl.textContent = '✓ Tour gespeichert – für alle im Team sichtbar.';
+    }).catch(function(err) {
+      tpStatusEl.textContent = 'Speichern fehlgeschlagen: ' + err.message;
+      tpStatusEl.classList.add('tp-error');
+    }).then(function() {
+      btn.disabled = false;
+      renderSavedTours();
+    });
+  }
+
+  function deleteCurrentTour() {
+    if (!currentTourId) return;
+    var t = tours.filter(function(x) { return x.id === currentTourId; })[0];
+    if (!confirm('Tour „' + ((t && t.name) || 'Tour') + '“ für alle löschen?')) return;
+    var id = currentTourId;
+    toursRequest('POST', { action: 'tour_delete', id: id }).then(function() {
+      tours = tours.filter(function(x) { return x.id !== id; });
+      try { localStorage.setItem(TOURS_CACHE_KEY, JSON.stringify(tours)); } catch (e) {}
+      newTour();
+      tpStatusEl.textContent = 'Tour gelöscht.';
+    }).catch(function(err) {
+      tpStatusEl.textContent = 'Löschen fehlgeschlagen: ' + err.message;
+      tpStatusEl.classList.add('tp-error');
+    });
+  }
+
+  document.getElementById('tp-new-tour').addEventListener('click', newTour);
+  document.getElementById('tp-save-btn').addEventListener('click', saveCurrentTour);
+  document.getElementById('tp-delete-btn').addEventListener('click', deleteCurrentTour);
+  document.getElementById('tp-tour-name').addEventListener('input', function() { if (currentTourId) renderSavedTours(); });
+  document.querySelectorAll('#tp-saved-filter button').forEach(function(b) {
+    b.addEventListener('click', function() {
+      tourFilter = b.getAttribute('data-f');
+      document.querySelectorAll('#tp-saved-filter button').forEach(function(x) { x.classList.toggle('active', x === b); });
+      renderSavedTours();
+    });
+  });
+  setInterval(function() { if (currentView === 'tour') loadTours(); }, 2 * 60 * 1000);
+
   if (alreadyAuthed) {
     initMapIfNeeded();
   } else {
@@ -5006,6 +5258,9 @@
     if (tpModal.parentNode !== wrap) wrap.insertBefore(tpModal, wrap.firstChild);
     tpModal.classList.remove('open');
     if (!tpAddrList.children.length) tpResetForm();
+    fillTourDriverOptions();
+    renderSavedTours();
+    loadTours();
     initMapIfNeeded();
     setTimeout(function() { if (map) map.invalidateSize(); }, 50);
     updateNavActive();
@@ -5350,6 +5605,7 @@
     ];
     loadMailData(true, false);
     if (typeof loadTodos === 'function') loadTodos();
+    if (typeof loadTours === 'function' && getTodoUrl()) loadTours();
     return Promise.all(jobs.map(function(j) { return j.catch(function() {}); })).then(function() {
       return new Promise(function(r) { var n = 0; (function w() { if ((!mailLoading && !todoLoading) || n++ > 40) r(); else setTimeout(w, 250); })(); });
     }).then(function() {
