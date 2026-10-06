@@ -3562,7 +3562,7 @@
   var trelloMemberNames = {}; // Vollständige Namen aller Board-Mitglieder (Vorschläge bei "Für wen?")
   var trelloBoardLists = {}; // boardId -> { name, lists: [{id, name}] } (für Verschieben / neue Karten)
   // Listen, deren Karten als abgeschlossen gelten und nirgends als "offen" gezählt werden.
-  var TRELLO_EXCLUDED_LIST_RE = /erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung|keine\s*reaktion|kb\s*an\s*kd|abgelehnt/i;
+  var TRELLO_EXCLUDED_LIST_RE = /erledigt|fertig|storniert|gesperrt|keine\s*r(ü|ue)ckmeldung|keine\s*reaktion|kb\s*an\s*kd|abgelehnt|rechnung\s*schreiben/i;
   var trelloAutoRefreshTimer = null;
 
   function getTrelloConfig() {
