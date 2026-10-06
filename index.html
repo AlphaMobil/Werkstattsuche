@@ -1925,6 +1925,28 @@
     .dash-table td.dash-empty { text-align: center; }
     .dash-todo-actions { flex-wrap: wrap; }
   }
+
+  /* ---------- Dashboard: Karten ohne Reaktion nach Erinnerung ---------- */
+  .dash-noreact { background: var(--surface); border: 1px solid #f1c4c4; border-radius: 12px; overflow: hidden; margin-bottom: 14px; min-width: 0; }
+  .dnr-head { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; padding: 12px 18px; background: var(--danger); color: #fff; }
+  .dnr-head b { font-family: var(--font-display); font-size: 15px; }
+  .dnr-count { background: rgba(255,255,255,0.22); border-radius: 10px; padding: 1px 9px; font-family: var(--font-mono); font-size: 12px; font-weight: 600; }
+  .dnr-hint { margin-left: auto; font-size: 12.5px; color: #ffe1e1; }
+  .dnr-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .dnr-table th { text-align: left; padding: 7px 10px; font-family: var(--font-mono); font-size: 10.5px; letter-spacing: 0.6px; text-transform: uppercase; color: #9a3a3a; background: #fdf0f0; font-weight: 600; }
+  .dnr-table th:first-child, .dnr-table td:first-child { padding-left: 18px; }
+  .dnr-table td { padding: 10px; border-top: 1px solid #f6dede; background: #fff8f8; vertical-align: top; }
+  .dnr-table td a { font-weight: 600; color: var(--accent); text-decoration: none; overflow-wrap: anywhere; }
+  .dnr-days { color: var(--danger); font-weight: 700; white-space: nowrap; }
+  .dnr-actions { display: flex; flex-wrap: wrap; gap: 6px; }
+  @media (max-width: 760px) {
+    .dnr-hint { margin-left: 0; flex-basis: 100%; }
+    .dnr-table thead { display: none; }
+    .dnr-table, .dnr-table tbody, .dnr-table tr, .dnr-table td { display: block; width: 100%; box-sizing: border-box; }
+    .dnr-table tr { border-top: 1px solid #f6dede; background: #fff8f8; padding: 8px 14px; }
+    .dnr-table td { border: none; padding: 3px 0 !important; background: none; }
+    .dnr-table td[data-l]::before { content: attr(data-l) ': '; color: #9a3a3a; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; }
+  }
 </style>
 </head>
 <body>
@@ -2171,6 +2193,8 @@
           </div>
           <div id="dash-todo-list" class="dash-todo-list"></div>
         </div>
+
+        <div class="dash-noreact" id="dash-noreact" style="display:none"></div>
 
         <div class="dash-panel" id="dash-table-panel">
           <div class="dash-panel-title">
@@ -5564,6 +5588,7 @@
     loadMailData(false);
     if (getTodoUrl() && !myName()) getDispatchUserName();
     loadTodos();
+    loadNoReaction();
     updateNavActive();
   }
 
@@ -5889,6 +5914,7 @@
     ];
     loadMailData(true, false);
     if (typeof loadTodos === 'function') loadTodos();
+    if (typeof loadNoReaction === 'function') loadNoReaction();
     if (typeof loadTours === 'function' && getTodoUrl()) loadTours();
     return Promise.all(jobs.map(function(j) { return j.catch(function() {}); })).then(function() {
       return new Promise(function(r) { var n = 0; (function w() { if ((!mailLoading && !todoLoading) || n++ > 40) r(); else setTimeout(w, 250); })(); });
@@ -6136,9 +6162,55 @@
     };
   }
 
+
+  /* ---------- Karten ohne Reaktion nach Erinnerung (aus dem Google-Skript, Blatt "Erinnerungen") ---------- */
+  var noReaction = [];
+  var noReactionLoading = false;
+  function loadNoReaction() {
+    var url = getTodoUrl();
+    if (!url || noReactionLoading) return;
+    noReactionLoading = true;
+    fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'type=noreaction', { cache: 'no-store' })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(d) { if (d && Array.isArray(d.noreaction)) noReaction = d.noreaction; })
+      .catch(function() {})
+      .then(function() { noReactionLoading = false; if (currentView === 'dashboard') renderNoReactionPanel(); });
+  }
+  function renderNoReactionPanel() {
+    var el = document.getElementById('dash-noreact');
+    if (!el) return;
+    var open = {};
+    (trelloOpenCards || []).forEach(function(c) { open[c.id] = c; });
+    var rows = noReaction.map(function(r) {
+      var c = open[r.cardId];
+      if (!c) return null; // erledigt, archiviert oder in ausgeschlossener Liste
+      var checked = r.checkedAt ? new Date(r.checkedAt).getTime() : 0;
+      var last = c.lastActivity ? new Date(c.lastActivity).getTime() : 0;
+      if (checked && last > checked + 60000) return null; // seit der Nachkontrolle bearbeitet
+      return { r: r, c: c, days: last ? Math.floor((Date.now() - last) / 86400000) : null };
+    }).filter(Boolean).sort(function(a, b) { return (b.days || 0) - (a.days || 0); });
+    if (!rows.length) { el.style.display = 'none'; el.innerHTML = ''; return; }
+    el.style.display = '';
+    el.innerHTML =
+      '<div class="dnr-head"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3l10 18H2z"></path><path d="M12 10v5M12 18h.01"></path></svg>' +
+        '<b>Keine Reaktion nach Erinnerung</b><span class="dnr-count">' + rows.length + '</span>' +
+        '<span class="dnr-hint">Erinnert – seitdem keine Aktivität. Bitte Kunden kontaktieren.</span></div>' +
+      '<table class="dnr-table"><thead><tr><th>Karte</th><th>Liste</th><th>Partner</th><th>Erinnert am</th><th>Ohne Aktivität</th><th></th></tr></thead><tbody>' +
+      rows.map(function(x) {
+        var partner = partnerLabelForCard(x.c);
+        var pColor = partnerColors[partner];
+        return '<tr><td><a href="' + escHtml(x.c.url) + '" target="_blank" rel="noopener">' + escHtml(x.c.name) + '</a></td>' +
+          '<td data-l="Liste">' + escHtml(x.c.listName) + '</td>' +
+          '<td data-l="Partner">' + (pColor ? '<span class="dash-pdot" style="background:' + pColor + '"></span>' : '') + escHtml(partner) + '</td>' +
+          '<td data-l="Erinnert am">' + (x.r.sentAt ? fmtDate(x.r.sentAt) : '–') + '</td>' +
+          '<td data-l="Ohne Aktivität" class="dnr-days">' + (x.days != null ? x.days + ' Tage' : '–') + '</td>' +
+          '<td><div class="dnr-actions">' + todoAddBtnHtml('card', x.c.id, x.c.name, x.c.url) + trelloCardBtnsHtml(x.c) + '</div></td></tr>';
+      }).join('') + '</tbody></table>';
+  }
   function renderDashboard() {
     if (!dashEl || currentView !== 'dashboard') return;
     var cards = dashCards();
+    renderNoReactionPanel();
 
     // ---- Kennzahlen ----
     var overdue = cards.filter(isOverdue).length;
