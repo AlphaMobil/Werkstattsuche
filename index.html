@@ -3656,7 +3656,11 @@
       var entries = [];
       var openCards = [];
       cards.forEach(function(c) {
-        var listName = listNameById[c.idList] || '—';
+        // Karten in archivierten Listen (Liste nicht unter den offenen Listen) ausblenden
+        if (!listNameById[c.idList]) return;
+        // Als vollständig/erledigt markierte Karten (Haken in Trello) ausblenden
+        if (c.dueComplete) return;
+        var listName = listNameById[c.idList];
         if (TRELLO_EXCLUDED_LIST_RE.test(listName)) return; // ausgeschlossene Listen werden nicht angezeigt
         var plz = extractPlzFromCardName(c.name || '');
         // Alle offenen Karten (auch ohne PLZ im Titel) für das Team-Dashboard sammeln
