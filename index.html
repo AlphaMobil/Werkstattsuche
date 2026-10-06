@@ -1947,6 +1947,9 @@
     .dnr-table td { border: none; padding: 3px 0 !important; background: none; }
     .dnr-table td[data-l]::before { content: attr(data-l) ': '; color: #9a3a3a; font-family: var(--font-mono); font-size: 10.5px; text-transform: uppercase; }
   }
+  a.brand { cursor: pointer; text-decoration: none; border-radius: 8px; }
+  a.brand:hover img { opacity: 0.85; }
+  a.brand:focus-visible { outline: 2px solid #fff; outline-offset: 4px; }
 </style>
 </head>
 <body>
@@ -2006,9 +2009,9 @@
         <span class="nav-burger" aria-hidden="true"><span></span><span></span><span></span></span>
         <span class="nav-current" id="nav-current">Men&uuml;</span>
       </button>
-      <div class="brand">
+      <a class="brand" id="brand-home" href="#" title="Zur PLZ-Karte" aria-label="Alpha-Mobil – zur PLZ-Karte">
         <img src="https://www.alpha-mobil.com/bilder/intern/shoplogo/alpha-mobil_logo_white.png" alt="Alpha-Mobil" />
-      </div>
+      </a>
       <button class="header-btn" id="dashboard-btn" type="button">📊 Dashboard</button>
       <button class="header-btn" id="view-toggle-btn" type="button">📍 Fallübersicht</button>
       <button class="header-btn" id="tour-planner-btn-header" type="button">🗺️ Tourenplaner</button>
@@ -5975,6 +5978,15 @@
     if (settingsPanelEl && settingsHome) { settingsPanelEl.style.display = 'none'; settingsHome.appendChild(settingsPanelEl); }
   }
 
+
+  // Klick auf das Alpha-Mobil-Logo: zurück zur PLZ-Karte (Startansicht)
+  document.getElementById('brand-home').addEventListener('click', function(e) {
+    e.preventDefault();
+    if (document.body.classList.contains('nav-open')) closeNav();
+    switchToPlzView();
+    window.scrollTo(0, 0);
+    setTimeout(function() { var i = document.getElementById('plz-input'); if (i && window.innerWidth > 760) i.focus(); }, 80);
+  });
   navMenuBtn.addEventListener('click', function() {
     if (document.body.classList.contains('nav-open')) closeNav(); else openNav();
   });
