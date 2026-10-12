@@ -5555,7 +5555,7 @@
         '<div class="cpsr-meta">PLZ ' + m.plz + ' &middot; ' + escapeAttrCase(m.entry.listName) + ' &middot; ' + escapeAttrCase(m.entry.boardName) + '</div>';
       item.addEventListener('click', function() {
         caseMap.setView([m.coord[0], m.coord[1]], 12);
-        window.open(m.entry.cardUrl, '_blank', 'noopener');
+        if (!openTrelloLink(m.entry.cardUrl)) window.open(m.entry.cardUrl, '_blank', 'noopener');
       });
       casePlzResults.appendChild(item);
     });
@@ -5729,9 +5729,11 @@
       rows: [
         ['Konto', trelloUserToken() ? (tName || 'verbunden') : '–'],
         ['Wofür', 'Kommentieren, Verschieben, Karten anlegen, private To-dos, dein Name in den Tickets'],
-        ['Gültig', trelloUserToken() ? 'unbefristet, in diesem Browser gespeichert' : '–']
+        ['Gültig', trelloUserToken() ? 'unbefristet, in diesem Browser gespeichert' : '–'],
+        ['Karten öffnen in', trelloOpenInApp() ? 'Trello-Desktop-App' : 'Browser']
       ],
-      actions: trelloUserToken() ? [{ id: 'trello-disconnect', label: 'Trennen', subtle: true }] : [{ id: 'trello-connect', label: 'Mit Trello verbinden', primary: true }],
+      actions: (trelloUserToken() ? [{ id: 'trello-disconnect', label: 'Trennen', subtle: true }] : [{ id: 'trello-connect', label: 'Mit Trello verbinden', primary: true }])
+        .concat([{ id: 'trello-open-app', label: trelloOpenInApp() ? 'Karten wieder im Browser öffnen' : 'Karten in Desktop-App öffnen', subtle: true }]),
       test: trelloUserToken() ? function() { return trelloWrite('GET', '/members/me', { fields: 'fullName' }).then(function(me) { return 'Angemeldet als ' + (me.fullName || 'unbekannt') + '.'; }); } : null
     });
 
@@ -5924,6 +5926,7 @@
     }
     else if (id === 'trello-connect') connectTrello();
     else if (id === 'trello-disconnect') { disconnectTrello(); delete setResults['trello-user']; renderSettingsPage(); }
+    else if (id === 'trello-open-app') { setTrelloOpenInApp(!trelloOpenInApp()); renderSettingsPage(); }
     else if (id === 'mail-dashboard') switchToDashboardView();
     else if (id === 'mail-disconnect') {
       if (!confirm('Verbindung zum E-Mail-Postfach in diesem Browser entfernen?')) return;
@@ -7086,6 +7089,26 @@
   var TRELLO_USER_NAME_KEY = 'trelloUserNameV1';
   var TRELLO_LAST_TARGET_KEY = 'trelloLastTargetV1';
   var trelloDialogAction = null;
+
+  // Trello-Karten/Boards wahlweise in der Desktop-App öffnen (trello://…) statt im Browser.
+  // Pro Browser einstellbar unter Einstellungen → „Trello – deine Anmeldung“.
+  var TRELLO_OPEN_APP_KEY = 'trelloOpenInAppV1';
+  var TRELLO_LINK_RE = /^https:\/\/trello\.com\/[cb]\//;
+  function trelloOpenInApp() { try { return localStorage.getItem(TRELLO_OPEN_APP_KEY) === '1'; } catch (e) { return false; } }
+  function setTrelloOpenInApp(on) { try { if (on) localStorage.setItem(TRELLO_OPEN_APP_KEY, '1'); else localStorage.removeItem(TRELLO_OPEN_APP_KEY); } catch (e) {} }
+  // Öffnet den Link in der Desktop-App, wenn eingestellt; gibt false zurück, wenn der Browser übernehmen soll.
+  function openTrelloLink(url) {
+    if (!trelloOpenInApp() || !TRELLO_LINK_RE.test(String(url || ''))) return false;
+    window.location.href = String(url).replace(/^https:\/\//, 'trello://');
+    return true;
+  }
+  // Alle normalen Klicks auf Trello-Links abfangen (Strg-/Mittelklick bleibt im Browser)
+  document.addEventListener('click', function(e) {
+    if (e.button !== 0 || e.ctrlKey || e.metaKey || e.shiftKey || e.altKey) return;
+    var a = e.target && e.target.closest ? e.target.closest('a[href]') : null;
+    if (!a || !TRELLO_LINK_RE.test(a.href)) return;
+    if (openTrelloLink(a.href)) e.preventDefault();
+  }, true);
 
   // Rücksprung von der Trello-Anmeldung: Token steht im URL-Fragment (#token=…)
   (function captureTrelloToken() {
