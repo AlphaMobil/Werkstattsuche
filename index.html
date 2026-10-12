@@ -3560,12 +3560,12 @@
   var TRELLO_CACHE_KEY = 'trelloDataCacheV1';
   var TRELLO_AUTO_REFRESH_MS = 10 * 60 * 1000; // 10 Minuten
 
-  // Fest hinterlegte Trello-Zugangsdaten, damit die Kolleg*innen diese nicht selbst
-  // eintragen müssen. Über das Panel ("Trello verbinden") kann das bei Bedarf trotzdem
-  // mit abweichenden eigenen Zugangsdaten überschrieben werden.
+  // Trello wird mit der PERSÖNLICHEN Anmeldung jeder Person gelesen ("Mit Trello anmelden/verbinden").
+  // Es steht bewusst KEIN Zugangs-Token im Quelltext, weil die Seite öffentlich erreichbar ist.
+  // Der API-Key ist nur die Kennung der Trello-App und kein Geheimnis.
   var DEFAULT_TRELLO_CONFIG = {
     apiKey: '4610f953bc62911b5a2e238437d773be',
-    token: 'ATTA29af3b66ded0244609a55b01e72095ef2fbabd7888971eb0a7740fd3e545213bACEC2493',
+    token: '',
     boardIds: ['5ff716d69a7ac4581abee2f6', '5f5a963e22319879493350df', '5ff44b2875eabc140004349a', '68e3e02d73d33077727c2f94', '5fdb4589cbf574472f78f4c1', '5ff570c5318bb273cfe780ff']
   };
 
@@ -3600,8 +3600,10 @@
         if (cfg && cfg.apiKey && cfg.token && Array.isArray(cfg.boardIds) && cfg.boardIds.length) return cfg;
       }
     } catch (e) {}
-    // Kein eigener (überschreibender) Eintrag im Browser gespeichert -> fest hinterlegte Zugangsdaten nutzen
-    return DEFAULT_TRELLO_CONFIG;
+    // Kein eigener Eintrag -> persönlichen Trello-Zugang dieser Person nutzen (leer = nicht verbunden)
+    var personal = '';
+    try { personal = localStorage.getItem('trelloUserTokenV1') || ''; } catch (e) {}
+    return { apiKey: DEFAULT_TRELLO_CONFIG.apiKey, token: personal, boardIds: DEFAULT_TRELLO_CONFIG.boardIds };
   }
 
   function isCustomTrelloConfig() {
@@ -3721,7 +3723,10 @@
 
   function refreshTrelloData(silent) {
     var cfg = getTrelloConfig();
-    if (!cfg) return;
+    if (!cfg || !cfg.token) {
+      if (!silent) { trelloStatusEl.className = 'err'; trelloStatusEl.textContent = 'Bitte zuerst mit Trello verbinden (persönliche Anmeldung).'; }
+      return Promise.resolve();
+    }
     if (!silent) {
       trelloStatusEl.className = '';
       trelloStatusEl.textContent = 'Trello-Karten werden abgerufen…';
@@ -3917,10 +3922,10 @@
     });
   }
   refreshTrelloUI();
-  if (getTrelloConfig()) {
-    refreshTrelloData(true);
-    trelloAutoRefreshTimer = setInterval(function() { refreshTrelloData(true); }, TRELLO_AUTO_REFRESH_MS);
+  if (getTrelloConfig().token || /[#&]token=/.test(window.location.hash || '')) {
+    setTimeout(function() { refreshTrelloData(true); }, 0); // nach dem Übernehmen eines neuen Tokens
   }
+  trelloAutoRefreshTimer = setInterval(function() { refreshTrelloData(true); }, TRELLO_AUTO_REFRESH_MS);
 
   /* ---------- Admin-Panel: geteilte PLZ-Zuordnung (Google Sheet) ---------- */
   var sharedSheetToggle = document.getElementById('shared-sheet-toggle');
@@ -4332,7 +4337,7 @@
       '</div>';
     }).join('');
 
-    var trelloConfigured = (typeof getTrelloConfig === 'function') && getTrelloConfig();
+    var trelloConfigured = (typeof getTrelloConfig === 'function') && getTrelloConfig().token;
     if (trelloConfigured) {
       cardsHtml += '<div class="overlay-card trello-radius-card" id="trello-radius-card">' +
         '<div class="oc-title" style="font-size:15px;">🗂️ Trello &middot; Umkreis 50&nbsp;km</div>' +
@@ -5303,6 +5308,7 @@
     if (!listId) { info.textContent = 'Bitte zuerst eine KW-Liste wählen.'; return; }
     var listName = sel.options[sel.selectedIndex].textContent;
     var cfg = getTrelloConfig();
+    if (!cfg.token) { info.textContent = 'Bitte zuerst mit Trello verbinden.'; return; }
     info.textContent = 'Karten werden gelesen …';
     fetch('https://api.trello.com/1/lists/' + encodeURIComponent(listId) + '/cards?fields=name,desc,shortUrl&key=' +
       encodeURIComponent(cfg.apiKey) + '&token=' + encodeURIComponent(cfg.token), { cache: 'no-store' })
@@ -5648,10 +5654,10 @@
 
     items.push({
       key: 'trello-read', icon: '🗂️', title: 'Trello – Boards lesen',
-      state: cfg && cfg.boardIds.length ? (trelloLastFetch ? 'ok' : 'warn') : 'err',
-      label: cfg && cfg.boardIds.length ? (trelloLastFetch ? 'Verbunden' : 'Noch nicht geladen') : 'Nicht eingerichtet',
+      state: cfg && cfg.token ? (trelloLastFetch ? 'ok' : 'warn') : 'err',
+      label: cfg && cfg.token ? (trelloLastFetch ? 'Verbunden' : 'Noch nicht geladen') : 'Mit Trello verbinden',
       rows: [
-        ['Zugang', isCustomTrelloConfig() ? 'eigene Zugangsdaten (nur dieser Browser)' : 'voreingestellt für alle'],
+        ['Zugang', isCustomTrelloConfig() ? 'eigene Zugangsdaten (nur dieser Browser)' : (cfg.token ? 'persönliche Trello-Anmeldung' : 'nicht verbunden – bitte „Mit Trello verbinden“')],
         ['Boards', (cfg ? cfg.boardIds.length : 0) + (boardNames.length ? ' – ' + boardNames.join(', ') : '')],
         ['Offene Karten', String((trelloOpenCards || []).length)],
         ['Letzter Abruf', fmtTime(trelloLastFetch) + ' (automatisch alle 10 Min.)']
@@ -6242,7 +6248,7 @@
 
     document.getElementById('dash-updated').textContent = trelloLastFetch
       ? 'Trello-Stand: ' + new Date(trelloLastFetch).toLocaleTimeString('de-DE', { hour: '2-digit', minute: '2-digit' }) + ' Uhr'
-      : 'Trello-Daten werden geladen…';
+      : (getTrelloConfig().token ? 'Trello-Daten werden geladen…' : 'Trello: bitte oben rechts „Mit Trello verbinden“');
 
     // ---- Verteilungen ----
     var byList = countBy(cards, function(c) { return c.listName; }).slice(0, 12);
@@ -6343,7 +6349,7 @@
       '</tr>';
     }).join('');
 
-    if (!rows.length) body = '<tr><td colspan="7" class="dash-empty">' + (dashCards().length ? 'Keine Karten passen zu den Filtern.' : 'Trello-Daten werden geladen…') + '</td></tr>';
+    if (!rows.length) body = '<tr><td colspan="7" class="dash-empty">' + (dashCards().length ? 'Keine Karten passen zu den Filtern.' : (getTrelloConfig().token ? 'Trello-Daten werden geladen…' : 'Die Trello-Karten erscheinen, sobald du dich mit Trello verbindest (Button oben rechts in diesem Kasten).')) + '</td></tr>';
     if (rows.length > DASH_MAX_ROWS) body += '<tr><td colspan="7" class="dash-empty">Es werden die ersten ' + DASH_MAX_ROWS + ' Karten angezeigt – Filter nutzen, um einzugrenzen.</td></tr>';
 
     var table = document.getElementById('dash-table');
@@ -7050,7 +7056,7 @@
       'scope=read,write',
       'response_type=token',
       'callback_method=fragment',
-      'key=' + encodeURIComponent(cfg.apiKey),
+      'key=' + encodeURIComponent(DEFAULT_TRELLO_CONFIG.apiKey),
       'return_url=' + encodeURIComponent(returnUrl)
     ].join('&');
   }
