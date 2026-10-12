@@ -2449,11 +2449,32 @@
   } catch (e) {}
 
   /* ---------- Anmeldung (Startseite) ----------
-     Benutzername = Name aus dem Team (TEAM_MEMBERS, Vorname reicht), Passwort = APP_PASSWORD.
-     Alternativ "Mit Trello anmelden": der persönliche Trello-Zugang gilt dann auch als Anmeldung.
-     Hinweis: Das ist eine Zugangssperre im Browser, kein serverseitiger Schutz. */
-  var APP_PASSWORD = "AlpMob2026#";
+     Benutzername = Name aus dem Team (TEAM_MEMBERS, Vorname reicht), Passwort = Team-Passwort.
+     Das Passwort steht NICHT im Quelltext: Das Google-Skript prüft es (Skripteigenschaft APP_TOKEN)
+     und verlangt es danach bei jeder Anfrage. Ohne gültiges Passwort liefert es keine Daten.
+     Alternativ "Mit Trello anmelden": das Skript lässt Trello-Konten zu, die Mitglied eines Team-Boards sind. */
   var AUTH_KEY = "alpinMobilAuthed";
+  var ACCESS_TOKEN_KEY = "teamAccessTokenV1";
+
+  function accessToken() {
+    try { return sessionStorage.getItem(ACCESS_TOKEN_KEY) || localStorage.getItem(ACCESS_TOKEN_KEY) || ''; } catch (e) { return ''; }
+  }
+  function setAccessToken(t, remember) {
+    try {
+      localStorage.removeItem(ACCESS_TOKEN_KEY); sessionStorage.removeItem(ACCESS_TOKEN_KEY);
+      if (t) (remember ? localStorage : sessionStorage).setItem(ACCESS_TOKEN_KEY, t);
+    } catch (e) {}
+  }
+  // Hängt Team-Passwort und Trello-Token an eine Apps-Script-URL (für Skripte ohne eigenes ?token=)
+  function withTeamAuth(url) {
+    if (!url) return url;
+    var params = [];
+    if (accessToken() && !/[?&]token=/.test(url)) params.push('token=' + encodeURIComponent(accessToken()));
+    var tt = '';
+    try { tt = localStorage.getItem('trelloUserTokenV1') || ''; } catch (e) {}
+    if (tt && !/[?&]tt=/.test(url)) params.push('tt=' + encodeURIComponent(tt));
+    return params.length ? url + (url.indexOf('?') === -1 ? '?' : '&') + params.join('&') : url;
+  }
 
   var usernameInput = document.getElementById('username-input');
   var passwordInput = document.getElementById('password-input');
@@ -2502,16 +2523,31 @@
     lockCard.classList.add('shake');
   }
 
+  var unlocking = false;
   function tryUnlock() {
+    if (unlocking) return;
     var who = matchTeamLogin(usernameInput.value);
+    var pw = passwordInput.value;
     if (!usernameInput.value.trim()) { lockFail('Bitte Benutzernamen eingeben.'); usernameInput.focus(); return; }
     if (!who) { lockFail('Benutzername unbekannt.'); usernameInput.focus(); return; }
-    if (passwordInput.value !== APP_PASSWORD) { lockFail('Falsches Passwort.'); passwordInput.focus(); return; }
-    lockError.textContent = '';
-    try { localStorage.setItem('dispatchUserName', who); } catch (e) {}
-    markAuthed(lockRemember.checked);
-    passwordInput.value = '';
-    initMapIfNeeded();
+    if (!pw) { lockFail('Bitte Passwort eingeben.'); passwordInput.focus(); return; }
+    // Passwort vom Google-Skript prüfen lassen
+    unlocking = true;
+    lockError.textContent = 'Wird geprüft …';
+    fetch(DEFAULT_TODO_URL + (DEFAULT_TODO_URL.indexOf('?') === -1 ? '?' : '&') + 'type=ping&token=' + encodeURIComponent(pw), { cache: 'no-store' })
+      .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
+      .then(function(data) {
+        if (!data || !data.ok) { lockFail('Falsches Passwort.'); passwordInput.focus(); return; }
+        lockError.textContent = '';
+        try { localStorage.setItem('dispatchUserName', who); } catch (e) {}
+        setAccessToken(pw, lockRemember.checked);
+        markAuthed(lockRemember.checked);
+        passwordInput.value = '';
+        initMapIfNeeded();
+        reloadSharedOverridesNow(true); // beim Seitenstart fehlte das Passwort noch
+      })
+      .catch(function(err) { lockFail('Anmeldung gerade nicht möglich (' + err.message + ').'); })
+      .then(function() { unlocking = false; });
   }
   unlockBtn.addEventListener('click', tryUnlock);
   [usernameInput, passwordInput].forEach(function(el) {
@@ -2560,6 +2596,8 @@
       sessionStorage.setItem(AUTH_KEY, '1');
     } else {
       alreadyAuthed = sessionStorage.getItem(AUTH_KEY) === '1' || localStorage.getItem(AUTH_KEY) === '1';
+      // Ohne Passwort oder Trello-Zugang liefert das Skript nichts (z. B. alte Anmeldung von vor der Umstellung)
+      if (alreadyAuthed && !accessToken() && !localStorage.getItem('trelloUserTokenV1')) alreadyAuthed = false;
     }
   } catch (e) {}
   if (alreadyAuthed) {
@@ -2571,6 +2609,7 @@
   function logout() {
     if (!confirm('Abmelden? Beim nächsten Öffnen wird wieder die Anmeldung angezeigt.')) return;
     try { localStorage.removeItem(AUTH_KEY); sessionStorage.removeItem(AUTH_KEY); } catch (e) {}
+    setAccessToken('');
     window.location.reload();
   }
 
@@ -2675,11 +2714,14 @@
   // Lädt beim Start einmal die geteilte Zuordnung vom Sheet und löst mit dem Ergebnis auf
   // (nie mit einer Ablehnung – bei Fehlern/fehlender URL einfach ein leeres Ergebnis).
   var sharedOverridesPromise = (function() {
-    var url = getSharedSheetUrl();
+    var url = withTeamAuth(getSharedSheetUrl());
     if (!url) return Promise.resolve({ ok: false, overrides: [] });
-    return fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=list')
+    return fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=list', { cache: 'no-store' })
       .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
-      .then(function(data) { return { ok: true, overrides: (data && data.overrides) || [] }; })
+      .then(function(data) {
+        if (data && data.ok === false) throw new Error(data.error || 'Fehler');
+        return { ok: true, overrides: (data && data.overrides) || [] };
+      })
       .catch(function(err) {
         console.warn('Geteilte PLZ-Zuordnung konnte nicht geladen werden:', err);
         return { ok: false, overrides: [] };
@@ -2715,12 +2757,14 @@
   }
 
   function pushSharedOverride(plz, partners) {
-    var url = getSharedSheetUrl();
+    var url = withTeamAuth(getSharedSheetUrl());
     if (!url) return;
     fetch(url, {
       method: 'POST',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' }, // vermeidet CORS-Preflight bei Apps Script
       body: JSON.stringify({ plz: plz, partners: partners, user: getDispatchUserName() })
+    }).then(function(res) { return res.json(); }).then(function(data) {
+      if (data && data.ok === false) throw new Error(data.error || 'Fehler');
     }).catch(function(err) {
       console.warn('PLZ-Zuordnung konnte nicht mit dem Google Sheet synchronisiert werden (lokal trotzdem gespeichert):', err);
     });
@@ -3382,7 +3426,9 @@
   // Voreingestellte Quelle für alle - einzelne Personen können das Feld im
   // Admin-Panel trotzdem mit einer eigenen URL überschreiben (z.B. zum
   // Testen), siehe setSourceUrl/isCustomSourceUrl.
-  var DEFAULT_WERKSTATT_SOURCE_URL = 'https://script.google.com/macros/s/AKfycbyNlIrmoiQGWqMFYHetiyR1A4VrAjHSA0twCdpgpYWvppzJAtRqoBa_NeUwRHV_yPgTrA/exec';
+  // Leer: Die Werkstätten kommen aus dem Team-Skript (?type=werkstaetten, mit Anmeldung).
+  // Die frühere öffentliche Quelle lieferte Kundendaten ohne Zugangsprüfung und ist entfernt.
+  var DEFAULT_WERKSTATT_SOURCE_URL = '';
   var sourceUrlInput = document.getElementById('werkstatt-source-url');
   var sourceSaveBtn = document.getElementById('werkstatt-source-save');
   var sourceActiveRow = document.getElementById('werkstatt-source-active');
@@ -3960,9 +4006,11 @@
       sharedSheetStatusEl.className = '';
       sharedSheetStatusEl.textContent = 'Wird geladen…';
     }
-    fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=list')
+    url = withTeamAuth(url);
+    fetch(url + (url.indexOf('?') === -1 ? '?' : '&') + 'action=list', { cache: 'no-store' })
       .then(function(res) { if (!res.ok) throw new Error('HTTP ' + res.status); return res.json(); })
       .then(function(data) {
+        if (data && data.ok === false) throw new Error(data.error || 'Fehler');
         applySharedOverrides({ ok: true, overrides: (data && data.overrides) || [] });
         if (!silent) {
           sharedSheetStatusEl.className = 'ok';
@@ -6605,16 +6653,19 @@
 
   // Fest hinterlegte To-do-Liste für das ganze Team (kann pro Browser im Dashboard überschrieben werden).
   var DEFAULT_TODO_URL = 'https://script.google.com/macros/s/AKfycbwHn9zjdK1GtYv947foWgeXPH-hxhZ0_itIlZ61w3krVHA_M9irEYRk1BSq4Sl9W8Ds/exec';
-  // Hier den TOKEN aus todo-backend.gs eintragen (gleiches Wort wie dort bei const TOKEN = '…').
-  var DEFAULT_TODO_TOKEN = 'WjA0shxsQXBJRkvw6PtD0Azz4cZQhh';
+  // Kein Token im Quelltext: Zugang ist das Passwort aus der Anmeldung bzw. der Trello-Token.
 
   function isCustomTodoUrl() { try { return !!localStorage.getItem(TODO_URL_KEY); } catch (e) { return false; } }
   function getTodoUrl() {
     var custom = '';
     try { custom = localStorage.getItem(TODO_URL_KEY) || ''; } catch (e) {}
-    if (custom) return custom;
-    if (!DEFAULT_TODO_URL) return '';
-    return DEFAULT_TODO_URL + (DEFAULT_TODO_TOKEN ? (DEFAULT_TODO_URL.indexOf('?') === -1 ? '?' : '&') + 'token=' + encodeURIComponent(DEFAULT_TODO_TOKEN) : '');
+    var base = custom || DEFAULT_TODO_URL;
+    if (!base) return '';
+    var params = [];
+    if (!custom && accessToken()) params.push('token=' + encodeURIComponent(accessToken()));
+    var tt = (typeof trelloUserToken === 'function') ? trelloUserToken() : '';
+    if (tt) params.push('tt=' + encodeURIComponent(tt));
+    return params.length ? base + (base.indexOf('?') === -1 ? '?' : '&') + params.join('&') : base;
   }
   function setTodoUrl(u) {
     try { if (u) localStorage.setItem(TODO_URL_KEY, u); else { localStorage.removeItem(TODO_URL_KEY); localStorage.removeItem(TODO_CACHE_KEY); } } catch (e) {}
@@ -6658,8 +6709,7 @@
   function todoRequest(method, payload) {
     var url = getTodoUrl();
     if (!url) return Promise.reject(new Error('Keine To-do-Liste verbunden'));
-    var tt = (typeof trelloUserToken === 'function') ? trelloUserToken() : '';
-    if (method === 'GET' && tt) url += (url.indexOf('?') === -1 ? '?' : '&') + 'tt=' + encodeURIComponent(tt);
+    var tt = (typeof trelloUserToken === 'function') ? trelloUserToken() : ''; // steckt für GET schon in getTodoUrl()
     var opts = method === 'GET'
       ? { cache: 'no-store' }
       : { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(Object.assign({}, payload, tt ? { tt: tt } : {})) };
@@ -6667,7 +6717,7 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
     }).then(function(data) {
-      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – stimmt der token in der URL?' : data.error === 'private_needs_trello' ? 'Das Google-Skript konnte deine Trello-Anmeldung nicht prüfen' + (data.detail ? ' (Grund: ' + data.detail + ')' : '') + '. Im Apps-Script einmal die Funktion „setup“ ausführen, Zugriff erlauben und danach eine neue Version bereitstellen.' : data.error);
+      if (data && data.error) throw new Error(data.error === 'unauthorized' ? 'Zugriff verweigert – bitte abmelden und mit dem aktuellen Team-Passwort neu anmelden.' : data.error === 'private_needs_trello' ? 'Das Google-Skript konnte deine Trello-Anmeldung nicht prüfen' + (data.detail ? ' (Grund: ' + data.detail + ')' : '') + '. Im Apps-Script einmal die Funktion „setup“ ausführen, Zugriff erlauben und danach eine neue Version bereitstellen.' : data.error);
       return data;
     });
   }
@@ -7042,6 +7092,7 @@
     if (!m) return;
     try { localStorage.setItem(TRELLO_USER_TOKEN_KEY, m[1]); localStorage.setItem('trelloJustConnected', '1'); } catch (e) {}
     try { history.replaceState(null, '', window.location.pathname + window.location.search); } catch (e) { window.location.hash = ''; }
+    reloadSharedOverridesNow(true); // PLZ-Zuordnung wurde beim Start noch ohne Trello-Token abgefragt
   })();
 
   function trelloUserToken() { try { return localStorage.getItem(TRELLO_USER_TOKEN_KEY) || ''; } catch (e) { return ''; } }
