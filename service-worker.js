@@ -13,7 +13,7 @@
  * merkt von alldem nichts.
  */
 
-var CACHE_NAME = 'alpha-mobil-shell-v1';
+var CACHE_NAME = 'alpha-mobil-shell-v2';
 var APP_SHELL = [
   './index.html',
   './plz-coords.json',

@@ -3126,12 +3126,22 @@
   // PLZ-Koordinaten werden dauerhaft im Browser zwischengespeichert, damit beim
   // nächsten Laden (z. B. Trello-Umkreissuche) bereits bekannte PLZ sofort verfügbar
   // sind und nicht erneut (gedrosselt) beim Kartendienst angefragt werden müssen.
-  var PLZ_COORD_CACHE_KEY = 'plzCoordCacheV1';
+  var PLZ_COORD_CACHE_KEY = 'plzCoordCacheV2';
+  // Geografischer Mittelpunkt Deutschlands: Geocoder liefern diesen Punkt, wenn sie eine
+  // PLZ nicht finden (Treffer = "Deutschland" statt PLZ). Solche Treffer sind unbrauchbar.
+  function isGermanyCentroid(lat, lon) {
+    return Math.abs(lat - 51.16569) < 0.01 && Math.abs(lon - 10.45153) < 0.01;
+  }
+  try { localStorage.removeItem('plzCoordCacheV1'); } catch (e) {}
   var plzCoordCache = {};
   (function loadPlzCoordCache() {
     try {
       var raw = localStorage.getItem(PLZ_COORD_CACHE_KEY);
       if (raw) plzCoordCache = JSON.parse(raw) || {};
+      Object.keys(plzCoordCache).forEach(function(k) {
+        var c = plzCoordCache[k];
+        if (c && isGermanyCentroid(c.lat, c.lon)) delete plzCoordCache[k];
+      });
     } catch (e) { plzCoordCache = {}; }
   })();
   var plzCoordCacheSaveTimer = null;
@@ -3147,7 +3157,7 @@
   // gedrosselte Live-Abfrage beim Kartendienst komplett – nur für PLZ, die (sehr selten)
   // nicht in der Tabelle stehen, wird noch live über LocationIQ nachgeschlagen.
   var staticPlzCoords = null;
-  var staticPlzCoordsPromise = fetch('plz-coords.json', { cache: 'force-cache' })
+  var staticPlzCoordsPromise = fetch('plz-coords.json?v=2', { cache: 'no-cache' })
     .then(function(res) {
       if (!res.ok) throw new Error('HTTP ' + res.status);
       return res.json();
@@ -3170,7 +3180,7 @@
     if (plzCoordCache[plz] !== undefined) return Promise.resolve(plzCoordCache[plz]);
     return staticPlzCoordsPromise.then(function() {
       var entry = staticPlzCoords[plz];
-      if (entry) {
+      if (entry && !isGermanyCentroid(entry[0], entry[1])) {
         var tableCoord = { lat: entry[0], lon: entry[1], city: '' };
         plzCoordCache[plz] = tableCoord;
         return tableCoord;
@@ -3194,6 +3204,10 @@
         var lat = parseFloat(place.lat);
         var lon = parseFloat(place.lon);
         if (isNaN(lat) || isNaN(lon)) return null;
+        if (isGermanyCentroid(lat, lon)) {
+          console.warn('PLZ "' + plz + '" nicht gefunden (Geocoder lieferte nur den Deutschland-Mittelpunkt).');
+          return null;
+        }
         var coord = { lat: lat, lon: lon, city: place.display_name || '' };
         plzCoordCache[plz] = coord;
         savePlzCoordCacheSoon();
