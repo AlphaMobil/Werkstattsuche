@@ -189,6 +189,23 @@ input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{ou
 .tm-fin p{margin:0;color:var(--muted)}
 .tm-note{font-size:12.5px;color:var(--muted);text-align:center;margin:4px 0 0}
 .tm-reset{background:none;border:0;color:var(--accent);font:600 13px/1 var(--f-body);cursor:pointer;padding:8px}
+.tm-h2{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.tm-edit{font:600 13px/1 var(--f-body);color:var(--accent);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-height:38px;cursor:pointer;flex:none}
+.tm-lab{font-size:12.5px;font-weight:600;color:var(--muted);margin-top:2px}
+.tm-inp{font:inherit;font-size:16px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:11px 12px;min-height:46px;width:100%;box-sizing:border-box}
+.tm-inp:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.tm-warn{margin:0;font-size:13px;font-weight:600;color:var(--warn)}
+.tm-list .tm-row{cursor:default}
+div.tm-row{display:flex;align-items:center;gap:12px;padding:10px 12px 10px 14px;min-height:56px;box-sizing:border-box}
+.ibs{display:flex;gap:4px;flex:none}
+.ib{min-width:40px;min-height:40px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--text);font:600 15px/1 var(--f-body);cursor:pointer;padding:0 10px}
+.ib:hover{border-color:var(--accent)}
+.ib:disabled{opacity:.35;cursor:default}
+.ib.del{color:var(--bad)}
+.ib.add{font-size:13px;color:var(--accent);white-space:nowrap}
+.tm-edacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.tm-btn:disabled{opacity:.45;cursor:default}
+.tm-reset.del{color:var(--bad);align-self:center}
 /* required styles */
 
 .leaflet-pane,
@@ -867,15 +884,28 @@ svg.leaflet-image-layer.leaflet-interactive path {
 .tour.sel{border-color:var(--partner);box-shadow:0 0 0 3px color-mix(in srgb,var(--partner) 25%,transparent)}
 .tsel{all:unset;box-sizing:border-box;padding:12px 14px 10px;cursor:pointer;display:flex;flex-direction:column;gap:6px;min-width:0}
 .tsel:focus-visible{box-shadow:inset 0 0 0 2px var(--accent)}
-.tgo{display:flex;align-items:center;justify-content:center;gap:8px;border:0;border-top:1px solid var(--line);background:var(--accent-soft);color:var(--accent);font:600 13px/1 var(--f-body);padding:12px;min-height:44px;cursor:pointer}
+.tacts{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);border-top:1px solid var(--line);margin-top:auto}
+.tgo,.ted{display:flex;align-items:center;justify-content:center;gap:7px;border:0;font:600 13px/1 var(--f-body);padding:12px 8px;min-height:44px;cursor:pointer;white-space:nowrap}
+.tgo{background:var(--accent-soft);color:var(--accent)}
 .tgo:hover{background:var(--accent);color:#fff}
-.tgo svg{width:15px;height:15px}
+.tgo:disabled{opacity:.5;cursor:default}
+.ted{background:var(--surface);color:var(--muted);border-left:1px solid var(--line)}
+.ted:hover{color:var(--text);background:var(--surface-2)}
+.tgo svg,.ted svg{width:15px;height:15px;flex:none}
+.tour.eigen{border-color:color-mix(in srgb,var(--accent) 35%,var(--line))}
+.tnum.eig{background:var(--accent);color:#fff;font-size:12px}
+.sec>div:first-child{display:flex;flex-direction:column;gap:2px}
+.secr{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.secr label{font-size:12.5px;color:var(--muted)}
+.secr select{font:inherit;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:7px 10px;min-height:36px}
+.neu{font:600 13px/1 var(--f-body);color:var(--accent);background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:9px 12px;min-height:36px;cursor:pointer}
+.neu:hover{border-color:var(--accent)}
 .tour .th{display:flex;align-items:center;gap:8px}
 .tnum{width:24px;height:24px;border-radius:50%;background:var(--partner);color:#0a0e13;font:700 12px/24px var(--f-mono);text-align:center;flex:none}
 .tour b{font:600 14px/1.3 var(--f-body);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .tour .tm{font:500 11.5px/1.5 var(--f-mono);color:var(--muted)}
 .tour .tp{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sec{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
+.sec{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;margin:0 0 10px;flex-wrap:wrap}
 .sec h2{margin:0;font:600 15px/1.3 var(--f-display)}
 .sec span{font-size:12px;color:var(--muted)}
 .flag{display:inline-flex;align-items:center;gap:5px;font:600 11px/1 var(--f-mono);padding:5px 8px;border-radius:20px;background:color-mix(in srgb,var(--partner) 22%,var(--surface));color:var(--text);white-space:nowrap}
@@ -928,7 +958,7 @@ svg.leaflet-image-layer.leaflet-interactive path {
       <p class="mapnote" id="mapnote"></p>
     </section>
 
-    <div class="sec"><h2>Tourvorschläge</h2><span id="tourinfo"></span></div>
+    <div class="sec"><div><h2>Touren</h2><span id="tourinfo"></span></div><div class="secr"><label for="maxs">Stopps pro Tag</label><select id="maxs"><option value="6">max. 6</option><option value="7">max. 7</option><option value="8">max. 8</option></select><button type="button" class="neu" id="tneu">+ Eigene Tour</button></div></div>
     <section class="tours" id="tours" aria-label="Tourvorschläge"></section>
 
     <div class="bar">
@@ -986,8 +1016,30 @@ function fuStart(D){
   const R = 6371, rad = x => x * Math.PI / 180;
   const km = (a,b) => { const dl = rad(b[0]-a[0]), dn = rad(b[1]-a[1]); const h = Math.sin(dl/2)**2 + Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(h)); };
   const RADIUS = 50, MIN = 4;
+  const sauber = v => String(v || '').replace(/^[\s,.;]+|[\s,.;]+$/g, '');
   const byId = {}; D.faelle.forEach(f => byId[f.id] = f);
   let TOURS = [], tourOf = {};
+  // Stopps pro Tagestour (6–8), pro Gerät gemerkt
+  let MAXS = 8;
+  try { const v = +localStorage.getItem('fu_max'); if (v >= 6 && v <= 8) MAXS = v; } catch (e) {}
+  // Reihenfolge: vom äußersten Fall aus immer zum nächstgelegenen
+  function ordne(list){
+    if (list.length < 2) return {order: list.slice(), len: 0};
+    const mid = [list.reduce((a,p)=>a+p.g[0],0)/list.length, list.reduce((a,p)=>a+p.g[1],0)/list.length];
+    let cur = list.reduce((a,p) => km(p.g,mid) > km(a.g,mid) ? p : a, list[0]);
+    const order = [cur], left = new Set(list.map(p=>p.id)); left.delete(cur.id); let len = 0;
+    while (left.size){
+      let nx = null, nd = Infinity;
+      left.forEach(id => { const d = km(cur.g, byId[id].g); if (d < nd){ nd = d; nx = byId[id]; } });
+      len += nd; order.push(nx); left.delete(nx.id); cur = nx;
+    }
+    return {order, len};
+  }
+  function streckeVon(ids){ let l = 0; for (let i = 1; i < ids.length; i++){ const a = byId[ids[i-1]], b = byId[ids[i]]; if (a.g && b.g) l += km(a.g, b.g); } return Math.round(l); }
+  function regionVon(list){
+    const orte = {}; list.forEach(p => { const o = sauber(p.d.Ort); if (o) orte[o] = (orte[o]||0) + 1; });
+    return Object.keys(orte).sort((a,b)=>orte[b]-orte[a])[0] || (list[0] && list[0].gp ? 'PLZ ' + list[0].gp : 'Tour');
+  }
   function berechneTouren(){
     TOURS = []; tourOf = {};
     const pts = D.faelle.filter(f => f.s === 'offen' && f.g && sichtbar(f));
@@ -1002,24 +1054,40 @@ function fuStart(D){
       }
       if (!best || best.m.length < MIN) break;
       const m = best.m;
-      const mid = [m.reduce((s,p)=>s+p.g[0],0)/m.length, m.reduce((s,p)=>s+p.g[1],0)/m.length];
-      // Reihenfolge: vom äußersten Fall aus immer zum nächstgelegenen
-      let cur = m.reduce((a,p) => km(p.g,mid) > km(a.g,mid) ? p : a, m[0]);
-      const order = [cur], left = new Set(m.map(p=>p.id)); left.delete(cur.id); let len = 0;
-      while (left.size){
-        let nx = null, nd = Infinity;
-        left.forEach(id => { const d = km(cur.g, byId[id].g); if (d < nd){ nd = d; nx = byId[id]; } });
-        len += nd; order.push(nx); left.delete(nx.id); cur = nx;
+      // große Gebiete in gleich große Tagestouren teilen (je höchstens MAXS Stopps)
+      const ganz = ordne(m).order;
+      let teile = Math.ceil(ganz.length / MAXS);
+      while (teile > 1 && Math.floor(ganz.length / teile) < MIN) teile--;
+      const basis = Math.floor(ganz.length / teile), extra = ganz.length % teile;
+      let start = 0;
+      for (let k = 0; k < teile; k++){
+        const gr = basis + (k < extra ? 1 : 0);
+        const teil = ordne(ganz.slice(start, start + gr)); start += gr;
+        const mid = [teil.order.reduce((a,p)=>a+p.g[0],0)/teil.order.length, teil.order.reduce((a,p)=>a+p.g[1],0)/teil.order.length];
+        const n = TOURS.length + 1;
+        TOURS.push({n, ids: teil.order.map(p=>p.id), mid, region: regionVon(teil.order) + (teile > 1 ? ' (' + (k + 1) + '/' + teile + ')' : ''), len: Math.round(teil.len)});
+        teil.order.forEach(p => tourOf[p.id] = n);
       }
-      const orte = {}; m.forEach(p => { const o = p.d.Ort || ''; if (o) orte[o] = (orte[o]||0) + 1; });
-      const region = Object.keys(orte).sort((a,b)=>orte[b]-orte[a])[0] || ('PLZ ' + (m[0].gp||''));
-      const plz = m.map(p => p.gp || '').filter(Boolean).sort();
-      const n = TOURS.length + 1;
-      TOURS.push({n, ids: order.map(p=>p.id), mid, region, len: Math.round(len), plz: plz.length ? plz[0].slice(0,2) + 'xxx' : ''});
-      m.forEach(p => { tourOf[p.id] = n; frei.delete(p.id); });
+      m.forEach(p => frei.delete(p.id));
     }
   }
   berechneTouren();
+  // ── Eigene Touren (pro Gerät gespeichert, über die Trello-Links stabil) ──
+  const EIG_KEY = 'fu_touren_' + D.partner;
+  const urlId = {}; D.faelle.forEach(f => urlId[f.u] = f.id);
+  let EIGENE = [];
+  try { EIGENE = JSON.parse(localStorage.getItem(EIG_KEY) || '[]'); if (!Array.isArray(EIGENE)) EIGENE = []; } catch (e) { EIGENE = []; }
+  const eigSpeichern = () => { try { localStorage.setItem(EIG_KEY, JSON.stringify(EIGENE)); } catch (e) {} };
+  // einheitliches Tour-Objekt für Vorschläge (Zahl) und eigene Touren ('e:<sid>')
+  function tourObj(key){
+    if (typeof key === 'number'){
+      const t = TOURS[key - 1]; if (!t) return null;
+      return {key, eigen: false, nr: t.n, titel: 'Raum ' + t.region, ids: t.ids, len: t.len, fehlt: 0};
+    }
+    const e = EIGENE.find(x => 'e:' + x.sid === key); if (!e) return null;
+    const ids = e.urls.map(u => urlId[u]).filter(id => id !== undefined);
+    return {key, eigen: true, sid: e.sid, titel: e.name || 'Eigene Tour', ids, len: streckeVon(ids), fehlt: e.urls.length - ids.length};
+  }
   const geoOhne = D.faelle.filter(f => f.s === 'offen' && !f.g).length;
 
   $('stand').textContent = 'Daten von ' + new Date(D.stand).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) + ' Uhr';
@@ -1114,17 +1182,27 @@ function fuStart(D){
 
   // ── Tourkarten-Liste ──
   function touren(){
-    $('tourinfo').textContent = TOURS.length ? TOURS.length + (TOURS.length===1?' Vorschlag':' Vorschläge') + ' · je mind. ' + MIN + ' Fälle im ' + RADIUS + '-km-Umkreis' : '';
-    $('tours').innerHTML = TOURS.length ? TOURS.map(t =>
-      '<div class="tour' + (selTour===t.n ? ' sel' : '') + '">' +
+    $('tourinfo').textContent = TOURS.length ? TOURS.length + (TOURS.length===1?' Vorschlag':' Vorschläge') + ' · je ' + MIN + '–' + MAXS + ' Stopps im ' + RADIUS + '-km-Umkreis' : '';
+    $('maxs').value = String(MAXS);
+    const orte = ids => esc(ids.map(id => sauber(byId[id].d.Ort) || byId[id].gp || '').filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).slice(0,5).join(' → '));
+    const aktionen = (key, o) => '<div class="tacts">' +
+      '<button type="button" class="tgo" data-go="' + key + '"' + (o.ids.length ? '' : ' disabled') + '><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg>Starten' + (fertigZahl(o) ? ' · ' + fertigZahl(o) + '/' + o.ids.length : '') + '</button>' +
+      '<button type="button" class="ted" data-ed="' + key + '" aria-label="' + esc(o.titel) + ' bearbeiten"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Bearbeiten</button></div>';
+    const eigene = EIGENE.map(e => tourObj('e:' + e.sid)).filter(Boolean).map(o =>
+      '<div class="tour eigen">' +
+        '<div class="tsel"><span class="th"><span class="tnum eig" aria-hidden="true">★</span><b>' + esc(o.titel) + '</b></span>' +
+        '<span class="tm">Eigene Tour · ' + o.ids.length + ' Stopps · ca. ' + o.len + ' km</span>' +
+        '<span class="tp">' + (o.fehlt ? o.fehlt + ' Fall/Fälle nicht mehr offen · ' : '') + orte(o.ids) + '</span></div>' +
+        aktionen(o.key, o) +
+      '</div>').join('');
+    const vorschlaege = TOURS.map(t => { const o = tourObj(t.n);
+      return '<div class="tour' + (selTour===t.n ? ' sel' : '') + '">' +
         '<button type="button" class="tsel" data-t="' + t.n + '" aria-pressed="' + (selTour===t.n) + '" aria-label="Tour ' + t.n + ' auf der Karte zeigen">' +
           '<span class="th"><span class="tnum">' + t.n + '</span><b>Raum ' + esc(t.region) + '</b></span>' +
-          '<span class="tm">' + t.ids.length + ' Fälle · ca. ' + t.len + ' km Luftlinie</span>' +
-          '<span class="tp">' + esc(t.ids.map(id => (byId[id].d.Ort || byId[id].gp || '')).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).slice(0,5).join(' → ')) + '</span>' +
-        '</button>' +
-        '<button type="button" class="tgo" data-go="' + t.n + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg>Tour starten' + (fertigZahl(t) ? ' · ' + fertigZahl(t) + '/' + t.ids.length + ' erledigt' : '') + '</button>' +
-      '</div>').join('')
-      : '<div class="leer" style="padding:20px">Aktuell liegen nirgends ' + MIN + ' offene Fälle im ' + RADIUS + '-km-Umkreis.</div>';
+          '<span class="tm">' + t.ids.length + ' Stopps · ca. ' + t.len + ' km Luftlinie</span>' +
+          '<span class="tp">' + orte(t.ids) + '</span>' +
+        '</button>' + aktionen(t.n, o) + '</div>'; }).join('');
+    $('tours').innerHTML = eigene + vorschlaege || '<div class="leer" style="padding:20px">Aktuell liegen nirgends ' + MIN + ' offene Fälle im ' + RADIUS + '-km-Umkreis. Über „Eigene Tour“ kannst du selbst eine zusammenstellen.</div>';
   }
 
   // ── Karte ──
@@ -1201,7 +1279,14 @@ function fuStart(D){
     touren(); zeichne();
     if (selTour) document.getElementById('map').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
   }
-  $('tours').addEventListener('click', e => { const g = e.target.closest('.tgo'); if (g){ tourStart(+g.dataset.go); return; } const b = e.target.closest('.tsel'); if (b) tourWahl(+b.dataset.t); });
+  const keyVon = v => /^\d+$/.test(v) ? +v : v;
+  $('tours').addEventListener('click', e => {
+    const g = e.target.closest('.tgo'); if (g){ tourStart(keyVon(g.dataset.go)); return; }
+    const ed = e.target.closest('.ted'); if (ed){ editStart(keyVon(ed.dataset.ed)); return; }
+    const b = e.target.closest('button.tsel'); if (b) tourWahl(+b.dataset.t);
+  });
+  $('maxs').addEventListener('change', e => { MAXS = +e.target.value; try { localStorage.setItem('fu_max', MAXS); } catch (err) {} selTour = null; berechneTouren(); alles(); });
+  $('tneu').addEventListener('click', () => editStart(null));
   $('tourchip').addEventListener('click', () => tourWahl(selTour));
 
 
@@ -1220,31 +1305,30 @@ function fuStart(D){
     nav: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m3 11 19-9-9 19-2-8-8-2z"/></svg>',
     ok: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m5 12 4.5 4.5L19 7"/></svg>'
   };
-  const sauber = v => String(v || '').replace(/^[\s,.;]+|[\s,.;]+$/g, '');
   const adresse = x => { const d = x.d; return [sauber(d.Strasse), [sauber(d.PLZ) || x.gp, sauber(d.Ort)].filter(Boolean).join(' ')].filter(Boolean).join(', '); };
   const navUrl = x => { const a = adresse(x); return 'https://www.google.com/maps/dir/?api=1&destination=' + encodeURIComponent(a || (x.g ? x.g.join(',') : '')); };
   const telNr = x => String(x.d.Telefon || '').replace(/[^\d+]/g, '');
   const nameVon = x => x.d.Name ? x.d.Name.replace(/\b\p{L}/gu, c => c.toUpperCase()) : (x.gp ? 'PLZ ' + x.gp : 'Fall');
 
-  function tourStart(n){
-    aktTour = n; fokus = null;
+  function tourStart(key){
+    aktTour = key; fokus = null; edit = null;
     $('tm').hidden = false; document.body.style.overflow = 'hidden';
     tourZeichnen(); $('tm').scrollTop = 0;
   }
   function tourEnde(){
-    $('tm').hidden = true; document.body.style.overflow = ''; aktTour = null;
+    $('tm').hidden = true; document.body.style.overflow = ''; aktTour = null; edit = null;
     touren();
   }
   function tourZeichnen(){
-    const t = TOURS[aktTour - 1]; if (!t){ tourEnde(); return; }
-    const stopps = t.ids.map((id, i) => ({x: byId[id], nr: i + 1, km: i ? Math.round(km(byId[t.ids[i-1]].g, byId[id].g)) : null}));
+    const t = tourObj(aktTour); if (!t || !t.ids.length){ tourEnde(); return; }
+    const stopps = t.ids.map((id, i) => { const a = i ? byId[t.ids[i-1]] : null, b = byId[id]; return {x: b, nr: i + 1, km: a ? (a.g && b.g ? Math.round(km(a.g, b.g)) : '?') : null}; });
     const offen = stopps.filter(s => !istErl(s.x)), fertig = stopps.filter(s => istErl(s.x));
     let akt = offen.find(s => s.x.id === fokus) || offen[0] || null;
     const anteil = Math.round(fertig.length / stopps.length * 100);
     let h = '<div class="tm-top"><div class="tm-in">' +
       '<button type="button" class="tm-back" id="tmback">' + SVG.back + 'Zur Übersicht</button>' +
-      '<small>Tour ' + t.n + ' · ' + stopps.length + ' Stopps · ca. ' + t.len + ' km Luftlinie</small>' +
-      '<h2>Raum ' + esc(t.region) + '</h2>' +
+      '<small>' + (t.eigen ? 'Eigene Tour' : 'Tour ' + t.nr) + ' · ' + stopps.length + ' Stopps · ca. ' + t.len + ' km Luftlinie</small>' +
+      '<div class="tm-h2"><h2>' + esc(t.titel) + '</h2><button type="button" class="tm-edit" id="tmedit">Bearbeiten</button></div>' +
       '<div class="tm-prog"><div class="tm-bar"><i style="width:' + anteil + '%"></i></div><span>' + fertig.length + ' von ' + stopps.length + ' erledigt</span></div>' +
       '</div></div><div class="tm-body"><div class="tm-in">';
     if (akt){
@@ -1284,11 +1368,98 @@ function fuStart(D){
   $('tm').addEventListener('click', e => {
     const b = e.target.closest('button'); if (!b) return;
     if (b.id === 'tmback'){ tourEnde(); return; }
-    if (b.id === 'tmreset'){ TOURS[aktTour-1].ids.forEach(id => delete erl[byId[id].u]); erlSpeichern(); fokus = null; tourZeichnen(); return; }
+    if (b.id === 'tmedit'){ editStart(aktTour); return; }
+    if (b.id === 'tmreset'){ tourObj(aktTour).ids.forEach(id => delete erl[byId[id].u]); erlSpeichern(); fokus = null; tourZeichnen(); return; }
     if (b.dataset.erl !== undefined){ erl[byId[+b.dataset.erl].u] = 1; erlSpeichern(); fokus = null; tourZeichnen(); $('tm').scrollTop = 0; return; }
     if (b.dataset.zurueck !== undefined){ delete erl[byId[+b.dataset.zurueck].u]; erlSpeichern(); fokus = +b.dataset.zurueck; tourZeichnen(); $('tm').scrollTop = 0; return; }
     if (b.dataset.fokus !== undefined){ fokus = +b.dataset.fokus; tourZeichnen(); $('tm').scrollTop = 0; }
   });
+
+
+  // ── Tour bearbeiten ──
+  let edit = null; // {sid|null, name, ids[]}
+  function editStart(key){
+    const o = key === null ? null : tourObj(key);
+    edit = {sid: o && o.eigen ? o.sid : null, name: o ? o.titel.replace(/^Raum /, '') : '', ids: o ? o.ids.slice() : [], q: ''};
+    if (!edit.name) edit.name = 'Meine Tour';
+    aktTour = null; $('tm').hidden = false; document.body.style.overflow = 'hidden';
+    editZeichnen(); $('tm').scrollTop = 0;
+  }
+  function kandidaten(){
+    const drin = new Set(edit.ids), q = edit.q.trim().toLowerCase();
+    let c = D.faelle.filter(f => f.s === 'offen' && f.g && !drin.has(f.id) && sichtbar(f));
+    if (q) c = c.filter(f => (f.t + ' ' + Object.values(f.d).join(' ')).toLowerCase().includes(q));
+    if (edit.ids.length){
+      const g = edit.ids.map(id => byId[id]).filter(x => x.g);
+      const mid = [g.reduce((a,p)=>a+p.g[0],0)/g.length, g.reduce((a,p)=>a+p.g[1],0)/g.length];
+      c.forEach(f => f._d = km(mid, f.g)); c.sort((a,b) => a._d - b._d);
+    } else { c.forEach(f => f._d = null); c.sort((a,b) => new Date(a.a) - new Date(b.a)); }
+    return c.slice(0, 15);
+  }
+  function kandZeichnen(){
+    const c = kandidaten();
+    $('tmcand').innerHTML = c.length ? c.map(f =>
+      '<li><div class="tm-row"><span class="t"><b>' + esc(nameVon(f)) + '</b><span>' + esc([f.gp || f.d.PLZ, sauber(f.d.Ort)].filter(Boolean).join(' ')) + (f._d !== null ? ' · ' + Math.round(f._d) + ' km entfernt' : ' · ruht ' + tage(f.a) + ' T') + '</span></span>' +
+      '<button type="button" class="ib add" data-add="' + f.id + '" aria-label="' + esc(nameVon(f)) + ' hinzufügen">+ Hinzufügen</button></div></li>').join('')
+      : '<li><div class="tm-row"><span class="t"><span>Keine passenden offenen Fälle gefunden.</span></span></div></li>';
+  }
+  function editZeichnen(){
+    const n = edit.ids.length, len = streckeVon(edit.ids);
+    let h = '<div class="tm-top"><div class="tm-in">' +
+      '<button type="button" class="tm-back" id="edback">' + SVG.back + 'Abbrechen</button>' +
+      '<small>' + (edit.sid ? 'Eigene Tour bearbeiten' : 'Neue eigene Tour') + '</small>' +
+      '<label class="tm-lab" for="edname">Name der Tour</label><input id="edname" class="tm-inp" type="text" maxlength="60" value="' + esc(edit.name) + '">' +
+      '<div class="tm-prog"><span>' + n + ' Stopps · ca. ' + len + ' km Luftlinie</span></div>' +
+      (n > 8 ? '<p class="tm-warn">Mehr als 8 Stopps sind für einen Tag meist zu viel.</p>' : '') +
+      '</div></div><div class="tm-body"><div class="tm-in">';
+    h += '<p class="tm-lbl">Stopps in dieser Reihenfolge</p>';
+    h += n ? '<ol class="tm-list">' + edit.ids.map((id, i) => { const x = byId[id];
+      return '<li><div class="tm-row"><span class="n">' + (i + 1) + '</span><span class="t"><b>' + esc(nameVon(x)) + '</b><span>' + esc([x.gp || x.d.PLZ, sauber(x.d.Ort)].filter(Boolean).join(' ')) + '</span></span>' +
+        '<span class="ibs"><button type="button" class="ib" data-up="' + i + '" aria-label="Nach oben"' + (i ? '' : ' disabled') + '>↑</button>' +
+        '<button type="button" class="ib" data-down="' + i + '" aria-label="Nach unten"' + (i < n - 1 ? '' : ' disabled') + '>↓</button>' +
+        '<button type="button" class="ib del" data-del="' + i + '" aria-label="' + esc(nameVon(x)) + ' entfernen">✕</button></span></div></li>'; }).join('') + '</ol>'
+      : '<div class="tm-fin"><p>Noch keine Stopps. Füge unten Fälle hinzu.</p></div>';
+    h += '<div class="tm-edacts"><button type="button" class="tm-btn" id="edopt"' + (n > 2 ? '' : ' disabled') + '>Reihenfolge optimieren</button>' +
+         '<button type="button" class="tm-btn nav" id="edsave"' + (n ? '' : ' disabled') + '>Tour speichern</button></div>';
+    h += '<p class="tm-lbl">Fälle hinzufügen' + (n ? ' (nächstgelegene zuerst)' : ' (am längsten offen zuerst)') + '</p>' +
+         '<label class="tm-lab" for="edq">Fälle durchsuchen</label><input id="edq" class="tm-inp" type="search" placeholder="Name, PLZ oder Ort" value="' + esc(edit.q) + '" autocomplete="off">' +
+         '<ol class="tm-list" id="tmcand"></ol>';
+    if (edit.sid) h += '<button type="button" class="tm-reset del" id="eddel">Eigene Tour löschen</button>';
+    h += '<p class="tm-note">Eigene Touren werden auf diesem Gerät gespeichert. Erledigte Fälle verschwinden automatisch daraus.</p></div></div>';
+    $('tm').innerHTML = h;
+    kandZeichnen();
+  }
+  function editSpeichern(){
+    const urls = edit.ids.map(id => byId[id].u);
+    if (edit.sid){ const e = EIGENE.find(x => x.sid === edit.sid); if (e){ e.name = edit.name; e.urls = urls; } }
+    else EIGENE.unshift({sid: Date.now().toString(36), name: edit.name, urls});
+    eigSpeichern(); tourEnde();
+  }
+  $('tm').addEventListener('input', e => {
+    if (!edit) return;
+    if (e.target.id === 'edname') edit.name = e.target.value;
+    if (e.target.id === 'edq'){ edit.q = e.target.value; kandZeichnen(); }
+  });
+  $('tm').addEventListener('click', e => {
+    if (!edit) return;
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    e.stopImmediatePropagation();
+    const top = $('tm').scrollTop;
+    if (b.id === 'edback'){ tourEnde(); return; }
+    if (b.id === 'edsave'){ editSpeichern(); return; }
+    if (b.id === 'eddel'){
+      if (b.dataset.sicher){ EIGENE = EIGENE.filter(x => x.sid !== edit.sid); eigSpeichern(); tourEnde(); }
+      else { b.dataset.sicher = '1'; b.textContent = 'Wirklich löschen? Nochmal tippen'; }
+      return;
+    }
+    if (b.id === 'edopt'){ edit.ids = ordne(edit.ids.map(id => byId[id]).filter(x => x.g)).order.map(x => x.id).concat(edit.ids.filter(id => !byId[id].g)); }
+    else if (b.dataset.add !== undefined) edit.ids.push(+b.dataset.add);
+    else if (b.dataset.del !== undefined) edit.ids.splice(+b.dataset.del, 1);
+    else if (b.dataset.up !== undefined){ const i = +b.dataset.up; [edit.ids[i-1], edit.ids[i]] = [edit.ids[i], edit.ids[i-1]]; }
+    else if (b.dataset.down !== undefined){ const i = +b.dataset.down; [edit.ids[i+1], edit.ids[i]] = [edit.ids[i], edit.ids[i+1]]; }
+    else return;
+    editZeichnen(); $('tm').scrollTop = top;
+  }, true);
 
   const alles = () => { kpis(); nav(); touren(); zeichne(); };
   $('reload').addEventListener('click', () => { $('reload').classList.add('busy'); $('reload').lastChild.textContent = 'Wird geladen …'; setTimeout(() => location.reload(), 150); });
@@ -1312,7 +1483,7 @@ function fuStart(D){
 if (!window.FU_LOCKED) fuStart(JSON.parse(document.getElementById('daten').textContent));
 </script>
 
-<script id="enc" type="application/json">{"v": 1, "n": 250000, "s": "2j5fbC8ubJXWjSIgW5O4Gw==", "i": "o05jKdDHl8DtcpSk", "c": "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"}</script>
+<script id="enc" type="application/json">{"v": 1, "n": 250000, "s": "gcXwH0vzrxwKOw8cGqhYYA==", "i": "BI21g1GyyCfIK8vB", "c": "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"}</script>
 
 <div class="gate" id="gate">
   <form class="gcard" id="gform" autocomplete="on">
