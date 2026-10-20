@@ -49,6 +49,10 @@ self.addEventListener('fetch', function (event) {
   // Service Worker vorbei direkt ans Netz.
   if (url.origin !== self.location.origin || req.method !== 'GET') return;
 
+  // Partner-Fallübersichten werden stündlich neu veröffentlicht – immer frisch
+  // vom Netz laden, nicht aus dem App-Cache.
+  if (url.pathname.indexOf('/falluebersicht/') !== -1) return;
+
   event.respondWith(
     caches.match(req).then(function (cached) {
       var network = fetch(req).then(function (res) {

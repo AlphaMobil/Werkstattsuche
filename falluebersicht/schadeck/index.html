@@ -1,0 +1,1259 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="referrer" content="no-referrer">
+<link rel="icon" href="../../icon-192.png">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0;font:14px/1.5 system-ui,sans-serif}img{max-width:100%}[hidden]{display:none!important}</style>
+<script>window.FU_LOCKED = true; window.FU_TILES = true;</script>
+<title>Fallübersicht Schadeck</title>
+</head>
+<body>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: schlanke Kopfzeile · links Status-Navigation (sticky) · rechts Kennzahlen, Suche und Fall-Karten im 2-Spalten-Raster */
+:root{
+  --bg:#f3f5f8; --surface:#ffffff; --surface-2:#f1f4f8; --line:#e4e8ee; --line-2:#d5dbe3;
+  --text:#141a22; --muted:#5b6575; --faint:#8a94a4;
+  --accent:#004177; --accent-soft:#e6eef6; --navy:#00223e;
+  --ok:#1f7a4d; --ok-soft:#e5f4ec; --warn:#9a5a06; --warn-soft:#fdf1df; --bad:#b8322f; --bad-soft:#fbe9e8;
+  --partner:#378add;
+  --map-sea:#e9eef4; --map-land:#ffffff; --map-near:#f3f5f8; --map-border:#c3ccd8; --map-label:#5b6575; --map-ink:#ffffff;
+  --shadow:0 1px 2px rgba(16,24,40,.04),0 1px 3px rgba(16,24,40,.06);
+  --shadow-h:0 8px 24px -8px rgba(16,24,40,.16);
+  --f-display:"Space Grotesk",system-ui,sans-serif; --f-body:"Inter",system-ui,sans-serif; --f-mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0c1117; --surface:#141b24; --surface-2:#1a232e; --line:#232d39; --line-2:#2f3b49;
+  --text:#e8edf3; --muted:#a0abba; --faint:#6f7b8b;
+  --accent:#8bbcec; --accent-soft:#16283a; --navy:#0a1826;
+  --ok:#5cc791; --ok-soft:#13291f; --warn:#e8a94e; --warn-soft:#2c2112; --bad:#f08883; --bad-soft:#2e1716;
+  --map-sea:#0f161e; --map-land:#1b2531; --map-near:#141c26; --map-border:#33414f; --map-label:#a0abba; --map-ink:#0c1117;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-h:0 10px 28px -10px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0c1117; --surface:#141b24; --surface-2:#1a232e; --line:#232d39; --line-2:#2f3b49;
+  --text:#e8edf3; --muted:#a0abba; --faint:#6f7b8b;
+  --accent:#8bbcec; --accent-soft:#16283a; --navy:#0a1826;
+  --ok:#5cc791; --ok-soft:#13291f; --warn:#e8a94e; --warn-soft:#2c2112; --bad:#f08883; --bad-soft:#2e1716;
+  --map-sea:#0f161e; --map-land:#1b2531; --map-near:#141c26; --map-border:#33414f; --map-label:#a0abba; --map-ink:#0c1117;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-h:0 10px 28px -10px rgba(0,0,0,.6); color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font:14px/1.5 var(--f-body);-webkit-font-smoothing:antialiased}
+button{font:inherit;color:inherit}
+.gut{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1240px;margin:0 auto}
+
+/* Kopf */
+.top{background:var(--navy);color:#eef3f8;padding-block:18px}
+.top .wrap{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:14px;min-width:0}
+.mark{width:40px;height:40px;border-radius:12px;background:var(--partner);display:grid;place-items:center;font:700 16px/1 var(--f-display);color:#0a0e13;flex:none}
+.top h1{margin:0;font:700 22px/1.15 var(--f-display);letter-spacing:-.2px}
+.top small{display:block;font:500 11px/1.4 var(--f-mono);letter-spacing:1.6px;text-transform:uppercase;color:#9fb3c7;margin-bottom:3px}
+.topr{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.reload{display:inline-flex;align-items:center;gap:7px;font:600 12.5px/1 var(--f-body);color:#fff;background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:8px 14px;cursor:pointer;min-height:34px}
+.reload:hover{background:rgba(255,255,255,.2)}
+.reload svg{width:14px;height:14px}
+.reload.busy svg{animation:spin 1s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}
+.stand{font:500 12px/1.4 var(--f-mono);color:#b9c8d7;background:rgba(255,255,255,.08);padding:7px 12px;border-radius:20px;white-space:nowrap}
+
+/* Raster */
+.grid{display:grid;grid-template-columns:240px minmax(0,1fr);gap:24px;padding-block:24px 56px}
+@media (max-width:900px){.grid{grid-template-columns:minmax(0,1fr)}}
+
+/* Seitenleiste */
+.side{position:sticky;top:16px;align-self:start;display:flex;flex-direction:column;gap:18px}
+@media (max-width:900px){.side{position:static}}
+.side h2{margin:0 0 8px;font:600 10.5px/1.4 var(--f-mono);letter-spacing:1.5px;text-transform:uppercase;color:var(--faint)}
+.nav{display:flex;flex-direction:column;gap:2px}
+@media (max-width:900px){.nav{flex-direction:row;overflow-x:auto;gap:6px;padding-bottom:4px}}
+.nav .sel{display:flex;align-items:center;gap:10px;width:100%;text-align:left;background:transparent;border:0;border-radius:9px;padding:9px 10px;cursor:pointer;color:var(--muted);font-size:13px;min-height:38px}
+@media (max-width:900px){.nav .sel{width:auto;white-space:nowrap;background:var(--surface);border:1px solid var(--line)}}
+.nav .sel:hover{background:var(--surface);color:var(--text)}
+.nav .sel[aria-pressed="true"]{background:var(--surface);color:var(--text);font-weight:600;box-shadow:var(--shadow)}
+.nrow{display:flex;align-items:center;gap:2px;min-width:0}
+@media (max-width:900px){.nrow{flex:none}}
+.nrow .sel{flex:1;min-width:0}
+.eye{flex:none;width:32px;height:32px;display:grid;place-items:center;background:transparent;border:0;border-radius:8px;color:var(--faint);cursor:pointer;opacity:.55}
+.nrow:hover .eye,.eye:focus-visible{opacity:1}
+.eye:hover{background:var(--surface);color:var(--text)}
+.eye svg{width:15px;height:15px}
+.nrow.off .sel{cursor:default}
+.nrow.off .lbl{text-decoration:line-through;color:var(--faint)}
+.nrow.off .eye{opacity:1;color:var(--muted)}
+.nrow.off .sel:hover{background:transparent}
+@media (hover:none){.eye{opacity:.9}}
+.linkbtn{align-self:flex-start;background:none;border:0;padding:6px 10px;margin-top:4px;font-size:12.5px;font-weight:600;color:var(--accent);cursor:pointer;border-radius:8px}
+.linkbtn:hover{background:var(--accent-soft)}
+.nav .lbl{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav .n{font:500 11.5px/1 var(--f-mono);color:var(--faint);font-variant-numeric:tabular-nums}
+.nav .d{width:8px;height:8px;border-radius:50%;background:var(--accent);flex:none}
+.nav .d.zu{background:var(--line-2)}
+.toggle{display:flex;align-items:center;gap:10px;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 2px}
+.toggle input{appearance:none;width:34px;height:20px;border-radius:20px;background:var(--line-2);position:relative;cursor:pointer;flex:none;transition:background .15s}
+.toggle input::after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;transition:transform .15s}
+.toggle input:checked{background:var(--accent)}
+.toggle input:checked::after{transform:translateX(14px)}
+
+/* Kennzahlen */
+.kpis{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:18px}
+@media (max-width:560px){.kpis{grid-template-columns:minmax(0,1fr)}}
+.kpi{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s}
+.kpi:hover{border-color:var(--line-2);box-shadow:var(--shadow-h)}
+.kpi[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.kpi.static{cursor:default}.kpi.static:hover{box-shadow:var(--shadow);border-color:var(--line)}
+.kpi .k{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--muted);font-weight:500}
+.kpi .ico{width:24px;height:24px;border-radius:7px;display:grid;place-items:center;flex:none}
+.kpi .ico svg{width:14px;height:14px}
+.kpi b{font:600 28px/1 var(--f-display);font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.i-a{background:var(--accent-soft);color:var(--accent)} .i-w{background:var(--warn-soft);color:var(--warn)}
+.i-b{background:var(--bad-soft);color:var(--bad)} .i-o{background:var(--ok-soft);color:var(--ok)}
+
+/* Werkzeugleiste */
+.bar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.search{flex:1 1 280px;position:relative;min-width:0}
+.search svg{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--faint);pointer-events:none}
+.search input{width:100%;font:inherit;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px 10px 38px;min-height:42px;box-shadow:var(--shadow)}
+select{font:inherit;font-size:13px;color:var(--text);background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:10px 12px;min-height:42px;box-shadow:var(--shadow)}
+input:focus-visible,select:focus-visible,button:focus-visible,a:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.count{font:500 12px/1.4 var(--f-mono);color:var(--muted);margin:0 0 10px}
+
+/* Karten */
+.cards{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+@media (max-width:1100px){.cards{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:10px;box-shadow:var(--shadow);transition:box-shadow .15s,border-color .15s;min-width:0}
+.card:hover{box-shadow:var(--shadow-h);border-color:var(--line-2)}
+.c-head{display:flex;align-items:flex-start;gap:12px}
+.c-who{flex:1;min-width:0}
+.c-name{font:600 15px/1.3 var(--f-body);margin:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.c-loc{font:500 12px/1.5 var(--f-mono);color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.age{font:600 11.5px/1 var(--f-mono);padding:6px 9px;border-radius:20px;background:var(--surface-2);color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.age.w{background:var(--warn-soft);color:var(--warn)} .age.b{background:var(--bad-soft);color:var(--bad)}
+.c-issue{font-size:13.5px;line-height:1.45;color:var(--text);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.c-facts{display:flex;flex-wrap:wrap;gap:6px}
+.fact{font:500 11.5px/1.3 var(--f-mono);background:var(--surface-2);color:var(--muted);padding:4px 8px;border-radius:6px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.fact.due{background:var(--bad-soft);color:var(--bad)}
+.kom{font-size:12.5px;color:var(--muted);border-left:2px solid var(--line-2);padding-left:10px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.kom span{font:500 11px/1 var(--f-mono);color:var(--faint);margin-right:6px}
+.c-foot{display:flex;align-items:center;justify-content:space-between;gap:10px;border-top:1px solid var(--line);padding-top:10px;margin-top:auto}
+.status{display:inline-flex;align-items:center;gap:7px;font-size:12px;font-weight:600;color:var(--accent);min-width:0}
+.status i{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.status em{font-style:normal;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.status.zu{color:var(--faint)}
+.open{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:var(--accent);text-decoration:none;padding:6px 10px;border-radius:8px;white-space:nowrap}
+.open:hover{background:var(--accent-soft)}
+.open svg{width:13px;height:13px}
+.mehr{display:block;width:100%;font-weight:600;font-size:13px;color:var(--accent);background:var(--surface);border:1px dashed var(--line-2);border-radius:12px;padding:13px;margin-top:14px;cursor:pointer}
+.mehr:hover{border-color:var(--accent)}
+.leer{grid-column:1/-1;text-align:center;color:var(--muted);padding:48px 16px;background:var(--surface);border:1px dashed var(--line-2);border-radius:14px}
+.hint{font-size:12px;color:var(--faint);line-height:1.5}
+@media (prefers-reduced-motion:no-preference){.card{animation:up .22s ease both}@keyframes up{from{transform:translateY(4px)}}}
+
+/* Karte und Touren */
+/* required styles */
+
+.leaflet-pane,
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-tile-container,
+.leaflet-pane > svg,
+.leaflet-pane > canvas,
+.leaflet-zoom-box,
+.leaflet-image-layer,
+.leaflet-layer {
+	position: absolute;
+	left: 0;
+	top: 0;
+	}
+.leaflet-container {
+	overflow: hidden;
+	}
+.leaflet-tile,
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	-webkit-user-select: none;
+	   -moz-user-select: none;
+	        user-select: none;
+	  -webkit-user-drag: none;
+	}
+/* Prevents IE11 from highlighting tiles in blue */
+.leaflet-tile::selection {
+	background: transparent;
+}
+/* Safari renders non-retina tile on retina better with this, but Chrome is worse */
+.leaflet-safari .leaflet-tile {
+	image-rendering: -webkit-optimize-contrast;
+	}
+/* hack that prevents hw layers "stretching" when loading new tiles */
+.leaflet-safari .leaflet-tile-container {
+	width: 1600px;
+	height: 1600px;
+	-webkit-transform-origin: 0 0;
+	}
+.leaflet-marker-icon,
+.leaflet-marker-shadow {
+	display: block;
+	}
+/* .leaflet-container svg: reset svg max-width decleration shipped in Joomla! (joomla.org) 3.x */
+/* .leaflet-container img: map is broken in FF if you have max-width: 100% on tiles */
+.leaflet-container .leaflet-overlay-pane svg {
+	max-width: none !important;
+	max-height: none !important;
+	}
+.leaflet-container .leaflet-marker-pane img,
+.leaflet-container .leaflet-shadow-pane img,
+.leaflet-container .leaflet-tile-pane img,
+.leaflet-container img.leaflet-image-layer,
+.leaflet-container .leaflet-tile {
+	max-width: none !important;
+	max-height: none !important;
+	width: auto;
+	padding: 0;
+	}
+
+.leaflet-container img.leaflet-tile {
+	/* See: https://bugs.chromium.org/p/chromium/issues/detail?id=600120 */
+	mix-blend-mode: plus-lighter;
+}
+
+.leaflet-container.leaflet-touch-zoom {
+	-ms-touch-action: pan-x pan-y;
+	touch-action: pan-x pan-y;
+	}
+.leaflet-container.leaflet-touch-drag {
+	-ms-touch-action: pinch-zoom;
+	/* Fallback for FF which doesn't support pinch-zoom */
+	touch-action: none;
+	touch-action: pinch-zoom;
+}
+.leaflet-container.leaflet-touch-drag.leaflet-touch-zoom {
+	-ms-touch-action: none;
+	touch-action: none;
+}
+.leaflet-container {
+	-webkit-tap-highlight-color: transparent;
+}
+.leaflet-container a {
+	-webkit-tap-highlight-color: rgba(51, 181, 229, 0.4);
+}
+.leaflet-tile {
+	filter: inherit;
+	visibility: hidden;
+	}
+.leaflet-tile-loaded {
+	visibility: inherit;
+	}
+.leaflet-zoom-box {
+	width: 0;
+	height: 0;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	z-index: 800;
+	}
+/* workaround for https://bugzilla.mozilla.org/show_bug.cgi?id=888319 */
+.leaflet-overlay-pane svg {
+	-moz-user-select: none;
+	}
+
+.leaflet-pane         { z-index: 400; }
+
+.leaflet-tile-pane    { z-index: 200; }
+.leaflet-overlay-pane { z-index: 400; }
+.leaflet-shadow-pane  { z-index: 500; }
+.leaflet-marker-pane  { z-index: 600; }
+.leaflet-tooltip-pane   { z-index: 650; }
+.leaflet-popup-pane   { z-index: 700; }
+
+.leaflet-map-pane canvas { z-index: 100; }
+.leaflet-map-pane svg    { z-index: 200; }
+
+.leaflet-vml-shape {
+	width: 1px;
+	height: 1px;
+	}
+.lvml {
+	behavior: url(#default#VML);
+	display: inline-block;
+	position: absolute;
+	}
+
+
+/* control positioning */
+
+.leaflet-control {
+	position: relative;
+	z-index: 800;
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+.leaflet-top,
+.leaflet-bottom {
+	position: absolute;
+	z-index: 1000;
+	pointer-events: none;
+	}
+.leaflet-top {
+	top: 0;
+	}
+.leaflet-right {
+	right: 0;
+	}
+.leaflet-bottom {
+	bottom: 0;
+	}
+.leaflet-left {
+	left: 0;
+	}
+.leaflet-control {
+	float: left;
+	clear: both;
+	}
+.leaflet-right .leaflet-control {
+	float: right;
+	}
+.leaflet-top .leaflet-control {
+	margin-top: 10px;
+	}
+.leaflet-bottom .leaflet-control {
+	margin-bottom: 10px;
+	}
+.leaflet-left .leaflet-control {
+	margin-left: 10px;
+	}
+.leaflet-right .leaflet-control {
+	margin-right: 10px;
+	}
+
+
+/* zoom and fade animations */
+
+.leaflet-fade-anim .leaflet-popup {
+	opacity: 0;
+	-webkit-transition: opacity 0.2s linear;
+	   -moz-transition: opacity 0.2s linear;
+	        transition: opacity 0.2s linear;
+	}
+.leaflet-fade-anim .leaflet-map-pane .leaflet-popup {
+	opacity: 1;
+	}
+.leaflet-zoom-animated {
+	-webkit-transform-origin: 0 0;
+	    -ms-transform-origin: 0 0;
+	        transform-origin: 0 0;
+	}
+svg.leaflet-zoom-animated {
+	will-change: transform;
+}
+
+.leaflet-zoom-anim .leaflet-zoom-animated {
+	-webkit-transition: -webkit-transform 0.25s cubic-bezier(0,0,0.25,1);
+	   -moz-transition:    -moz-transform 0.25s cubic-bezier(0,0,0.25,1);
+	        transition:         transform 0.25s cubic-bezier(0,0,0.25,1);
+	}
+.leaflet-zoom-anim .leaflet-tile,
+.leaflet-pan-anim .leaflet-tile {
+	-webkit-transition: none;
+	   -moz-transition: none;
+	        transition: none;
+	}
+
+.leaflet-zoom-anim .leaflet-zoom-hide {
+	visibility: hidden;
+	}
+
+
+/* cursors */
+
+.leaflet-interactive {
+	cursor: pointer;
+	}
+.leaflet-grab {
+	cursor: -webkit-grab;
+	cursor:    -moz-grab;
+	cursor:         grab;
+	}
+.leaflet-crosshair,
+.leaflet-crosshair .leaflet-interactive {
+	cursor: crosshair;
+	}
+.leaflet-popup-pane,
+.leaflet-control {
+	cursor: auto;
+	}
+.leaflet-dragging .leaflet-grab,
+.leaflet-dragging .leaflet-grab .leaflet-interactive,
+.leaflet-dragging .leaflet-marker-draggable {
+	cursor: move;
+	cursor: -webkit-grabbing;
+	cursor:    -moz-grabbing;
+	cursor:         grabbing;
+	}
+
+/* marker & overlays interactivity */
+.leaflet-marker-icon,
+.leaflet-marker-shadow,
+.leaflet-image-layer,
+.leaflet-pane > svg path,
+.leaflet-tile-container {
+	pointer-events: none;
+	}
+
+.leaflet-marker-icon.leaflet-interactive,
+.leaflet-image-layer.leaflet-interactive,
+.leaflet-pane > svg path.leaflet-interactive,
+svg.leaflet-image-layer.leaflet-interactive path {
+	pointer-events: visiblePainted; /* IE 9-10 doesn't have auto */
+	pointer-events: auto;
+	}
+
+/* visual tweaks */
+
+.leaflet-container {
+	background: #ddd;
+	outline-offset: 1px;
+	}
+.leaflet-container a {
+	color: #0078A8;
+	}
+.leaflet-zoom-box {
+	border: 2px dotted #38f;
+	background: rgba(255,255,255,0.5);
+	}
+
+
+/* general typography */
+.leaflet-container {
+	font-family: "Helvetica Neue", Arial, Helvetica, sans-serif;
+	font-size: 12px;
+	font-size: 0.75rem;
+	line-height: 1.5;
+	}
+
+
+/* general toolbar styles */
+
+.leaflet-bar {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.65);
+	border-radius: 4px;
+	}
+.leaflet-bar a {
+	background-color: #fff;
+	border-bottom: 1px solid #ccc;
+	width: 26px;
+	height: 26px;
+	line-height: 26px;
+	display: block;
+	text-align: center;
+	text-decoration: none;
+	color: black;
+	}
+.leaflet-bar a,
+.leaflet-control-layers-toggle {
+	background-position: 50% 50%;
+	background-repeat: no-repeat;
+	display: block;
+	}
+.leaflet-bar a:hover,
+.leaflet-bar a:focus {
+	background-color: #f4f4f4;
+	}
+.leaflet-bar a:first-child {
+	border-top-left-radius: 4px;
+	border-top-right-radius: 4px;
+	}
+.leaflet-bar a:last-child {
+	border-bottom-left-radius: 4px;
+	border-bottom-right-radius: 4px;
+	border-bottom: none;
+	}
+.leaflet-bar a.leaflet-disabled {
+	cursor: default;
+	background-color: #f4f4f4;
+	color: #bbb;
+	}
+
+.leaflet-touch .leaflet-bar a {
+	width: 30px;
+	height: 30px;
+	line-height: 30px;
+	}
+.leaflet-touch .leaflet-bar a:first-child {
+	border-top-left-radius: 2px;
+	border-top-right-radius: 2px;
+	}
+.leaflet-touch .leaflet-bar a:last-child {
+	border-bottom-left-radius: 2px;
+	border-bottom-right-radius: 2px;
+	}
+
+/* zoom control */
+
+.leaflet-control-zoom-in,
+.leaflet-control-zoom-out {
+	font: bold 18px 'Lucida Console', Monaco, monospace;
+	text-indent: 1px;
+	}
+
+.leaflet-touch .leaflet-control-zoom-in, .leaflet-touch .leaflet-control-zoom-out  {
+	font-size: 22px;
+	}
+
+
+/* layers control */
+
+.leaflet-control-layers {
+	box-shadow: 0 1px 5px rgba(0,0,0,0.4);
+	background: #fff;
+	border-radius: 5px;
+	}
+.leaflet-control-layers-toggle {
+	background-image: url(images/layers.png);
+	width: 36px;
+	height: 36px;
+	}
+.leaflet-retina .leaflet-control-layers-toggle {
+	background-image: url(images/layers-2x.png);
+	background-size: 26px 26px;
+	}
+.leaflet-touch .leaflet-control-layers-toggle {
+	width: 44px;
+	height: 44px;
+	}
+.leaflet-control-layers .leaflet-control-layers-list,
+.leaflet-control-layers-expanded .leaflet-control-layers-toggle {
+	display: none;
+	}
+.leaflet-control-layers-expanded .leaflet-control-layers-list {
+	display: block;
+	position: relative;
+	}
+.leaflet-control-layers-expanded {
+	padding: 6px 10px 6px 6px;
+	color: #333;
+	background: #fff;
+	}
+.leaflet-control-layers-scrollbar {
+	overflow-y: scroll;
+	overflow-x: hidden;
+	padding-right: 5px;
+	}
+.leaflet-control-layers-selector {
+	margin-top: 2px;
+	position: relative;
+	top: 1px;
+	}
+.leaflet-control-layers label {
+	display: block;
+	font-size: 13px;
+	font-size: 1.08333em;
+	}
+.leaflet-control-layers-separator {
+	height: 0;
+	border-top: 1px solid #ddd;
+	margin: 5px -10px 5px -6px;
+	}
+
+/* Default icon URLs */
+.leaflet-default-icon-path { /* used only in path-guessing heuristic, see L.Icon.Default */
+	background-image: url(images/marker-icon.png);
+	}
+
+
+/* attribution and scale controls */
+
+.leaflet-container .leaflet-control-attribution {
+	background: #fff;
+	background: rgba(255, 255, 255, 0.8);
+	margin: 0;
+	}
+.leaflet-control-attribution,
+.leaflet-control-scale-line {
+	padding: 0 5px;
+	color: #333;
+	line-height: 1.4;
+	}
+.leaflet-control-attribution a {
+	text-decoration: none;
+	}
+.leaflet-control-attribution a:hover,
+.leaflet-control-attribution a:focus {
+	text-decoration: underline;
+	}
+.leaflet-attribution-flag {
+	display: inline !important;
+	vertical-align: baseline !important;
+	width: 1em;
+	height: 0.6669em;
+	}
+.leaflet-left .leaflet-control-scale {
+	margin-left: 5px;
+	}
+.leaflet-bottom .leaflet-control-scale {
+	margin-bottom: 5px;
+	}
+.leaflet-control-scale-line {
+	border: 2px solid #777;
+	border-top: none;
+	line-height: 1.1;
+	padding: 2px 5px 1px;
+	white-space: nowrap;
+	-moz-box-sizing: border-box;
+	     box-sizing: border-box;
+	background: rgba(255, 255, 255, 0.8);
+	text-shadow: 1px 1px #fff;
+	}
+.leaflet-control-scale-line:not(:first-child) {
+	border-top: 2px solid #777;
+	border-bottom: none;
+	margin-top: -2px;
+	}
+.leaflet-control-scale-line:not(:first-child):not(:last-child) {
+	border-bottom: 2px solid #777;
+	}
+
+.leaflet-touch .leaflet-control-attribution,
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	box-shadow: none;
+	}
+.leaflet-touch .leaflet-control-layers,
+.leaflet-touch .leaflet-bar {
+	border: 2px solid rgba(0,0,0,0.2);
+	background-clip: padding-box;
+	}
+
+
+/* popup */
+
+.leaflet-popup {
+	position: absolute;
+	text-align: center;
+	margin-bottom: 20px;
+	}
+.leaflet-popup-content-wrapper {
+	padding: 1px;
+	text-align: left;
+	border-radius: 12px;
+	}
+.leaflet-popup-content {
+	margin: 13px 24px 13px 20px;
+	line-height: 1.3;
+	font-size: 13px;
+	font-size: 1.08333em;
+	min-height: 1px;
+	}
+.leaflet-popup-content p {
+	margin: 17px 0;
+	margin: 1.3em 0;
+	}
+.leaflet-popup-tip-container {
+	width: 40px;
+	height: 20px;
+	position: absolute;
+	left: 50%;
+	margin-top: -1px;
+	margin-left: -20px;
+	overflow: hidden;
+	pointer-events: none;
+	}
+.leaflet-popup-tip {
+	width: 17px;
+	height: 17px;
+	padding: 1px;
+
+	margin: -10px auto 0;
+	pointer-events: auto;
+
+	-webkit-transform: rotate(45deg);
+	   -moz-transform: rotate(45deg);
+	    -ms-transform: rotate(45deg);
+	        transform: rotate(45deg);
+	}
+.leaflet-popup-content-wrapper,
+.leaflet-popup-tip {
+	background: white;
+	color: #333;
+	box-shadow: 0 3px 14px rgba(0,0,0,0.4);
+	}
+.leaflet-container a.leaflet-popup-close-button {
+	position: absolute;
+	top: 0;
+	right: 0;
+	border: none;
+	text-align: center;
+	width: 24px;
+	height: 24px;
+	font: 16px/24px Tahoma, Verdana, sans-serif;
+	color: #757575;
+	text-decoration: none;
+	background: transparent;
+	}
+.leaflet-container a.leaflet-popup-close-button:hover,
+.leaflet-container a.leaflet-popup-close-button:focus {
+	color: #585858;
+	}
+.leaflet-popup-scrolled {
+	overflow: auto;
+	}
+
+.leaflet-oldie .leaflet-popup-content-wrapper {
+	-ms-zoom: 1;
+	}
+.leaflet-oldie .leaflet-popup-tip {
+	width: 24px;
+	margin: 0 auto;
+
+	-ms-filter: "progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678)";
+	filter: progid:DXImageTransform.Microsoft.Matrix(M11=0.70710678, M12=0.70710678, M21=-0.70710678, M22=0.70710678);
+	}
+
+.leaflet-oldie .leaflet-control-zoom,
+.leaflet-oldie .leaflet-control-layers,
+.leaflet-oldie .leaflet-popup-content-wrapper,
+.leaflet-oldie .leaflet-popup-tip {
+	border: 1px solid #999;
+	}
+
+
+/* div icon */
+
+.leaflet-div-icon {
+	background: #fff;
+	border: 1px solid #666;
+	}
+
+
+/* Tooltip */
+/* Base styles for the element that has a tooltip */
+.leaflet-tooltip {
+	position: absolute;
+	padding: 6px;
+	background-color: #fff;
+	border: 1px solid #fff;
+	border-radius: 3px;
+	color: #222;
+	white-space: nowrap;
+	-webkit-user-select: none;
+	-moz-user-select: none;
+	-ms-user-select: none;
+	user-select: none;
+	pointer-events: none;
+	box-shadow: 0 1px 3px rgba(0,0,0,0.4);
+	}
+.leaflet-tooltip.leaflet-interactive {
+	cursor: pointer;
+	pointer-events: auto;
+	}
+.leaflet-tooltip-top:before,
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	position: absolute;
+	pointer-events: none;
+	border: 6px solid transparent;
+	background: transparent;
+	content: "";
+	}
+
+/* Directions */
+
+.leaflet-tooltip-bottom {
+	margin-top: 6px;
+}
+.leaflet-tooltip-top {
+	margin-top: -6px;
+}
+.leaflet-tooltip-bottom:before,
+.leaflet-tooltip-top:before {
+	left: 50%;
+	margin-left: -6px;
+	}
+.leaflet-tooltip-top:before {
+	bottom: 0;
+	margin-bottom: -12px;
+	border-top-color: #fff;
+	}
+.leaflet-tooltip-bottom:before {
+	top: 0;
+	margin-top: -12px;
+	margin-left: -6px;
+	border-bottom-color: #fff;
+	}
+.leaflet-tooltip-left {
+	margin-left: -6px;
+}
+.leaflet-tooltip-right {
+	margin-left: 6px;
+}
+.leaflet-tooltip-left:before,
+.leaflet-tooltip-right:before {
+	top: 50%;
+	margin-top: -6px;
+	}
+.leaflet-tooltip-left:before {
+	right: 0;
+	margin-right: -12px;
+	border-left-color: #fff;
+	}
+.leaflet-tooltip-right:before {
+	left: 0;
+	margin-left: -12px;
+	border-right-color: #fff;
+	}
+
+/* Printing */
+
+@media print {
+	/* Prevent printers from removing background-images of controls. */
+	.leaflet-control {
+		-webkit-print-color-adjust: exact;
+		print-color-adjust: exact;
+		}
+	}
+
+.mapbox{background:var(--surface);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);overflow:hidden;margin-bottom:14px}
+.maphead{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;padding:12px 16px;border-bottom:1px solid var(--line)}
+.maphead h2{margin:0;font:600 15px/1.3 var(--f-display)}
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted)}
+.legend span{display:inline-flex;align-items:center;gap:6px}
+.legend i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.lg-fall{background:var(--faint)} .lg-tour{background:var(--partner);box-shadow:0 0 0 2px var(--surface),0 0 0 3.5px var(--text)}
+#map{height:440px;background:var(--map-sea)}
+@media (max-width:600px){#map{height:340px}}
+.mapnote{font-size:11.5px;color:var(--faint);padding:8px 16px;border-top:1px solid var(--line)}
+.tours{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin-bottom:18px}
+.tour{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:12px 14px;text-align:left;cursor:pointer;display:flex;flex-direction:column;gap:6px;box-shadow:var(--shadow);transition:border-color .15s,box-shadow .15s;min-width:0}
+.tour:hover{border-color:var(--line-2);box-shadow:var(--shadow-h)}
+.tour[aria-pressed="true"]{border-color:var(--partner);box-shadow:0 0 0 3px color-mix(in srgb,var(--partner) 25%,transparent)}
+.tour .th{display:flex;align-items:center;gap:8px}
+.tnum{width:24px;height:24px;border-radius:50%;background:var(--partner);color:#0a0e13;font:700 12px/24px var(--f-mono);text-align:center;flex:none}
+.tour b{font:600 14px/1.3 var(--f-body);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tour .tm{font:500 11.5px/1.5 var(--f-mono);color:var(--muted)}
+.tour .tp{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sec{display:flex;align-items:baseline;justify-content:space-between;gap:12px;margin:0 0 10px}
+.sec h2{margin:0;font:600 15px/1.3 var(--f-display)}
+.sec span{font-size:12px;color:var(--muted)}
+.flag{display:inline-flex;align-items:center;gap:5px;font:600 11px/1 var(--f-mono);padding:5px 8px;border-radius:20px;background:color-mix(in srgb,var(--partner) 22%,var(--surface));color:var(--text);white-space:nowrap}
+.flag svg{width:11px;height:11px}
+.card.intour{border-color:color-mix(in srgb,var(--partner) 55%,var(--line))}
+.filterchip{display:inline-flex;align-items:center;gap:8px;font-size:12.5px;font-weight:600;background:var(--accent-soft);color:var(--accent);border:0;border-radius:20px;padding:7px 12px;cursor:pointer;margin:0 0 10px}
+.num-ic{background:none;border:0}
+.num-ic div{width:22px;height:22px;border-radius:50%;background:var(--partner);color:#0a0e13;font:700 11px/22px "JetBrains Mono",monospace;text-align:center;border:2px solid var(--map-ink);box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.city{background:none;border:0;font:600 10.5px/1 "Inter",sans-serif;color:var(--map-label);white-space:nowrap;text-shadow:0 0 3px var(--map-land),0 0 3px var(--map-land)}
+.leaflet-container{font:inherit;background:var(--map-sea)}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) #map.tiles .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}}
+:root[data-theme="dark"] #map.tiles .leaflet-tile-pane{filter:invert(1) hue-rotate(180deg) brightness(.85) contrast(.9)}
+.leaflet-popup-content-wrapper,.leaflet-popup-tip{background:var(--surface);color:var(--text);box-shadow:var(--shadow-h)}
+.leaflet-popup-content{margin:12px 14px;font-size:13px;line-height:1.45}
+.leaflet-popup-content b{display:block;font-size:14px}
+.leaflet-popup-content .pm{font:500 11.5px/1.5 var(--f-mono);color:var(--muted)}
+.leaflet-popup-content a{color:var(--accent);font-weight:600}
+.leaflet-bar a{background:var(--surface);color:var(--text);border-color:var(--line)}
+.leaflet-control-attribution{background:color-mix(in srgb,var(--surface) 85%,transparent)!important;color:var(--faint)!important;font-size:10px}
+</style>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+
+<header class="top gut"><div class="wrap">
+  <div class="brand">
+    <div class="mark" id="mark" aria-hidden="true"></div>
+    <div><small>Alpha-Mobil · Mobiler Service</small><h1>Fallübersicht Schadeck</h1></div>
+  </div>
+  <div class="topr"><span class="stand" id="stand"></span><button type="button" class="reload" id="reload" title="Lädt den neuesten Stand. Die Daten werden jede Stunde aus Trello übernommen."><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 5v6h-6"/></svg>Aktualisieren</button></div>
+</div></header>
+
+<div class="gut"><div class="wrap grid">
+  <aside class="side" aria-label="Filter">
+    <div>
+      <h2>Listen</h2>
+      <nav class="nav" id="nav"></nav>
+      <button type="button" class="linkbtn" id="allein" hidden></button>
+    </div>
+    <label class="toggle" for="zu"><input type="checkbox" id="zu" role="switch"> Stornierte und abgelehnte zeigen</label>
+    <p class="hint">Mit dem Auge neben einer Liste nimmst du sie aus Kennzahlen, Karte, Touren und Fall-Liste heraus. Das merkt sich dein Browser.</p>
+    <p class="hint">Bearbeitet wird weiterhin in Trello. Ein Klick auf „Trello“ öffnet die Karte.</p>
+  </aside>
+
+  <main>
+    <section class="kpis" id="kpis" aria-label="Kennzahlen"></section>
+
+    <section class="mapbox" aria-label="Karte der offenen Fälle">
+      <div class="maphead">
+        <h2>Karte</h2>
+        <div class="legend"><span><i class="lg-fall"></i>Offener Fall</span><span><i class="lg-tour"></i>Teil eines Tourvorschlags</span></div>
+      </div>
+      <div id="map"></div>
+      <p class="mapnote" id="mapnote"></p>
+    </section>
+
+    <div class="sec"><h2>Tourvorschläge</h2><span id="tourinfo"></span></div>
+    <section class="tours" id="tours" aria-label="Tourvorschläge"></section>
+
+    <div class="bar">
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" id="suche" placeholder="Name, PLZ, Ort, FIN oder Telefon suchen" aria-label="Fälle durchsuchen" autocomplete="off">
+      </div>
+      <select id="sort" aria-label="Sortierung">
+        <option value="alt">Älteste Aktivität zuerst</option>
+        <option value="neu">Neueste Aktivität zuerst</option>
+        <option value="plz">Nach PLZ</option>
+        <option value="faellig">Nach Fälligkeit</option>
+      </select>
+    </div>
+    <button type="button" class="filterchip" id="tourchip" hidden></button>
+    <p class="count" id="count"></p>
+    <section class="cards" id="cards" aria-live="polite"></section>
+    <button type="button" class="mehr" id="mehr" hidden></button>
+  </main>
+</div></div>
+
+<script id="daten" type="application/json">null</script>
+<script id="geo" type="application/json">{"type":"FeatureCollection","features":[]}</script>
+<script>
+function fuStart(D){
+  document.documentElement.style.setProperty('--partner', D.farbe || '#378add');
+  const $ = id => document.getElementById(id);
+  $('mark').textContent = (D.partner || '?').slice(0,1).toUpperCase();
+  const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const jetzt = Date.now(), TAG = 864e5;
+  const tage = iso => iso ? Math.max(0, Math.floor((jetzt - new Date(iso)) / TAG)) : 0;
+  const datum = iso => iso ? new Date(iso).toLocaleDateString('de-DE',{day:'2-digit',month:'2-digit',year:'2-digit'}) : '';
+  const clean = s => String(s||'').replace(/\s{2,}/g,' ').trim();
+  const plzVon = f => f.d.PLZ || (f.t.match(/\b\d{5}\b/) || [''])[0];
+  const ruhend = f => f.s === 'offen' && tage(f.a) >= 14;
+  const faellig = f => f.s === 'offen' && f.f && !f.fe && new Date(f.f) < jetzt;
+  const ICON = {
+    a:'<path d="M4 7h16M4 12h16M4 17h10"/>',
+    w:'<circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/>',
+    b:'<path d="M12 4 2.5 20h19L12 4z"/><path d="M12 10v4M12 17h.01"/>',
+    o:'<path d="m5 12 4.5 4.5L19 7"/>'
+  };
+  const ico = (k) => '<span class="ico i-' + k + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">' + ICON[k] + '</svg></span>';
+
+  let liste = 'alle', kf = null, bis = 40, selTour = null;
+  // ausgeblendete Trello-Listen, pro Betrachter im Browser gemerkt
+  const AUS_KEY = 'fu_aus_' + D.partner;
+  let aus = new Set();
+  try { aus = new Set(JSON.parse(localStorage.getItem(AUS_KEY) || '[]')); } catch (e) {}
+  const merke = () => { try { localStorage.setItem(AUS_KEY, JSON.stringify([...aus])); } catch (e) {} };
+  const sichtbar = f => !aus.has(f.l);
+
+  // ── Tourvorschläge: mind. 4 offene Fälle im 50-km-Umkreis ──
+  const R = 6371, rad = x => x * Math.PI / 180;
+  const km = (a,b) => { const dl = rad(b[0]-a[0]), dn = rad(b[1]-a[1]); const h = Math.sin(dl/2)**2 + Math.cos(rad(a[0]))*Math.cos(rad(b[0]))*Math.sin(dn/2)**2; return 2*R*Math.asin(Math.sqrt(h)); };
+  const RADIUS = 50, MIN = 4;
+  const byId = {}; D.faelle.forEach(f => byId[f.id] = f);
+  let TOURS = [], tourOf = {};
+  function berechneTouren(){
+    TOURS = []; tourOf = {};
+    const pts = D.faelle.filter(f => f.s === 'offen' && f.g && sichtbar(f));
+    const frei = new Set(pts.map(p => p.id));
+    for (;;){
+      let best = null;
+      for (const c of pts){
+        if (!frei.has(c.id)) continue;
+        let m = [], sum = 0;
+        for (const p of pts){ if (!frei.has(p.id)) continue; const d = km(c.g, p.g); if (d <= RADIUS){ m.push(p); sum += d; } }
+        if (!best || m.length > best.m.length || (m.length === best.m.length && sum < best.sum)) best = {c, m, sum};
+      }
+      if (!best || best.m.length < MIN) break;
+      const m = best.m;
+      const mid = [m.reduce((s,p)=>s+p.g[0],0)/m.length, m.reduce((s,p)=>s+p.g[1],0)/m.length];
+      // Reihenfolge: vom äußersten Fall aus immer zum nächstgelegenen
+      let cur = m.reduce((a,p) => km(p.g,mid) > km(a.g,mid) ? p : a, m[0]);
+      const order = [cur], left = new Set(m.map(p=>p.id)); left.delete(cur.id); let len = 0;
+      while (left.size){
+        let nx = null, nd = Infinity;
+        left.forEach(id => { const d = km(cur.g, byId[id].g); if (d < nd){ nd = d; nx = byId[id]; } });
+        len += nd; order.push(nx); left.delete(nx.id); cur = nx;
+      }
+      const orte = {}; m.forEach(p => { const o = p.d.Ort || ''; if (o) orte[o] = (orte[o]||0) + 1; });
+      const region = Object.keys(orte).sort((a,b)=>orte[b]-orte[a])[0] || ('PLZ ' + (m[0].gp||''));
+      const plz = m.map(p => p.gp || '').filter(Boolean).sort();
+      const n = TOURS.length + 1;
+      TOURS.push({n, ids: order.map(p=>p.id), mid, region, len: Math.round(len), plz: plz.length ? plz[0].slice(0,2) + 'xxx' : ''});
+      m.forEach(p => { tourOf[p.id] = n; frei.delete(p.id); });
+    }
+  }
+  berechneTouren();
+  const geoOhne = D.faelle.filter(f => f.s === 'offen' && !f.g).length;
+
+  $('stand').textContent = 'Daten von ' + new Date(D.stand).toLocaleString('de-DE',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) + ' Uhr';
+
+  // Anliegen: Kartentitel ohne PLZ, Ort und Namen, die schon oben stehen
+  function anliegen(f){
+    let t = f.t;
+    [f.d.PLZ, f.d.Ort, f.d.Name].filter(Boolean).forEach(w => { t = t.replace(new RegExp(w.replace(/[.*+?^${}()|[\]\\]/g,'\\$&'),'i'), ''); });
+    t = clean(t.replace(/^[\s,.\-–:]+/,''));
+    return t || f.t;
+  }
+
+  function kpis(){
+    const o = D.faelle.filter(f => f.s === 'offen' && sichtbar(f));
+    const k = [
+      {id:null, i:'a', n:o.length, t:'Offene Fälle'},
+      {id:'ruhend', i:'w', n:o.filter(ruhend).length, t:'14+ Tage ohne Aktivität'},
+      {id:'x', i:'o', n:D.erledigt, t:'Erledigt gesamt', st:true},
+    ];
+    $('kpis').innerHTML = k.map(x => x.st
+      ? '<div class="kpi static"><span class="k">' + ico(x.i) + x.t + '</span><b>' + x.n.toLocaleString('de-DE') + '</b></div>'
+      : '<button type="button" class="kpi" data-k="' + (x.id||'') + '" aria-pressed="' + (kf === x.id) + '"><span class="k">' + ico(x.i) + x.t + '</span><b>' + x.n + '</b></button>').join('');
+  }
+
+  function nav(){
+    const zu = $('zu').checked, z = {}; let tot = 0;
+    D.faelle.forEach(f => { if (zu || f.s === 'offen'){ z[f.l] = (z[f.l]||0) + 1; if (sichtbar(f)) tot++; } });
+    if (liste !== 'alle' && (!z[liste] || aus.has(liste))) liste = 'alle';
+    const ls = D.listen.filter(l => z[l.n]);
+    const AUGE = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>';
+    const ZU = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 3l18 18"/><path d="M10.6 5.1A10.4 10.4 0 0 1 12 5c6.4 0 10 7 10 7a17 17 0 0 1-3.2 4.1M6.6 6.6A17 17 0 0 0 2 12s3.6 7 10 7a9.7 9.7 0 0 0 5.4-1.6"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>';
+    $('nav').innerHTML = '<div class="nrow"><button type="button" class="sel" data-l="alle" aria-pressed="' + (liste==='alle') + '"><span class="lbl">Alle Fälle</span><span class="n">' + tot + '</span></button></div>' +
+      ls.map(l => { const off = aus.has(l.n), name = clean(l.n);
+        return '<div class="nrow' + (off ? ' off' : '') + '">' +
+          '<button type="button" class="sel" data-l="' + esc(l.n) + '" aria-pressed="' + (liste===l.n) + '" title="' + esc(name) + '"' + (off ? ' disabled' : '') + '><i class="d' + (l.s==='geschlossen'?' zu':'') + '"></i><span class="lbl">' + esc(name) + '</span><span class="n">' + z[l.n] + '</span></button>' +
+          '<button type="button" class="eye" data-aus="' + esc(l.n) + '" aria-pressed="' + !off + '" aria-label="' + esc(name) + (off ? ' wieder einblenden' : ' ausblenden') + '" title="' + (off ? 'Wieder einblenden' : 'Aus der Übersicht nehmen') + '">' + (off ? ZU : AUGE) + '</button></div>'; }).join('');
+    $('allein').hidden = aus.size === 0;
+    if (aus.size) $('allein').textContent = aus.size + (aus.size === 1 ? ' Liste' : ' Listen') + ' ausgeblendet · alle einblenden';
+  }
+
+  function treffer(){
+    const q = $('suche').value.trim().toLowerCase(), zu = $('zu').checked;
+    let f = D.faelle.filter(x => (zu || x.s === 'offen') && sichtbar(x) && (liste === 'alle' || x.l === liste));
+    if (selTour){ const t = TOURS[selTour-1]; const ord = {}; t.ids.forEach((id,i)=>ord[id]=i); f = D.faelle.filter(x => x.id in ord); if (q) f = f.filter(x => (x.t + ' ' + Object.values(x.d).join(' ')).toLowerCase().includes(q)); return f.sort((a,b)=>ord[a.id]-ord[b.id]); }
+    if (kf === 'ruhend') f = f.filter(ruhend);
+    if (q) f = f.filter(x => (x.t + ' ' + Object.values(x.d).join(' ') + ' ' + (x.k ? x.k.text : '') + ' ' + x.lb.join(' ')).toLowerCase().includes(q));
+    const inf = Infinity;
+    f.sort({
+      alt:(a,b) => new Date(a.a) - new Date(b.a),
+      neu:(a,b) => new Date(b.a) - new Date(a.a),
+      plz:(a,b) => plzVon(a).localeCompare(plzVon(b)),
+      faellig:(a,b) => (a.f ? +new Date(a.f) : inf) - (b.f ? +new Date(b.f) : inf),
+    }[$('sort').value]);
+    return f;
+  }
+
+  function karte(x){
+    const d = x.d, t = tage(x.a);
+    const ac = x.s !== 'offen' ? '' : t >= 30 ? ' b' : t >= 14 ? ' w' : '';
+    const name = d.Name ? d.Name.replace(/\b\p{L}/gu, c => c.toUpperCase()) : (plzVon(x) ? 'PLZ ' + plzVon(x) : 'Fall');
+    const loc = [[d.PLZ, d.Ort].filter(Boolean).join(' '), d.Telefon].filter(Boolean).join('  ·  ');
+    const facts = [];
+    if (d.Fahrzeug) facts.push('<span class="fact" title="' + esc(d.Fahrzeug) + '">' + esc(d.Fahrzeug.replace(/^Motorroller\s+/i,'')) + '</span>');
+    if (d.FIN) facts.push('<span class="fact">FIN ' + esc(d.FIN) + '</span>');
+    if (x.f) facts.push('<span class="fact' + (faellig(x) ? ' due' : '') + '">Fällig ' + datum(x.f) + (x.fe ? ' ✓' : '') + '</span>');
+    x.lb.forEach(l => facts.push('<span class="fact">' + esc(l) + '</span>'));
+    return '<article class="card' + (tourOf[x.id] ? ' intour' : '') + '">' +
+      '<div class="c-head"><div class="c-who"><h3 class="c-name">' + esc(name) + '</h3>' +
+        (loc ? '<div class="c-loc">' + esc(loc) + '</div>' : '') + '</div>' +
+        (tourOf[x.id] ? '<span class="flag" title="Teil von Tourvorschlag ' + tourOf[x.id] + '"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 21V4h11l-2 4 2 4H5"/></svg>Tour ' + tourOf[x.id] + '</span>' : '') +
+        '<span class="age' + ac + '" title="Letzte Aktivität ' + datum(x.a) + '">' + (t === 0 ? 'heute' : t + ' T') + '</span></div>' +
+      '<div class="c-issue">' + esc(anliegen(x)) + '</div>' +
+      (facts.length ? '<div class="c-facts">' + facts.join('') + '</div>' : '') +
+      (x.k && x.k.text ? '<div class="kom"><span>' + datum(x.k.datum) + '</span>' + esc(x.k.text) + '</div>' : '') +
+      '<div class="c-foot"><span class="status' + (x.s!=='offen'?' zu':'') + '"><i></i><em>' + esc(clean(x.l)) + '</em></span>' +
+        '<a class="open" href="' + esc(x.u) + '" target="_blank" rel="noopener">Trello <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M7 17 17 7M9 7h8v8"/></svg></a></div>' +
+    '</article>';
+  }
+
+  function zeichne(){
+    const f = treffer();
+    $('count').textContent = f.length + (f.length === 1 ? ' Fall' : ' Fälle');
+    $('tourchip').hidden = !selTour;
+    if (selTour){ const t = TOURS[selTour-1]; $('tourchip').textContent = 'Tour ' + t.n + ' · Raum ' + t.region + ' · Reihenfolge als Vorschlag  ✕'; }
+    karteZeichnen(f);
+    $('cards').innerHTML = f.length ? f.slice(0, bis).map(karte).join('') : '<div class="leer">Keine Fälle für diese Auswahl.</div>';
+    const rest = f.length - bis;
+    $('mehr').hidden = rest <= 0;
+    if (rest > 0) $('mehr').textContent = 'Weitere ' + Math.min(40, rest) + ' Fälle anzeigen (' + rest + ' übrig)';
+  }
+
+
+  // ── Tourkarten-Liste ──
+  function touren(){
+    $('tourinfo').textContent = TOURS.length ? TOURS.length + (TOURS.length===1?' Vorschlag':' Vorschläge') + ' · je mind. ' + MIN + ' Fälle im ' + RADIUS + '-km-Umkreis' : '';
+    $('tours').innerHTML = TOURS.length ? TOURS.map(t =>
+      '<button type="button" class="tour" data-t="' + t.n + '" aria-pressed="' + (selTour===t.n) + '">' +
+        '<span class="th"><span class="tnum">' + t.n + '</span><b>Raum ' + esc(t.region) + '</b></span>' +
+        '<span class="tm">' + t.ids.length + ' Fälle · ca. ' + t.len + ' km Luftlinie</span>' +
+        '<span class="tp">' + esc(t.ids.map(id => (byId[id].d.Ort || byId[id].gp || '')).filter(Boolean).filter((v,i,a)=>a.indexOf(v)===i).slice(0,5).join(' → ')) + '</span>' +
+      '</button>').join('')
+      : '<div class="leer" style="padding:20px">Aktuell liegen nirgends ' + MIN + ' offene Fälle im ' + RADIUS + '-km-Umkreis.</div>';
+  }
+
+  // ── Karte ──
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  let map = null, land = null, marks = null, ringe = null, linie = null;
+  const STAEDTE = [['Hamburg',53.55,10.0],['Berlin',52.52,13.4],['München',48.14,11.58],['Köln',50.94,6.96],['Frankfurt',50.11,8.68],['Stuttgart',48.78,9.18],['Hannover',52.37,9.73],['Leipzig',51.34,12.37],['Dresden',51.05,13.74],['Nürnberg',49.45,11.08],['Bremen',53.08,8.8],['Dortmund',51.51,7.47],['Kiel',54.32,10.13],['Rostock',54.09,12.13],['Magdeburg',52.13,11.62],['Erfurt',50.98,11.03],['Kassel',51.31,9.48],['Freiburg',47.99,7.85],['Osnabrück',52.28,8.05],['Regensburg',49.01,12.1],['Saarbrücken',49.23,7.0]];
+  function landStil(f){ const de = f.properties.c === 'DE'; return {color: css('--map-border'), weight: de ? 1.2 : .6, fillColor: de ? css('--map-land') : css('--map-near'), fillOpacity: 1}; }
+  function karteInit(){
+    if (!window.L || map) return;
+    const TILES = !!window.FU_TILES;
+    map = L.map('map', {zoomSnap: .25, minZoom: 5, maxZoom: TILES ? 17 : 12, attributionControl: true, preferCanvas: true});
+    if (TILES){
+      map.attributionControl.setPrefix('');
+      L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {maxZoom: 19, attribution: '© <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener">OpenStreetMap</a>-Mitwirkende · Orte nach PLZ'}).addTo(map);
+      document.getElementById('map').classList.add('tiles');
+    } else {
+      map.attributionControl.setPrefix('').addAttribution('Grenzen: Natural Earth · Orte nach PLZ (OpenStreetMap/GeoNames)');
+      land = L.geoJSON(JSON.parse(document.getElementById('geo').textContent), {style: landStil, interactive: false}).addTo(map);
+      STAEDTE.forEach(c => L.marker([c[1],c[2]], {icon: L.divIcon({className:'city', html: c[0], iconSize: null}), interactive: false, keyboard: false}).addTo(map));
+    }
+    ringe = L.layerGroup().addTo(map); marks = L.layerGroup().addTo(map);
+    map.fitBounds([[47.3,5.9],[55.05,15.0]]);
+    const mq = matchMedia('(prefers-color-scheme: dark)');
+    const neu = () => { if (land) land.setStyle(landStil); zeichne(); };
+    mq.addEventListener && mq.addEventListener('change', neu);
+    new MutationObserver(neu).observe(document.documentElement, {attributes: true, attributeFilter: ['data-theme']});
+  }
+  function popup(x){
+    const d = x.d;
+    return '<b>' + esc(d.Name || x.t.slice(0,60)) + '</b><span class="pm">' + esc([x.gp || d.PLZ, d.Ort].filter(Boolean).join(' ')) + (d.Telefon ? ' · ' + esc(d.Telefon) : '') + '</span>' +
+      '<div style="margin:6px 0">' + esc(anliegen(x).slice(0,140)) + '</div>' +
+      (tourOf[x.id] ? '<div class="pm">Tourvorschlag ' + tourOf[x.id] + '</div>' : '') +
+      '<a href="' + esc(x.u) + '" target="_blank" rel="noopener">In Trello öffnen ↗</a>';
+  }
+  function karteZeichnen(liste){
+    karteInit();
+    if (!map){ $('mapnote').textContent = 'Die Karte konnte nicht geladen werden.'; return; }
+    marks.clearLayers(); ringe.clearLayers(); if (linie){ map.removeLayer(linie); linie = null; }
+    const partner = css('--partner'), grau = css('--faint'), ink = css('--map-ink'), text = css('--text');
+    TOURS.forEach(t => {
+      const sel = selTour === t.n;
+      L.circle(t.mid, {radius: RADIUS*1000, color: partner, weight: sel ? 2 : 1, opacity: sel ? .9 : .5, dashArray: '5 6', fillColor: partner, fillOpacity: sel ? .12 : .05, interactive: false}).addTo(ringe);
+    });
+    const mitGeo = liste.filter(x => x.g);
+    // gleiche PLZ leicht versetzen, damit Punkte nicht übereinander liegen
+    const zahl = {};
+    mitGeo.forEach(x => {
+      const k = x.g.join(','), i = zahl[k] = (zahl[k]||0) + 1;
+      const pos = i === 1 ? x.g : [x.g[0] + Math.sin(i*2.4)*.012*Math.sqrt(i), x.g[1] + Math.cos(i*2.4)*.018*Math.sqrt(i)];
+      const t = tourOf[x.id];
+      let m;
+      if (selTour && t === selTour){
+        const nr = TOURS[t-1].ids.indexOf(x.id) + 1;
+        m = L.marker(pos, {icon: L.divIcon({className: 'num-ic', html: '<div>' + nr + '</div>', iconSize: [22,22]}), title: x.d.Name || x.t});
+      } else {
+        m = L.circleMarker(pos, {radius: t ? 6.5 : 5, color: t ? text : ink, weight: t ? 1.5 : 1, fillColor: t ? partner : grau, fillOpacity: t ? 1 : .85});
+      }
+      m.bindPopup(popup(x), {maxWidth: 260}).addTo(marks);
+    });
+    if (selTour){
+      const t = TOURS[selTour-1];
+      linie = L.polyline(t.ids.map(id => byId[id].g), {color: text, weight: 2, opacity: .7, dashArray: '2 6'}).addTo(map);
+      map.fitBounds(L.latLngBounds(t.ids.map(id => byId[id].g)).pad(.35), {maxZoom: 10});
+    }
+    const ohne = liste.length - mitGeo.length;
+    $('mapnote').textContent = mitGeo.length + ' von ' + liste.length + ' angezeigten Fällen auf der Karte, verortet über die PLZ' + (ohne ? '. ' + ohne + ' ohne erkennbare PLZ.' : '.');
+  }
+  function tourWahl(n){
+    selTour = selTour === n ? null : n; bis = 200;
+    if (!selTour && map) map.fitBounds([[47.3,5.9],[55.05,15.0]]);
+    touren(); zeichne();
+    if (selTour) document.getElementById('map').scrollIntoView({behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'start'});
+  }
+  $('tours').addEventListener('click', e => { const b = e.target.closest('.tour'); if (b) tourWahl(+b.dataset.t); });
+  $('tourchip').addEventListener('click', () => tourWahl(selTour));
+
+  const alles = () => { kpis(); nav(); touren(); zeichne(); };
+  $('reload').addEventListener('click', () => { $('reload').classList.add('busy'); $('reload').lastChild.textContent = 'Wird geladen …'; setTimeout(() => location.reload(), 150); });
+  $('kpis').addEventListener('click', e => { const b = e.target.closest('button.kpi'); if (!b) return; const k = b.dataset.k || null; kf = kf === k ? null : k; bis = 40; selTour = null; alles(); });
+  $('nav').addEventListener('click', e => {
+    const b = e.target.closest('button'); if (!b || b.disabled) return;
+    if (b.dataset.aus !== undefined){
+      const n = b.dataset.aus;
+      aus.has(n) ? aus.delete(n) : aus.add(n); merke();
+      selTour = null; bis = 40; berechneTouren(); alles(); return;
+    }
+    liste = b.dataset.l; selTour = null; touren(); bis = 40; nav(); zeichne();
+  });
+  $('allein').addEventListener('click', () => { aus.clear(); merke(); selTour = null; berechneTouren(); alles(); });
+  $('suche').addEventListener('input', () => { bis = 40; zeichne(); });
+  $('sort').addEventListener('change', zeichne);
+  $('zu').addEventListener('change', () => { bis = 40; nav(); zeichne(); });
+  $('mehr').addEventListener('click', () => { bis += 40; zeichne(); });
+  alles();
+}
+if (!window.FU_LOCKED) fuStart(JSON.parse(document.getElementById('daten').textContent));
+</script>
+
+<script id="enc" type="application/json">{"v": 1, "n": 250000, "s": "CBeo+k+NHJZs1pYWdVVeyg==", "i": "j6TEUFYIGSwW1oz5", "c": "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"}</script>
+
+<div class="gate" id="gate">
+  <form class="gcard" id="gform" autocomplete="on">
+    <div class="gmark" aria-hidden="true">S</div>
+    <small>Alpha-Mobil · Mobiler Service</small>
+    <h1>Fallübersicht Schadeck</h1>
+    <p>Bitte gib das Passwort ein, das du von Alpha-Mobil bekommen hast.</p>
+    <input type="text" name="username" value="Schadeck" autocomplete="username" hidden>
+    <label for="gpw">Passwort</label>
+    <input type="password" id="gpw" autocomplete="current-password" required>
+    <label class="gkeep" for="gkeep"><input type="checkbox" id="gkeep" checked> Auf diesem Gerät angemeldet bleiben</label>
+    <button type="submit" id="gbtn">Öffnen</button>
+    <p class="gerr" id="gerr" role="alert" hidden></p>
+  </form>
+</div>
+<style>
+.gate{position:fixed;inset:0;z-index:2000;background:var(--navy);display:grid;place-items:center;padding:24px max(16px,env(safe-area-inset-right,0px)) 24px max(16px,env(safe-area-inset-left,0px));overflow:auto}
+.gcard{width:100%;max-width:380px;background:var(--surface);color:var(--text);border-radius:16px;padding:28px 24px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 50px -16px rgba(0,0,0,.5)}
+.gmark{width:44px;height:44px;border-radius:12px;background:var(--partner);display:grid;place-items:center;font:700 18px/1 var(--f-display);color:#0a0e13}
+.gcard small{font:500 11px/1.4 var(--f-mono);letter-spacing:1.6px;text-transform:uppercase;color:var(--muted);margin-top:6px}
+.gcard h1{margin:0;font:700 22px/1.2 var(--f-display)}
+.gcard p{margin:0 0 6px;color:var(--muted);font-size:13.5px}
+.gcard label{font-size:12.5px;font-weight:600}
+.gcard input[type=password]{font:inherit;font-size:16px;color:var(--text);background:var(--surface-2);border:1px solid var(--line);border-radius:10px;padding:12px;min-height:46px}
+.gcard input[type=password]:focus-visible{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.gkeep{display:flex;align-items:center;gap:8px;font-weight:500!important;color:var(--muted)}
+.gkeep input{width:18px;height:18px;accent-color:var(--accent)}
+.gcard button{font:600 15px/1 var(--f-body);color:#fff;background:#004177;border:0;border-radius:10px;padding:14px;cursor:pointer;min-height:46px;margin-top:4px}
+.gcard button:disabled{opacity:.6}
+.gerr{color:var(--bad)!important;font-weight:600;margin:0!important}
+.logout{display:inline-flex;align-items:center;font:600 12.5px/1 var(--f-body);color:#fff;background:transparent;border:1px solid rgba(255,255,255,.22);border-radius:20px;padding:8px 14px;cursor:pointer;min-height:34px}
+.logout:hover{background:rgba(255,255,255,.12)}
+</style>
+<script>
+(function(){
+  const ENC = JSON.parse(document.getElementById('enc').textContent);
+  const KEY = 'fu_pw_schadeck';
+  const $ = id => document.getElementById(id);
+  const ub = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  let gespeichert = null;
+  try { gespeichert = localStorage.getItem(KEY); } catch (e) {}
+
+  async function oeffnen(pw){
+    if (!window.crypto || !crypto.subtle) throw new Error('Dieser Browser unterstützt keine Verschlüsselung. Bitte einen aktuellen Browser verwenden.');
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name: 'PBKDF2', salt: ub(ENC.s), iterations: ENC.n, hash: 'SHA-256'}, base, {name: 'AES-GCM', length: 256}, false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({name: 'AES-GCM', iv: ub(ENC.i)}, key, ub(ENC.c));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  function start(D, pw, merken){
+    try { merken ? localStorage.setItem(KEY, pw) : localStorage.removeItem(KEY); } catch (e) {}
+    $('gate').hidden = true;
+    fuStart(D);
+    const out = document.createElement('button');
+    out.type = 'button'; out.className = 'logout'; out.textContent = 'Abmelden';
+    out.addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+    const tr = document.querySelector('.topr'); if (tr) tr.appendChild(out);
+  }
+  $('gform').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pw = $('gpw').value.trim(); if (!pw) return;
+    $('gbtn').disabled = true; $('gbtn').textContent = 'Wird geöffnet …'; $('gerr').hidden = true;
+    try { start(await oeffnen(pw), pw, $('gkeep').checked); }
+    catch (err) {
+      $('gerr').textContent = err && err.name === 'OperationError' ? 'Das Passwort stimmt nicht. Bitte noch einmal versuchen.' : (err.message || 'Die Seite konnte nicht geöffnet werden.');
+      $('gerr').hidden = false; $('gpw').select();
+    } finally { $('gbtn').disabled = false; $('gbtn').textContent = 'Öffnen'; }
+  });
+  if (gespeichert){
+    oeffnen(gespeichert).then(D => start(D, gespeichert, true)).catch(() => { try { localStorage.removeItem(KEY); } catch (e) {} $('gpw').focus(); });
+  } else { $('gpw').focus(); }
+})();
+</script>
+<script>document.documentElement.style.setProperty("--partner", "#d85a30");</script>
+</body>
+</html>
