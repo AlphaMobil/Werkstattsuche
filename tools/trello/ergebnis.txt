@@ -1,4 +1,0 @@
-Benutzer: FEHLER HTTP Error 400: Bad Request
-Board Norderstedt: FEHLER HTTP Error 401: Unauthorized
-Test Board: FEHLER HTTP Error 401: Unauthorized
-FEHLER: HTTP Error 401: Unauthorized
