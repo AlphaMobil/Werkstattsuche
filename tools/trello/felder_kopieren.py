@@ -17,6 +17,21 @@ def api(method, path, body=None):
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read() or b'null')
 
+def pruefen():
+    for name, pfad in [('Token', f'/tokens/{TOKEN}'), ('Benutzer', '/members/me'),
+                       ('Board Norderstedt', f'/boards/{QUELLE}'), ('Test Board', f'/boards/{ZIEL}')]:
+        try:
+            r = api('GET', pfad)
+            if name == 'Token':
+                log.append('Token-Rechte: ' + json.dumps([{'typ': x.get('modelType'), 'lesen': x.get('read'), 'schreiben': x.get('write')} for x in r.get('permissions', [])]))
+            elif name == 'Benutzer':
+                log.append('Token gehört zu: ' + r.get('fullName', '?'))
+            else:
+                log.append(f'{name}: lesbar')
+        except Exception as ex:
+            log.append(f'{name}: FEHLER {ex}')
+
+pruefen()
 try:
     quelle = sorted(api('GET', f'/boards/{QUELLE}/customFields'), key=lambda f: f['pos'])
     vorhanden = {f['name'] for f in api('GET', f'/boards/{ZIEL}/customFields')}
