@@ -4,21 +4,23 @@ und legt zusätzliche Felder an. Bereits vorhandene Felder (gleicher Name) werde
 Schreibt ein Protokoll nach tools/trello/ergebnis.txt (ohne Schlüssel)."""
 import json, os, urllib.request, urllib.parse
 
-KEY, TOKEN = os.environ['TRELLO_KEY'], os.environ['TRELLO_TOKEN']
+KEY, TOKEN = os.environ['TRELLO_KEY'].strip(), os.environ['TRELLO_TOKEN'].strip()
+AUTH = f'OAuth oauth_consumer_key="{KEY}", oauth_token="{TOKEN}"'
 QUELLE = '5ff716d69a7ac4581abee2f6'   # Aufträge Norderstedt
 ZIEL = '6981e822cf4fd3d928e7da65'     # Test Board Automation
 EXTRA = [{'name': 'Telefonnummer', 'type': 'text'}]
 log = []
 
 def api(method, path, body=None):
-    url = 'https://api.trello.com/1' + path + '?' + urllib.parse.urlencode({'key': KEY, 'token': TOKEN})
+    url = 'https://api.trello.com/1' + path
     data = json.dumps(body).encode() if body is not None else None
-    req = urllib.request.Request(url, data=data, method=method, headers={'Content-Type': 'application/json'})
+    req = urllib.request.Request(url, data=data, method=method,
+                                 headers={'Content-Type': 'application/json', 'Accept': 'application/json', 'Authorization': AUTH})
     with urllib.request.urlopen(req, timeout=30) as r:
         return json.loads(r.read() or b'null')
 
 def pruefen():
-    for name, pfad in [('Token', f'/tokens/{TOKEN}'), ('Benutzer', '/members/me'),
+    for name, pfad in [('Benutzer', '/members/me'),
                        ('Board Norderstedt', f'/boards/{QUELLE}'), ('Test Board', f'/boards/{ZIEL}')]:
         try:
             r = api('GET', pfad)
