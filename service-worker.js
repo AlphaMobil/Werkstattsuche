@@ -13,7 +13,7 @@
  * merkt von alldem nichts.
  */
 
-var CACHE_NAME = 'alpha-mobil-shell-v2';
+var CACHE_NAME = 'alpha-mobil-shell-v3';
 var APP_SHELL = [
   './index.html',
   './plz-coords.json',
@@ -52,6 +52,10 @@ self.addEventListener('fetch', function (event) {
   // Partner-Fallübersichten werden stündlich neu veröffentlicht – immer frisch
   // vom Netz laden, nicht aus dem App-Cache.
   if (url.pathname.indexOf('/falluebersicht/') !== -1) return;
+
+  // Das Händler-Cockpit ist eine eigene App mit eigenem Manifest und wird
+  // ebenfalls neu veröffentlicht – nie aus dem Cache der Einsatzleitzentrale bedienen.
+  if (url.pathname.indexOf('/haendler-cockpit/') !== -1) return;
 
   event.respondWith(
     caches.match(req).then(function (cached) {
