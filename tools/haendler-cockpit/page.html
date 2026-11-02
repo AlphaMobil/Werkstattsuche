@@ -1,7 +1,7 @@
 <meta name="dash-one-writer">
 <style>
 #dash-root{--dash-gutter:0}
-.vx{--vx-canvas:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg));--vx-card:var(--color-bg);--vx-soft:color-mix(in srgb,var(--color-fg) 4%,var(--color-bg));--vx-line:color-mix(in srgb,var(--color-fg) 9%,transparent);--vx-ink:var(--color-fg);--vx-mute:var(--color-fg-muted);--vx-or:#F05A28;--vx-or2:#F7854F;--vx-green:#1E9E5A;--vx-red:#E5484D;
+.vx{--vx-canvas:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg));--vx-card:var(--color-bg);--vx-soft:color-mix(in srgb,var(--color-fg) 4%,var(--color-bg));--vx-line:color-mix(in srgb,var(--color-fg) 9%,transparent);--vx-ink:var(--color-fg);--vx-mute:var(--color-fg-muted);--vx-or:#004177;--vx-or2:#1F6FB2;--vx-navy:#00223E;--vx-amber:#C2760F;--vx-gold:#E5A400;--vx-green:#1E9E5A;--vx-red:#E5484D;
   font-family:var(--font-anthropic-sans);color:var(--vx-ink);background:var(--vx-canvas);border-radius:28px;padding:clamp(14px,2.4vw,28px)}
 .vx *{box-sizing:border-box}
 .vx .top{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-bottom:clamp(18px,3vw,30px)}
@@ -79,7 +79,7 @@
 .vx .muted{color:var(--vx-mute)}
 .vx .stat-dot{display:inline-flex;align-items:center;gap:6px;white-space:nowrap}
 .vx .stat-dot::before{content:"";width:7px;height:7px;border-radius:50%;background:currentColor}
-.vx .c-bad{color:var(--vx-red)}.vx .c-warn{color:var(--vx-or)}.vx .c-ok{color:var(--vx-green)}
+.vx .c-bad{color:var(--vx-red)}.vx .c-warn{color:var(--vx-amber)}.vx .c-ok{color:var(--vx-green)}
 .vx a{color:inherit;text-decoration:none;border-bottom:1px solid var(--vx-line)}
 .vx a:hover{color:var(--vx-or)}
 .vx .soon{border:1.5px dashed var(--vx-line);border-radius:22px;padding:20px;color:var(--vx-mute);font-size:13px}
@@ -90,13 +90,14 @@
 .vx .feed{display:grid;gap:10px}
 .vx .rv{background:var(--vx-soft);border-radius:16px;padding:14px 16px}
 .vx .rv .h{display:flex;flex-wrap:wrap;gap:8px;align-items:center;font-size:12px;color:var(--vx-mute)}
-.vx .rv .stars{color:var(--vx-or);letter-spacing:1px;font-size:13px}
+.vx .rv .stars{color:var(--vx-gold);letter-spacing:1px;font-size:13px}
 .vx .rv .p{font-size:13px;font-weight:600;margin:6px 0 4px;color:var(--vx-ink)}
 .vx .rv .t{font-size:13.5px;line-height:1.55;margin:0}
 .vx .rv details{margin-top:10px;font-size:13px}
-.vx .rv summary{cursor:pointer;color:var(--vx-or);font-weight:500}
+.vx .rv summary{cursor:pointer;color:var(--vx-or2);font-weight:500}
 .vx .rv .ans{background:var(--vx-card);border-radius:12px;padding:10px 12px;margin-top:8px;line-height:1.55}
 .vx .newb{background:var(--vx-or);color:#fff;border-radius:999px;padding:1px 8px;font-weight:600;font-size:11px}
+@media (prefers-color-scheme:dark){.vx{--vx-or:#2F7FC8;--vx-or2:#5AA2E0}}
 [data-dash-source-state=empty]{color:transparent}
 [data-dash-source-state=refreshing]{opacity:.5;transition:opacity var(--cds-dur-slow)}
 </style>
@@ -131,7 +132,7 @@
           <div class="hd"><b>Händler</b> | Seiten · Ø Sterne</div>
           <div class="wgrid">
             <div class="w"><div class="n"><i style="background:#0050AA"></i>Lidl</div><div class="v" data-draw="shopnum" data-source="shops" data-field="listings" data-where="shop=Lidl">—</div><div class="s"><span data-draw="shopstar" data-source="shops" data-field="stars" data-where="shop=Lidl">—</span> ★</div></div>
-            <div class="w"><div class="n"><i style="background:#E2001A"></i>Netto</div><div class="v" data-draw="shopnum" data-source="shops" data-field="listings" data-where="shop=Netto">—</div><div class="s"><span data-draw="shopstar" data-source="shops" data-field="stars" data-where="shop=Netto">—</span> ★</div></div>
+            <div class="w"><div class="n"><i style="background:#F2C200"></i>Netto</div><div class="v" data-draw="shopnum" data-source="shops" data-field="listings" data-where="shop=Netto">—</div><div class="s"><span data-draw="shopstar" data-source="shops" data-field="stars" data-where="shop=Netto">—</span> ★</div></div>
             <div class="w"><div class="n"><i style="background:#00843D"></i>hagebau</div><div class="v" data-draw="shopnum" data-source="shops" data-field="listings" data-where="shop=hagebau">—</div><div class="s"><span data-draw="shopstar" data-source="shops" data-field="stars" data-where="shop=hagebau">—</span> ★</div></div>
             <div class="w"><div class="n"><i style="background:#E10915"></i>Kaufland</div><div class="v" data-draw="shopnum" data-source="shops" data-field="listings" data-where="shop=Kaufland">—</div><div class="s"><span data-draw="shopstar" data-source="shops" data-field="stars" data-where="shop=Kaufland">—</span> ★</div></div>
           </div>
@@ -199,7 +200,7 @@
     <p class="sub">Günstigster Preis je Händler – Preisfehler und Zubehör ausgenommen.</p>
     <div class="card" style="margin-bottom:16px">
       <div class="cardhead"><div><h2>Preis je Modell und Händler</h2><p class="note">Meistgelistete Modelle mit mindestens zwei Händlern. Punkt antippen für Details.</p></div>
-        <div class="legend"><span><i style="background:#0050AA"></i>Lidl</span><span><i style="background:#E2001A"></i>Netto</span><span><i style="background:#00843D"></i>hagebau</span><span><i style="background:var(--vx-or)"></i>Kaufland</span></div></div>
+        <div class="legend"><span><i style="background:#0050AA"></i>Lidl</span><span><i style="background:#F2C200"></i>Netto</span><span><i style="background:#00843D"></i>hagebau</span><span><i style="background:#E10915"></i>Kaufland</span></div></div>
       <div class="inner"><div class="chart" data-draw="c_prices" data-source="matrix" style="min-height:420px"></div></div>
     </div>
     <div class="card">
@@ -296,7 +297,7 @@
 
 <script>
 (function(){
-  window.HC = {PRICE_ERR: 10000, LOW: 3.5, SHOPCOL: {Lidl: '#0050AA', Netto: '#E2001A', hagebau: '#00843D', Kaufland: '#F05A28'}};
+  window.HC = {PRICE_ERR: 10000, LOW: 3.5, SHOPCOL: {Lidl: '#0050AA', Netto: '#F2C200', hagebau: '#00843D', Kaufland: '#E10915'}};
 
   dash.loader('products', {description: 'Liest die Produktliste als Tabelle; Preise und Sterne als Zahlen.', fn: (rows) => rows.map(r => ({...r, artnr: String(r.artnr), preis: r.preis == null ? null : Number(r.preis), bewertungen: Number(r.bewertungen || 0), sterne: r.sterne == null ? null : Number(r.sterne)}))});
 
@@ -428,14 +429,14 @@
     const x = d3.scaleLinear([0, d3.max(rows, r => r.reviews) || 1], [0, Math.max(10, x1 - x0)]);
     rows.forEach((r, i) => { const yy = i * (bh + gap); const low = r.stars != null && r.stars < window.HC.LOW;
       svg.append('text').attr('x', 0).attr('y', yy + bh / 2).attr('dy', '0.35em').attr('font-size', 12).attr('fill', 'var(--color-fg)').text(r.modell);
-      svg.append('rect').attr('x', x0).attr('y', yy).attr('width', Math.max(4, x(r.reviews))).attr('height', bh).attr('rx', 9).attr('fill', low ? css('--vx-or') : 'var(--color-fg)')
+      svg.append('rect').attr('x', x0).attr('y', yy).attr('width', Math.max(4, x(r.reviews))).attr('height', bh).attr('rx', 9).attr('fill', low ? css('--vx-red') : 'var(--color-fg)')
         .on('pointermove', (ev) => tipShow(el, ev, r.modell + ' · ' + r.marke, int(r.reviews) + ' Bewertungen · ' + star(r.stars) + ' ★')).on('pointerleave', () => tipHide(el));
-      svg.append('text').attr('x', x0 + x(r.reviews) + 8).attr('y', yy + bh / 2).attr('dy', '0.35em').attr('font-size', 12).attr('font-weight', 600).attr('fill', low ? css('--vx-or') : 'var(--color-fg-muted)').style('font-variant-numeric', 'tabular-nums').text(int(r.reviews) + ' · ' + star(r.stars) + ' ★');
+      svg.append('text').attr('x', x0 + x(r.reviews) + 8).attr('y', yy + bh / 2).attr('dy', '0.35em').attr('font-size', 12).attr('font-weight', 600).attr('fill', low ? css('--vx-red') : 'var(--color-fg-muted)').style('font-variant-numeric', 'tabular-nums').text(int(r.reviews) + ' · ' + star(r.stars) + ' ★');
     });
   });
 
   dash.draw('c_prices', (el) => { const d = dash.data('matrix'); el.replaceChildren(); if (d.status !== 'ok') return;
-    const keys = ['lidl', 'netto', 'hagebau', 'kaufland'], names = ['Lidl', 'Netto', 'hagebau', 'Kaufland'], cols = ['#0050AA', '#E2001A', '#00843D', css('--vx-or')];
+    const keys = ['lidl', 'netto', 'hagebau', 'kaufland'], names = ['Lidl', 'Netto', 'hagebau', 'Kaufland'], cols = ['#0050AA', '#F2C200', '#00843D', '#E10915'];
     const rows = d.data.filter(r => r.shops >= 2).sort((a, b) => b.listings - a.listings).slice(0, 16).sort((a, b) => d3.min(keys, k => a[k]) - d3.min(keys, k => b[k]));
     const W = el.clientWidth || 400, rh = 26, top = 24;
     const svg = d3.select(el).append('svg').attr('width', '100%');

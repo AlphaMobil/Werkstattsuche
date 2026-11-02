@@ -13,15 +13,15 @@ html,body{margin:0;background:color-mix(in srgb,var(--color-fg) 5%,var(--color-b
 .gate{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:24px 16px;background:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg))}
 .gate[hidden]{display:none}
 .gcard{width:100%;max-width:380px;background:var(--color-bg);border-radius:24px;padding:28px 24px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 40px -24px rgba(16,24,40,.25)}
-.gmark{width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#F7854F,#F05A28);display:grid;place-items:center;font:700 18px/1 var(--font-anthropic-sans);color:#fff}
+.gmark{width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#1F6FB2,#004177);display:grid;place-items:center;font:700 18px/1 var(--font-anthropic-sans);color:#fff}
 .gcard small{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--color-fg-muted);margin-top:6px}
 .gcard h1{margin:0;font-size:22px;font-weight:600}
 .gcard p{margin:0 0 6px;color:var(--color-fg-muted);font-size:13.5px}
 .gcard label{font-size:12.5px;font-weight:600}
 .gcard input[type=password]{font:inherit;font-size:16px;color:var(--color-fg);background:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg));border:1px solid color-mix(in srgb,var(--color-fg) 12%,transparent);border-radius:12px;padding:12px;min-height:46px}
 .gkeep{display:flex;align-items:center;gap:8px;font-weight:500!important;color:var(--color-fg-muted)}
-.gkeep input{width:18px;height:18px;accent-color:#F05A28}
-.gcard button{font:600 15px/1 var(--font-anthropic-sans);color:var(--color-bg);background:var(--color-fg);border:0;border-radius:999px;padding:14px;cursor:pointer;min-height:46px;margin-top:4px}
+.gkeep input{width:18px;height:18px;accent-color:#004177}
+.gcard button{font:600 15px/1 var(--font-anthropic-sans);color:#fff;background:#004177;border:0;border-radius:999px;padding:14px;cursor:pointer;min-height:46px;margin-top:4px}
 .gcard button:disabled{opacity:.6}
 .gerr{color:#E5484D!important;font-weight:600;margin:0!important}
 .hc-foot{max-width:1440px;margin:0 auto;padding:0 clamp(8px,2vw,24px) 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--color-fg-muted)}
@@ -65,7 +65,7 @@ html,body{margin:0;background:color-mix(in srgb,var(--color-fg) 5%,var(--color-b
   const runDraw = (name) => { (draws[name] ? [name] : []).forEach(n => document.querySelectorAll('[data-draw="' + n + '"]').forEach(el => { if (!visible(el)) return; try { draws[n](el); } catch (e) { console.error('draw ' + n, e); } })); };
   const runAll = () => { Object.keys(draws).forEach(runDraw); onData.forEach(f => { try { f(); } catch (e) { console.error(e); } }); };
   window.dash = {
-    colors: ['#16181d', '#F05A28', '#2F6FED', '#1E9E5A', '#A855F7', '#E5484D', '#0EA5A4', '#B7791F'],
+    colors: ['#16181d', '#004177', '#2F6FED', '#1E9E5A', '#A855F7', '#E5484D', '#0EA5A4', '#B7791F'],
     data: (id) => { const d = get(id); return d === undefined ? {status: 'missing', data: [], columns: [], meta: []} : {status: 'ok', data: d, columns: Array.isArray(d) && d[0] ? Object.keys(d[0]) : [], meta: []}; },
     loader: (id, o) => { loaders[id] = (rows) => o.fn(rows); },
     calc: (id, o) => { calcs[id] = o; },
