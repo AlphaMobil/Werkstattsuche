@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Händler-Cockpit · Alpha-Mobil</title>
+<style>
+:root{--color-bg:#ffffff;--color-fg:#16181d;--color-fg-muted:#6b7080;--font-anthropic-sans:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;--cds-dur-slow:.45s;--cds-ease-out:cubic-bezier(.2,.8,.2,1);color-scheme:light}
+@media (prefers-color-scheme:dark){:root{--color-bg:#16181d;--color-fg:#eef0f4;--color-fg-muted:#9aa1b0;color-scheme:dark}}
+html,body{margin:0;background:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg));font-family:var(--font-anthropic-sans);color:var(--color-fg)}
+#dash-root{max-width:1440px;margin:0 auto;padding:clamp(8px,2vw,24px)}
+.gate{position:fixed;inset:0;z-index:2000;display:grid;place-items:center;padding:24px 16px;background:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg))}
+.gate[hidden]{display:none}
+.gcard{width:100%;max-width:380px;background:var(--color-bg);border-radius:24px;padding:28px 24px;display:flex;flex-direction:column;gap:10px;box-shadow:0 20px 40px -24px rgba(16,24,40,.25)}
+.gmark{width:44px;height:44px;border-radius:50%;background:linear-gradient(145deg,#F7854F,#F05A28);display:grid;place-items:center;font:700 18px/1 var(--font-anthropic-sans);color:#fff}
+.gcard small{font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:var(--color-fg-muted);margin-top:6px}
+.gcard h1{margin:0;font-size:22px;font-weight:600}
+.gcard p{margin:0 0 6px;color:var(--color-fg-muted);font-size:13.5px}
+.gcard label{font-size:12.5px;font-weight:600}
+.gcard input[type=password]{font:inherit;font-size:16px;color:var(--color-fg);background:color-mix(in srgb,var(--color-fg) 5%,var(--color-bg));border:1px solid color-mix(in srgb,var(--color-fg) 12%,transparent);border-radius:12px;padding:12px;min-height:46px}
+.gkeep{display:flex;align-items:center;gap:8px;font-weight:500!important;color:var(--color-fg-muted)}
+.gkeep input{width:18px;height:18px;accent-color:#F05A28}
+.gcard button{font:600 15px/1 var(--font-anthropic-sans);color:var(--color-bg);background:var(--color-fg);border:0;border-radius:999px;padding:14px;cursor:pointer;min-height:46px;margin-top:4px}
+.gcard button:disabled{opacity:.6}
+.gerr{color:#E5484D!important;font-weight:600;margin:0!important}
+.hc-foot{max-width:1440px;margin:0 auto;padding:0 clamp(8px,2vw,24px) 24px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;font-size:12px;color:var(--color-fg-muted)}
+.hc-foot button{all:unset;cursor:pointer;text-decoration:underline}
+</style>
+</head>
+<body>
+<div class="gate" id="gate">
+  <form class="gcard" id="gform" autocomplete="on">
+    <div class="gmark" aria-hidden="true">A</div>
+    <small>Alpha-Mobil · intern</small>
+    <h1>Händler-Cockpit</h1>
+    <p>Bitte gib das Team-Passwort ein.</p>
+    <input type="text" name="username" value="Händler-Cockpit" autocomplete="username" hidden>
+    <label for="gpw">Passwort</label>
+    <input type="password" id="gpw" autocomplete="current-password" required>
+    <label class="gkeep" for="gkeep"><input type="checkbox" id="gkeep" checked> Auf diesem Gerät angemeldet bleiben</label>
+    <button type="submit" id="gbtn">Öffnen</button>
+    <p class="gerr" id="gerr" role="alert" hidden></p>
+  </form>
+</div>
+<div id="dash-root"></div>
+<div class="hc-foot" id="foot" hidden><span id="stand"></span><button type="button" id="logout">Abmelden</button></div>
+
+<template id="page">__PAGE__</template>
+<script id="enc" type="application/json">__ENC__</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+/* Kleiner Ersatz für die Dashboard-Laufzeit von Claude: liefert dash.data, dash.calc, dash.loader,
+   dash.draw usw. aus den eingebetteten (entschlüsselten) Daten, damit die Seite unverändert läuft. */
+(function(){
+  const raw = {}, loaders = {}, calcs = {}, cache = {}, draws = {}, onData = [];
+  const order = [];
+  const get = (id) => {
+    if (id in cache) return cache[id];
+    if (calcs[id]) { const c = calcs[id]; cache[id] = c.fn(...c.inputs.map(i => get(i))); return cache[id]; }
+    if (id in raw) { cache[id] = loaders[id] ? loaders[id](raw[id]) : raw[id]; return cache[id]; }
+    return undefined;
+  };
+  const visible = (el) => !el.closest('[hidden]');
+  const runDraw = (name) => { (draws[name] ? [name] : []).forEach(n => document.querySelectorAll('[data-draw="' + n + '"]').forEach(el => { if (!visible(el)) return; try { draws[n](el); } catch (e) { console.error('draw ' + n, e); } })); };
+  const runAll = () => { Object.keys(draws).forEach(runDraw); onData.forEach(f => { try { f(); } catch (e) { console.error(e); } }); };
+  window.dash = {
+    colors: ['#16181d', '#F05A28', '#2F6FED', '#1E9E5A', '#A855F7', '#E5484D', '#0EA5A4', '#B7791F'],
+    data: (id) => { const d = get(id); return d === undefined ? {status: 'missing', data: [], columns: [], meta: []} : {status: 'ok', data: d, columns: Array.isArray(d) && d[0] ? Object.keys(d[0]) : [], meta: []}; },
+    loader: (id, o) => { loaders[id] = (rows) => o.fn(rows); },
+    calc: (id, o) => { calcs[id] = o; },
+    draw: (name, fn) => { if (fn) { draws[name] = typeof fn === 'function' ? fn : (el) => { const m = el.__made || (el.__made = fn.mount ? fn.mount(el) : null); fn.update && fn.update(el, m); }; if (window.__hcReady) runDraw(name); } else runDraw(name); },
+    onData: (fn) => { onData.push(fn); if (window.__hcReady) fn(); },
+    refresh: () => location.reload(),
+    setLink: (name) => { try { history.replaceState(null, '', '#' + name); } catch (e) {} },
+    params: () => ({}), setParams: () => {}, resetParams: () => {},
+    __load: (data) => { Object.assign(raw, data); },
+    __start: () => {
+      window.__hcReady = true; runAll();
+      new MutationObserver((ms) => { if (ms.some(m => m.attributeName === 'hidden' && !m.target.hidden)) requestAnimationFrame(runAll); })
+        .observe(document.getElementById('dash-root'), {attributes: true, subtree: true, attributeFilter: ['hidden']});
+      let t; window.addEventListener('resize', () => { clearTimeout(t); t = setTimeout(runAll, 200); });
+    }
+  };
+})();
+
+(function(){
+  const ENC = JSON.parse(document.getElementById('enc').textContent);
+  const KEY = 'hc_pw';
+  const $ = id => document.getElementById(id);
+  const ub = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+  async function oeffnen(pw){
+    if (!window.crypto || !crypto.subtle) throw new Error('Dieser Browser unterstützt keine Verschlüsselung. Bitte einen aktuellen Browser verwenden.');
+    const base = await crypto.subtle.importKey('raw', new TextEncoder().encode(pw), 'PBKDF2', false, ['deriveKey']);
+    const key = await crypto.subtle.deriveKey({name: 'PBKDF2', salt: ub(ENC.s), iterations: ENC.n, hash: 'SHA-256'}, base, {name: 'AES-GCM', length: 256}, false, ['decrypt']);
+    const plain = await crypto.subtle.decrypt({name: 'AES-GCM', iv: ub(ENC.i)}, key, ub(ENC.c));
+    return JSON.parse(new TextDecoder().decode(plain));
+  }
+  function start(D, pw, merken){
+    try { merken ? localStorage.setItem(KEY, pw) : localStorage.removeItem(KEY); } catch (e) {}
+    $('gate').hidden = true;
+    dash.__load({products: D.products, reviews: D.reviews});
+    const root = $('dash-root');
+    const frag = $('page').content.cloneNode(true);
+    const scripts = [...frag.querySelectorAll('script')];
+    scripts.forEach(s => s.remove());
+    root.append(frag);
+    scripts.forEach(s => { const n = document.createElement('script'); n.textContent = s.textContent; document.body.appendChild(n); });
+    dash.__start();
+    $('stand').textContent = 'Datenstand: ' + (D.stand || '–');
+    $('foot').hidden = false;
+  }
+  $('logout').addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch (e) {} location.reload(); });
+  $('gform').addEventListener('submit', async e => {
+    e.preventDefault();
+    const pw = $('gpw').value.trim(); if (!pw) return;
+    $('gbtn').disabled = true; $('gbtn').textContent = 'Wird geöffnet …'; $('gerr').hidden = true;
+    try { start(await oeffnen(pw), pw, $('gkeep').checked); }
+    catch (err) {
+      $('gerr').textContent = err && err.name === 'OperationError' ? 'Das Passwort stimmt nicht. Bitte noch einmal versuchen.' : (err.message || 'Die Seite konnte nicht geöffnet werden.');
+      $('gerr').hidden = false; $('gpw').select();
+    } finally { $('gbtn').disabled = false; $('gbtn').textContent = 'Öffnen'; }
+  });
+  let gespeichert = null; try { gespeichert = localStorage.getItem(KEY); } catch (e) {}
+  if (gespeichert) oeffnen(gespeichert).then(D => start(D, gespeichert, true)).catch(() => { try { localStorage.removeItem(KEY); } catch (e) {} $('gpw').focus(); });
+  else $('gpw').focus();
+})();
+</script>
+</body>
+</html>
