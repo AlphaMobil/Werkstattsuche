@@ -50,7 +50,8 @@
   }
 
   /* ---------- Speicher ---------- */
-  const S = { u: null, tab: 'home', sub: {}, session: null, pedo: null };
+  const S = { u: null, tab: 'home', sub: {}, session: null, pedo: null, cloud: freshCloud() };
+  function freshCloud() { return { status: 'off', user: null, code: null, friends: [], duels: [], err: '', lastPush: 0 }; }
   const users = () => lsGet('fx.users', []);
   const loadUser = id => lsGet('fx.u.' + id, null);
   function save() {
@@ -60,6 +61,7 @@
     const entry = { id: S.u.id, name: S.u.profile.name, color: S.u.profile.color, email: S.u.profile.email };
     if (i >= 0) list[i] = entry; else list.push(entry);
     lsSet('fx.users', list);
+    if (S.cloud.status === 'on') { clearTimeout(save._push); save._push = setTimeout(() => cloudPush().catch(() => { }), 3000); }
   }
 
   /* ---------- Körperwerte ---------- */
@@ -143,8 +145,12 @@
     if (f.kind === 'demo') return demoDigest(f);
     if (f.kind === 'local') { const u = loadUser(f.uid); return u ? digestOf(u) : null; }
     if (f.kind === 'code') return f.digest || null;
+    if (f.kind === 'cloud') return S.cloud.friends.find(x => x.id === f.uid) || null;
     return null;
   }
+  /** Lokale Freunde + Online-Freunde */
+  const allFriends = () => [...(S.u.friends || []), ...S.cloud.friends.map(dg => ({ id: 'cloud-' + dg.id, kind: 'cloud', uid: dg.id }))];
+  const allDuels = () => [...(S.u.duels || []), ...S.cloud.duels];
 
   /* ---------- Wochen-Challenge & Punkte ---------- */
   function challengeFor(mon) {
@@ -204,7 +210,7 @@
     return Math.round(v);
   }
   function duelState(d) {
-    const f = S.u.friends.find(x => x.id === d.friendId);
+    const f = allFriends().find(x => x.id === d.friendId);
     const me = duelMetric(digestOf(S.u), d); const fdg = f ? friendDigest(f) : null; const them = duelMetric(fdg, d);
     const over = d.end < today();
     let result = 'open'; if (over) result = me > them ? 'won' : me < them ? 'lost' : 'draw';
@@ -214,7 +220,7 @@
   /* ---------- Rangliste ---------- */
   function participants() {
     const list = [{ me: true, dg: digestOf(S.u) }];
-    for (const f of S.u.friends) { const dg = friendDigest(f); if (dg) list.push({ f, dg }); }
+    for (const f of allFriends()) { const dg = friendDigest(f); if (dg) list.push({ f, dg }); }
     return list;
   }
   function seasonWeeks() {
@@ -224,7 +230,7 @@
   }
   function duelPointsFor(id, isMe) {
     let p = 0;
-    for (const d of S.u.duels || []) {
+    for (const d of allDuels()) {
       if (d.end >= today()) continue;
       if (!isMe && d.friendId !== id) continue;
       const st = duelState(d);
@@ -247,14 +253,17 @@
   function b64u(bytes) { let s = ''; for (let i = 0; i < bytes.length; i += 0x8000) s += String.fromCharCode.apply(null, bytes.subarray(i, i + 0x8000)); return btoa(s).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, ''); }
   function unb64u(str) { const s = atob(str.replace(/-/g, '+').replace(/_/g, '/')); const b = new Uint8Array(s.length); for (let i = 0; i < s.length; i++) b[i] = s.charCodeAt(i); return b; }
   async function pipe(bytes, stream) { const out = new Response(new Blob([bytes]).stream().pipeThrough(stream)); return new Uint8Array(await out.arrayBuffer()); }
-  async function makeCode() {
+  function compactPayload() {
     const dg = digestOf(S.u); const from = addDays(today(), -62); const days = {};
     for (const [k, d] of Object.entries(dg.days)) {
       if (k < from) continue;
       const c = {}; for (const [f, v] of Object.entries(d)) { if (typeof v === 'object') { if (Object.keys(v).length) c[f] = v; } else if (v) c[f] = Math.round(v); }
       if (Object.keys(c).length) days[k] = c;
     }
-    const payload = { v: 1, id: S.u.id, name: dg.name, color: dg.color, goal: dg.goal, since: dg.since, days, weights: dg.weights.filter(w => w[0] >= from), at: Date.now() };
+    return { v: 1, id: S.u.id, name: dg.name, color: dg.color, goal: dg.goal, since: dg.since, days, weights: dg.weights.filter(w => w[0] >= from), at: Date.now() };
+  }
+  async function makeCode() {
+    const payload = compactPayload();
     const bytes = new TextEncoder().encode(JSON.stringify(payload));
     if (window.CompressionStream) { try { return 'FX2.' + b64u(await pipe(bytes, new CompressionStream('deflate-raw'))); } catch { /* Fallback */ } }
     return 'FX1.' + b64u(bytes);
@@ -432,10 +441,12 @@
     $('#auth').hidden = true; $('#app').hidden = false;
     $('#profileBtn').innerHTML = avatar(u.profile.name, u.profile.color);
     S.session = u.activeSession || null;
+    S.cloud = freshCloud();
     go(S.tab || 'home');
     setTimeout(checkWeekResult, 400);
+    cloudInit();
   }
-  function logout() { stopPedo(); S.u = null; localStorage.removeItem('fx.session'); closeModal(); showAuth('login'); }
+  function logout() { stopPedo(); if (S.u?.cloud && window.FitCloud?.configured()) FitCloud.signOut().catch(() => { }); S.cloud = freshCloud(); S.u = null; localStorage.removeItem('fx.session'); closeModal(); showAuth('login'); }
 
   /** Meldung zur abgelaufenen Wochen-Challenge (einmalig pro Woche) */
   function checkWeekResult() {
@@ -483,7 +494,7 @@
     const lb = leaderboard().sort((a, b) => b.week.pts - a.week.pts);
     const myPos = lb.findIndex(x => x.me) + 1;
     const plan = PLANS[p.goal][(u.planIdx || 0) % PLANS[p.goal].length];
-    const active = (u.duels || []).filter(x => x.end >= t);
+    const active = allDuels().filter(x => x.end >= t);
     const h = new Date().getHours();
     v.innerHTML = `
       <div class="row between"><div><div class="muted small">${h < 11 ? 'Guten Morgen' : h < 18 ? 'Hallo' : 'Guten Abend'}</div><h2>${esc(p.name)} ${GOALS[p.goal].icon}</h2></div>
@@ -996,9 +1007,13 @@
   }
   function bindDuelRows(root) {
     $$('[data-duel]', root).forEach(r => r.onclick = () => {
-      const d = S.u.duels.find(x => x.id === r.dataset.duel); if (!d) return;
-      openModal(`<h2>Duell</h2><div class="list">${duelRow(d)}</div><p class="small muted">${esc(DUEL_TYPES[d.type].desc)}<br>Zeitraum: ${fmtDate(d.start)} – ${fmtDate(d.end)}</p><p class="small muted">Gewinner: <b class="good">+${POINTS.duelWin}</b> Punkte · Verlierer: <b class="bad">${POINTS.duelLoss}</b> Punkte (Gesamtwertung).</p><button class="btn danger block mt" id="delDuel">Duell entfernen</button>`, b => {
-        b.querySelector('#delDuel').onclick = () => { S.u.duels = S.u.duels.filter(x => x.id !== d.id); save(); closeModal(); rerender(); };
+      const d = allDuels().find(x => x.id === r.dataset.duel); if (!d) return;
+      openModal(`<h2>Duell</h2><div class="list">${duelRow(d)}</div><p class="small muted">${esc(DUEL_TYPES[d.type].desc)}${d.cloud ? '<br>🌐 Online-Duell – dein Freund sieht es auch.' : ''}<br>Zeitraum: ${fmtDate(d.start)} – ${fmtDate(d.end)}</p><p class="small muted">Gewinner: <b class="good">+${POINTS.duelWin}</b> Punkte · Verlierer: <b class="bad">${POINTS.duelLoss}</b> Punkte (Gesamtwertung).</p><button class="btn danger block mt" id="delDuel">Duell entfernen</button>`, b => {
+        b.querySelector('#delDuel').onclick = async () => {
+          if (d.cloud) { try { await FitCloud.deleteDuel(d.cloudId); await cloudRefresh(); } catch (e) { return toast(e.message); } }
+          else { S.u.duels = S.u.duels.filter(x => x.id !== d.id); save(); }
+          closeModal(); rerender();
+        };
       });
     });
   }
@@ -1022,14 +1037,21 @@
       <div class="section-title"><h3>Deine Challenge-Bilanz</h3></div>
       <div class="card"><div class="week-hist">${hist.map(w => `<div class="${w.status === 'done' ? 'ok' : w.status === 'failed' ? 'no' : 'op'}" title="${esc(w.ch.title)}">KW${isoWeekNo(w.mon)}<br><b>${w.status === 'done' ? '✓' : w.status === 'failed' ? '✗' : w.ended ? '–' : '…'}</b><br>${w.bonus > 0 ? '+' : ''}${w.bonus || ''}</div>`).join('')}</div></div>
       <div class="section-title"><h3>Monats-Duelle</h3><button class="btn sm primary" id="newDuel">⚔️ Herausfordern</button></div>
-      <div class="card">${S.u.duels.length ? `<div class="list">${[...S.u.duels].sort((a, b) => b.start < a.start ? -1 : 1).map(duelRow).join('')}</div>` : '<div class="empty">Fordere einen Freund heraus: Wer bewegt in 30 Tagen mehr Gewicht oder nimmt mehr ab?</div>'}</div>
-      <div class="section-title"><h3>Freunde (${S.u.friends.length})</h3><button class="btn sm" id="addFriend">＋ Hinzufügen</button></div>
-      <div class="card">${S.u.friends.length ? `<div class="list">${S.u.friends.map(f => { const dg = friendDigest(f); return `<div class="li">${avatar(dg?.name || '?', dg?.color)}<div class="grow"><div class="t">${esc(dg?.name || 'Unbekannt')}</div><div class="muted tiny">${f.kind === 'demo' ? 'Demo-Freund (simuliert)' : f.kind === 'local' ? 'Konto auf diesem Gerät · live' : `Freundes-Code · Stand ${dg ? new Date(dg.at).toLocaleDateString('de-DE') : '–'}`}${dg?.goal ? ' · ' + GOALS[dg.goal].icon + ' ' + GOALS[dg.goal].label : ''}</div></div><button class="icon-btn" data-unf="${f.id}" aria-label="Entfernen">✕</button></div>`; }).join('')}</div>` : '<div class="empty">Noch keine Freunde – füge welche hinzu!</div>'}</div>
-      <div class="card"><h3>Dein Freundes-Code</h3><p class="small muted">Teile deinen Code, damit Freunde deinen aktuellen Stand in ihre Rangliste übernehmen. Schick ihn nach dem Training erneut, um ihn zu aktualisieren.</p><div class="grid2 mt"><button class="btn" id="shareCode">📤 Code teilen</button><button class="btn" id="pasteCode">📥 Code einfügen</button></div></div>`;
+      <div class="card">${allDuels().length ? `<div class="list">${allDuels().sort((a, b) => b.start < a.start ? -1 : 1).map(duelRow).join('')}</div>` : '<div class="empty">Fordere einen Freund heraus: Wer bewegt in 30 Tagen mehr Gewicht oder nimmt mehr ab?</div>'}</div>
+      <div class="section-title"><h3>Freunde (${allFriends().length})</h3><button class="btn sm" id="addFriend">＋ Hinzufügen</button></div>
+      ${cloudCard()}
+      <div class="card">${allFriends().length ? `<div class="list">${allFriends().map(f => { const dg = friendDigest(f); return `<div class="li">${avatar(dg?.name || '?', dg?.color)}<div class="grow"><div class="t">${esc(dg?.name || 'Unbekannt')}</div><div class="muted tiny">${f.kind === 'demo' ? 'Demo-Freund (simuliert)' : f.kind === 'local' ? 'Konto auf diesem Gerät · live' : f.kind === 'cloud' ? `🌐 Online · aktualisiert ${dg ? new Date(dg.at).toLocaleString('de-DE', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' }) : '–'}` : `Freundes-Code · Stand ${dg ? new Date(dg.at).toLocaleDateString('de-DE') : '–'}`}${dg?.goal ? ' · ' + GOALS[dg.goal].icon + ' ' + GOALS[dg.goal].label : ''}</div></div><button class="icon-btn" data-unf="${f.id}" aria-label="Entfernen">✕</button></div>`; }).join('')}</div>` : '<div class="empty">Noch keine Freunde – füge welche hinzu!</div>'}</div>
+      <div class="card"><h3>Offline-Freundes-Code</h3><p class="small muted">Ohne Online-Konto: Teile deinen Code, damit Freunde deinen aktuellen Stand in ihre Rangliste übernehmen. Schick ihn nach dem Training erneut, um ihn zu aktualisieren.</p><div class="grid2 mt"><button class="btn" id="shareCode">📤 Code teilen</button><button class="btn" id="pasteCode">📥 Code einfügen</button></div></div>`;
     $$('#fseg button').forEach(b => b.onclick = () => go('friends', b.dataset.k));
     $('#newDuel').onclick = duelModal; $('#addFriend').onclick = addFriendModal;
     $('#shareCode').onclick = shareCode; $('#pasteCode').onclick = () => addFriendModal('code');
-    $$('[data-unf]', v).forEach(b => b.onclick = () => confirmBox('Freund aus deiner Rangliste entfernen?', 'Entfernen', () => { S.u.friends = S.u.friends.filter(f => f.id !== b.dataset.unf); save(); rerender(); }));
+    $$('[data-unf]', v).forEach(b => b.onclick = () => confirmBox('Freund aus deiner Rangliste entfernen?', 'Entfernen', async () => {
+      const id = b.dataset.unf;
+      if (id.startsWith('cloud-')) { try { await FitCloud.removeFriend(id.slice(6)); await cloudRefresh(); } catch (e) { return toast(e.message); } }
+      else { S.u.friends = S.u.friends.filter(f => f.id !== id); save(); }
+      rerender();
+    }));
+    bindCloudCard(v);
     bindDuelRows(v);
   };
 
@@ -1045,14 +1067,20 @@
     const locals = users().filter(x => x.id !== S.u.id && !S.u.friends.some(f => f.kind === 'local' && f.uid === x.id));
     const demos = DEMO.filter(d => !S.u.friends.some(f => f.id === d.id));
     openModal(`<h2>Freund hinzufügen</h2>
-      <h3 class="mt">Per Freundes-Code</h3><p class="small muted">Dein Freund tippt in FitDuell auf „Code teilen“ und schickt dir den Code.</p>
-      <textarea class="in mt-s" id="fcode" placeholder="FX2.…">${''}</textarea><button class="btn primary block mt-s" id="fadd">Code übernehmen</button>
+      <h3 class="mt">Per Freundes-Code</h3><p class="small muted">${S.cloud.status === 'on' ? 'Online-Code (10 Zeichen) oder Offline-Code (FX2.…) einfügen.' : 'Dein Freund tippt in FitDuell auf „Code teilen“ und schickt dir den Code.'}</p>
+      <textarea class="in mt-s" id="fcode" placeholder="${S.cloud.status === 'on' ? 'z. B. 3FA9C01B7E' : 'FX2.…'}">${''}</textarea><button class="btn primary block mt-s" id="fadd">Code übernehmen</button>
       ${locals.length ? `<h3 class="mt">Konten auf diesem Gerät</h3><div class="list">${locals.map(x => `<div class="li">${avatar(x.name, x.color)}<div class="grow t">${esc(x.name)}</div><button class="btn sm" data-loc="${x.id}">Hinzufügen</button></div>`).join('')}</div>` : ''}
       ${demos.length ? `<h3 class="mt">Demo-Freunde</h3><div class="list">${demos.map(x => `<div class="li">${avatar(x.name, x.color)}<div class="grow t">${esc(x.name)}</div><button class="btn sm" data-demo="${x.id}">Hinzufügen</button></div>`).join('')}</div>` : ''}`, b => {
       if (start === 'code') b.querySelector('#fcode').focus();
       b.querySelector('#fadd').onclick = async () => {
+        const raw = b.querySelector('#fcode').value.trim();
+        if (/^[0-9a-f]{10}$/i.test(raw)) {
+          if (S.cloud.status !== 'on') return toast('Für Online-Codes zuerst „Online verbinden“');
+          try { await FitCloud.addFriend(raw); await cloudRefresh(); closeModal(); toast('Online-Freund hinzugefügt 🎉'); rerender(); } catch (e) { toast(e.message || 'Code nicht gefunden'); }
+          return;
+        }
         try {
-          const p = await readCode(b.querySelector('#fcode').value);
+          const p = await readCode(raw);
           if (p.id === S.u.id) return toast('Das ist dein eigener Code 😄');
           const ex = S.u.friends.find(f => f.id === 'code-' + p.id);
           if (ex) ex.digest = p; else S.u.friends.push({ id: 'code-' + p.id, kind: 'code', digest: p });
@@ -1064,20 +1092,120 @@
     });
   }
   function duelModal() {
-    if (!S.u.friends.length) return toast('Füge zuerst einen Freund hinzu');
+    if (!allFriends().length) return toast('Füge zuerst einen Freund hinzu');
     const lifts = EXERCISES.filter(e => e.type === 'reps' && !e.bw);
     openModal(`<h2>⚔️ Freund herausfordern</h2><p class="small muted">Das Duell läuft 30 Tage. Der Sieger bekommt +${POINTS.duelWin} Punkte in der Gesamtwertung.</p>
-      <label class="f mt"><span>Gegner</span><select class="in" id="df">${S.u.friends.map(f => `<option value="${f.id}">${esc(friendDigest(f)?.name || f.id)}</option>`).join('')}</select></label>
+      <label class="f mt"><span>Gegner</span><select class="in" id="df">${allFriends().map(f => `<option value="${f.id}">${esc(friendDigest(f)?.name || f.id)}${f.kind === 'cloud' ? ' 🌐' : ''}</option>`).join('')}</select></label>
       <label class="f"><span>Disziplin</span><select class="in" id="dt">${Object.entries(DUEL_TYPES).map(([k, t]) => `<option value="${k}">${t.label}</option>`).join('')}</select></label>
       <label class="f" id="dexw" hidden><span>Übung</span><select class="in" id="dex">${lifts.map(e => `<option value="${e.id}">${esc(e.name)}</option>`).join('')}</select></label>
       <p class="small muted" id="ddesc"></p>
       <button class="btn primary block mt" id="dgo">Herausforderung starten</button>`, b => {
       const upd = () => { const t = $('#dt').value; $('#dexw').hidden = t !== 'max'; $('#ddesc').textContent = DUEL_TYPES[t].desc; };
       $('#dt').onchange = upd; upd();
-      $('#dgo').onclick = () => {
+      $('#dgo').onclick = async () => {
         const d = { id: uid(), friendId: $('#df').value, type: $('#dt').value, start: today(), end: addDays(today(), 30) };
         if (d.type === 'max') d.ex = $('#dex').value;
-        S.u.duels.push(d); save(); closeModal(); toast('Duell gestartet – viel Erfolg! ⚔️'); go('friends');
+        if (d.friendId.startsWith('cloud-')) {
+          try { await FitCloud.createDuel(d, d.friendId.slice(6)); await cloudRefresh(); } catch (e) { return toast(e.message); }
+        } else { S.u.duels.push(d); save(); }
+        closeModal(); toast('Duell gestartet – viel Erfolg! ⚔️'); go('friends');
+      };
+    });
+  }
+
+  /* ===================================================================== */
+  /*  ONLINE (Supabase)                                                    */
+  /* ===================================================================== */
+  const cloudOk = () => !!window.FitCloud && FitCloud.configured();
+  function cloudRerender() { if (S.u && ['friends', 'home'].includes(S.tab) && $('#modal').hidden) rerender(); }
+  async function cloudInit() {
+    const u = S.u; if (!u || !cloudOk() || !u.cloud) return;
+    // Zwischenstand für schnelle Anzeige
+    if (u.cloudCache) { S.cloud.friends = u.cloudCache.friends || []; S.cloud.duels = u.cloudCache.duels || []; S.cloud.code = u.cloudCache.code || null; }
+    S.cloud.status = 'connecting';
+    try {
+      const user = await FitCloud.currentUser();
+      if (S.u !== u) return;
+      if (!user || user.id !== u.cloud.uid) { if (user) await FitCloud.signOut(); S.cloud = freshCloud(); S.cloud.status = 'expired'; cloudRerender(); return; }
+      S.cloud.user = user; S.cloud.status = 'on';
+      await cloudPush(); await cloudRefresh();
+      let t; FitCloud.subscribe(() => { clearTimeout(t); t = setTimeout(() => cloudRefresh().then(cloudRerender).catch(() => { }), 800); });
+    } catch (e) { S.cloud.status = 'error'; S.cloud.err = e.message; }
+    cloudRerender();
+  }
+  async function cloudPush() {
+    if (S.cloud.status !== 'on') return;
+    S.cloud.code = await FitCloud.pushDigest(compactPayload()); S.cloud.lastPush = Date.now();
+  }
+  async function cloudRefresh() {
+    if (S.cloud.status !== 'on') return;
+    const [friends, duels] = await Promise.all([FitCloud.friends(), FitCloud.duels()]);
+    S.cloud.friends = friends; S.cloud.duels = duels;
+    S.u.cloudCache = { friends, duels, code: S.cloud.code, at: Date.now() };
+    lsSet('fx.u.' + S.u.id, S.u);
+  }
+  function cloudCard() {
+    const c = S.cloud;
+    if (c.status === 'on') return `<div class="card hl"><div class="row between"><div><b>🟢 Online-Rangliste aktiv</b><div class="muted tiny">${esc(c.user?.email || '')} · Echtzeit-Abgleich</div></div><button class="btn sm ghost" id="cloudOff">Trennen</button></div>
+      <div class="row mt"><div class="grow"><div class="muted small">Dein Online-Code</div><div class="big" style="font-size:26px;letter-spacing:2px">${esc(c.code || '…')}</div></div><button class="btn sm" id="cloudShare">📤 Teilen</button></div>
+      <form class="row mt-s" id="cloudAddF"><input class="in grow" id="cloudCode" placeholder="Code eines Freundes" maxlength="10" autocomplete="off" style="text-transform:uppercase"><button class="btn primary">＋</button></form></div>`;
+    if (c.status === 'connecting') return `<div class="card"><b>🌐 Verbinde mit der Online-Rangliste …</b></div>`;
+    const msg = c.status === 'error' ? `<p class="small bad">Verbindung fehlgeschlagen: ${esc(c.err)}</p>` : c.status === 'expired' ? '<p class="small warn">Sitzung abgelaufen – bitte erneut verbinden.</p>' : '';
+    return `<div class="card"><b>🌐 Online-Rangliste</b><p class="small muted">Mit einem Online-Konto sehen deine Freunde deinen Stand automatisch und in Echtzeit – auf jedem Gerät. Duelle sehen beide Seiten.</p>${msg}
+      <button class="btn ${cloudOk() ? 'primary' : ''} block mt-s" id="cloudOn">${cloudOk() ? 'Online verbinden' : 'Online-Modus einrichten'}</button></div>`;
+  }
+  function bindCloudCard(v) {
+    const on = $('#cloudOn', v); if (on) on.onclick = () => cloudOk() ? cloudLoginModal() : cloudSetupModal();
+    const off = $('#cloudOff', v); if (off) off.onclick = () => confirmBox('Online-Verbindung für dieses Konto trennen? Deine lokalen Daten bleiben erhalten.', 'Trennen', async () => {
+      try { await FitCloud.signOut(); } catch { /* egal */ }
+      S.u.cloud = null; S.u.cloudCache = null; S.cloud = freshCloud(); save(); rerender();
+    });
+    const sh = $('#cloudShare', v); if (sh) sh.onclick = async () => {
+      const text = `Fordere mich in FitDuell heraus! Mein Online-Code: ${S.cloud.code}\n${location.href.split('#')[0]}`;
+      if (navigator.share) { try { await navigator.share({ title: 'FitDuell', text }); } catch { /* abgebrochen */ } }
+      else { try { await navigator.clipboard.writeText(S.cloud.code); toast('Code kopiert ✓'); } catch { toast(S.cloud.code); } }
+    };
+    const f = $('#cloudAddF', v); if (f) f.onsubmit = async e => {
+      e.preventDefault(); const code = $('#cloudCode').value.trim(); if (!code) return;
+      try { await FitCloud.addFriend(code); await cloudRefresh(); toast('Online-Freund hinzugefügt 🎉'); rerender(); } catch (err) { toast(err.message || 'Code nicht gefunden'); }
+    };
+  }
+  function cloudLoginModal() {
+    let mode = 'signup';
+    const draw = () => {
+      $('#modalBody').innerHTML = `<h2>🌐 Online verbinden</h2><p class="small muted">Verknüpft dein Konto „${esc(S.u.profile.name)}“ mit der Online-Rangliste. Hochgeladen werden Name, Ziel und Tageswerte (Trainings, Volumen, Schritte, Gewicht) der letzten ~60 Tage.</p>
+        <div class="seg mt" id="cm"><button data-m="signup" class="${mode === 'signup' ? 'on' : ''}">Neu registrieren</button><button data-m="login" class="${mode === 'login' ? 'on' : ''}">Anmelden</button></div>
+        <form id="cf" class="mt"><label class="f"><span>E-Mail</span><input class="in" type="email" id="ce" required value="${esc(S.u.profile.email || '')}" autocomplete="email"></label>
+        <label class="f"><span>Passwort (mind. 6 Zeichen)</span><input class="in" type="password" id="cp" minlength="6" required autocomplete="${mode === 'signup' ? 'new-password' : 'current-password'}"></label>
+        <button class="btn primary block" id="cgo">${mode === 'signup' ? 'Konto erstellen' : 'Anmelden'}</button></form><p class="small muted mt-s" id="cmsg"></p>`;
+      $$('#cm button').forEach(b => b.onclick = () => { mode = b.dataset.m; draw(); });
+      $('#cf').onsubmit = async e => {
+        e.preventDefault(); const email = $('#ce').value.trim(), pw = $('#cp').value; const btn = $('#cgo'); btn.disabled = true; $('#cmsg').textContent = 'Bitte warten …';
+        try {
+          let user;
+          if (mode === 'signup') {
+            const r = await FitCloud.signUp(email, pw, S.u.profile.name);
+            if (r.needsConfirm) { mode = 'login'; draw(); $('#cmsg').innerHTML = '📧 Fast geschafft: Bestätige den Link in deiner E-Mail und melde dich dann hier an.'; return; }
+            user = r.user;
+          } else user = await FitCloud.signIn(email, pw);
+          S.u.cloud = { uid: user.id, email }; if (!S.u.profile.email) S.u.profile.email = email; save();
+          closeModal(); toast('Online verbunden 🌐'); await cloudInit(); rerender();
+        } catch (err) { $('#cmsg').innerHTML = `<span class="bad">${esc(err.message)}</span>`; btn.disabled = false; }
+      };
+    };
+    openModal('', draw);
+  }
+  function cloudSetupModal() {
+    const cfg = window.FitCloud?.config() || {};
+    openModal(`<h2>Online-Modus einrichten</h2><p class="small muted">Einmalig vom Betreiber der App: kostenloses Projekt bei <b>supabase.com</b> anlegen, <code>supabase/schema.sql</code> im SQL-Editor ausführen und URL + „anon public“-Schlüssel in <code>config.js</code> eintragen. Dann ist der Online-Modus für alle Nutzer aktiv.</p>
+      <p class="small muted">Zum Testen kannst du die Werte auch nur auf diesem Gerät hinterlegen:</p>
+      <label class="f mt"><span>Supabase-URL</span><input class="in" id="su" placeholder="https://xyz.supabase.co" value="${esc(cfg.url || '')}"></label>
+      <label class="f"><span>Anon-Key</span><input class="in" id="sk" placeholder="eyJ…" value="${esc(cfg.key || '')}"></label>
+      <button class="btn primary block" id="ssave">Speichern</button>`, b => {
+      b.querySelector('#ssave').onclick = () => {
+        const url = $('#su').value.trim(), key = $('#sk').value.trim();
+        if (!/^https:\/\/.+/.test(url) || key.length < 20) return toast('Bitte gültige URL und Schlüssel eintragen');
+        FitCloud.saveLocalConfig(url, key); closeModal(); toast('Gespeichert – jetzt verbinden'); cloudLoginModal();
       };
     });
   }
