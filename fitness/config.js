@@ -6,5 +6,5 @@
  */
 window.FITDUELL_CONFIG = {
   supabaseUrl: 'https://cnfdowfzsjhumvipptzf.supabase.co',
-  supabaseAnonKey: ''
+  supabaseAnonKey: 'sb_publishable_EHDKCvA-TQnK9Va6QgE6jg_Iw6bklis'
 };

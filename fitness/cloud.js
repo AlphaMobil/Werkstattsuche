@@ -1,7 +1,7 @@
 /* FitDuell – Online-Anbindung (Supabase): Konto, Freunde, Digests, Duelle, Echtzeit */
 (function () {
   'use strict';
-  const LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js';
+  const LIB = 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/dist/umd/supabase.js';
   let client = null, loading = null, channel = null;
 
   function config() {
