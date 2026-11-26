@@ -133,17 +133,26 @@ textarea.in { min-height: 70px; resize: vertical; }
 .steps li { margin: 5px 0; }
 
 /* Figuren-Farben */
-.fx-ground { stroke: #39414D; stroke-linecap: round; }
-.fx-limb, .fx-body { stroke: var(--accent); stroke-linecap: round; }
-.fx-far .fx-limb { stroke: #6D8122; }
-.fx-torso, .fx-head { fill: var(--accent); }
-.fx-joint { fill: var(--bg); }
-.fx-prop { fill: #7C8696; }
-.fx-prop-l { stroke: #7C8696; stroke-linecap: round; }
-.fx-plate { fill: #3A414D; stroke: #8A94A4; stroke-width: 2; }
-.fx-ball { fill: var(--orange); }
-.fx-club { stroke: #C8CFDA; stroke-linecap: round; }
-.fx-wheel { fill: none; stroke: #7C8696; stroke-width: 3; }
+.fx-bg { fill: #161A20; }
+.fx-spot { fill: rgba(215, 255, 58, .05); }
+.fx-ground { stroke: #2E3540; stroke-linecap: round; }
+.fx-shadow { fill: rgba(0, 0, 0, .5); }
+.fx-outline * { fill: #07090C !important; stroke: #07090C; stroke-width: 3.4; stroke-linejoin: round; }
+.fx-skin { fill: #E8B48A; }
+.fx-skin2 { fill: #D49B70; }
+.fx-hair { fill: #3B2A22; }
+.fx-eye { fill: #17191C; }
+.fx-shirt { fill: var(--accent); }
+.fx-shorts { fill: #2F3B52; }
+.fx-belt { fill: #1E2636; }
+.fx-shoe { fill: #F3F5F8; }
+.fx-far { filter: brightness(.62) saturate(.8); }
+.fx-prop { fill: #8A94A4; stroke: #07090C; stroke-width: 1.5; }
+.fx-prop-l { stroke: #8A94A4; stroke-linecap: round; }
+.fx-plate { fill: #2B313B; stroke: #9AA4B4; stroke-width: 2.5; }
+.fx-ball { fill: var(--orange); stroke: #07090C; stroke-width: 1.5; }
+.fx-club { stroke: #D5DBE4; stroke-linecap: round; }
+.fx-wheel { fill: none; stroke: #8A94A4; stroke-width: 3; }
 
 /* Rangliste */
 .rank { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-bottom: 1px solid var(--line); }

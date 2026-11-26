@@ -71,7 +71,7 @@
     return out;
   }
 
-  const ease = x => 0.5 - 0.5 * Math.cos(Math.PI * x);
+  const ease = x => { const k = Math.max(0, Math.min(1, (x - 0.1) / 0.8)); return 0.5 - 0.5 * Math.cos(Math.PI * k); };
   function lerp(a, b, k) {
     if (Array.isArray(a)) return a.map((v, i) => lerp(v, b[i], k));
     return a + (b - a) * k;
@@ -210,29 +210,116 @@
     return anim._ox;
   }
 
+  /* ---------- Figur: Mannequin mit Kleidung ---------- */
+  const f1 = n => n.toFixed(1);
+  const sub = (a, b) => [a[0] - b[0], a[1] - b[1]];
+  const mul = (v, k) => [v[0] * k, v[1] * k];
+  const len = v => Math.hypot(v[0], v[1]) || 1;
+  const unit = v => mul(v, 1 / len(v));
+  const lerpP = (a, b, k) => [a[0] + (b[0] - a[0]) * k, a[1] + (b[1] - a[1]) * k];
+  const perp = v => [-v[1], v[0]];
+
+  /** verjüngtes Segment (Kapsel) von A (Breite wa) nach B (Breite wb) */
+  function limb(A, B, wa, wb, cls) {
+    const d = unit(sub(B, A)), n = perp(d);
+    const a1 = add(A, mul(n, wa / 2)), a2 = add(A, mul(n, -wa / 2)), b1 = add(B, mul(n, wb / 2)), b2 = add(B, mul(n, -wb / 2));
+    const kb = wb / 2 * 1.33, ka = wa / 2 * 1.33; // runde Kappen (kubische Näherung eines Halbkreises)
+    const c1 = add(b1, mul(d, kb)), c2 = add(b2, mul(d, kb)), c3 = add(a2, mul(d, -ka)), c4 = add(a1, mul(d, -ka));
+    const P = q => `${f1(q[0])} ${f1(q[1])}`;
+    return `<path class="${cls}" d="M${P(a1)} L${P(b1)} C${P(c1)} ${P(c2)} ${P(b2)} L${P(a2)} C${P(c3)} ${P(c4)} ${P(a1)} Z"/>`;
+  }
+  const dot = (c, r, cls) => `<circle class="${cls}" cx="${f1(c[0])}" cy="${f1(c[1])}" r="${r}"/>`;
+
+  function leg(hip, kn, ft, to, sideOut) {
+    // Schuh: Ferse etwas hinter dem Knöchel
+    const fdir = unit(sub(to, ft)); const heel = add(ft, mul(fdir, -4));
+    let s = limb(kn, ft, 10, 7, 'fx-skin') + limb(hip, kn, 15, 11, 'fx-skin');
+    s += limb(hip, lerpP(hip, kn, 0.55), 16.5, 14, 'fx-shorts');
+    s += limb(heel, add(to, mul(fdir, 2)), 8, 6, 'fx-shoe');
+    s += dot(kn, 5, 'fx-skin');
+    void sideOut;
+    return s;
+  }
+  function arm(sh, el, ha) {
+    let s = limb(el, ha, 8, 6, 'fx-skin') + limb(sh, el, 10.5, 8.5, 'fx-skin');
+    s += limb(sh, lerpP(sh, el, 0.42), 12, 11, 'fx-shirt');
+    s += dot(ha, 4.2, 'fx-skin');
+    return s;
+  }
+  function torsoSide(hip, sh) {
+    const u = unit(sub(sh, hip)); let n = perp(u); // n zeigt nach vorn (Blickrichtung)
+    if (n[0] < 0 && Math.abs(u[0]) < 0.2) n = mul(n, -1);
+    const T = (k, off) => add(lerpP(hip, sh, k), mul(n, off));
+    const p = [T(-0.06, -9), T(0.12, -10), T(0.45, -7.5), T(0.8, -9.5), T(1.03, -6.5), T(1.03, 6.5), T(0.72, 11.5), T(0.42, 8.5), T(0.14, 8.5), T(-0.06, 7.5)];
+    const d = `M${f1(p[0][0])} ${f1(p[0][1])} Q${f1(p[1][0])} ${f1(p[1][1])} ${f1(p[2][0])} ${f1(p[2][1])} Q${f1(p[3][0])} ${f1(p[3][1])} ${f1(p[4][0])} ${f1(p[4][1])} L${f1(p[5][0])} ${f1(p[5][1])} Q${f1(p[6][0])} ${f1(p[6][1])} ${f1(p[7][0])} ${f1(p[7][1])} Q${f1(p[8][0])} ${f1(p[8][1])} ${f1(p[9][0])} ${f1(p[9][1])} Z`;
+    const sh1 = T(-0.08, -9.5), sh2 = T(0.3, -8.5), sh3 = T(0.3, 9), sh4 = T(-0.08, 8);
+    const shorts = `M${f1(sh1[0])} ${f1(sh1[1])} L${f1(sh2[0])} ${f1(sh2[1])} L${f1(sh3[0])} ${f1(sh3[1])} L${f1(sh4[0])} ${f1(sh4[1])} Z`;
+    return `<path class="fx-shirt" d="${d}"/><path class="fx-shorts" d="${shorts}"/>` + limb(T(0.3, -8.6), T(0.3, 9.1), 2.2, 2.2, 'fx-belt');
+  }
+  function torsoFront(P) {
+    const { sh1, sh2, hip1, hip2, shC, hipC } = P;
+    const u = unit(sub(shC, hipC)); const n = perp(u);
+    const wa1 = add(lerpP(hipC, shC, 0.42), mul(n, 12)), wa2 = add(lerpP(hipC, shC, 0.42), mul(n, -12));
+    const s1 = add(sh1, mul(u, 2)), s2 = add(sh2, mul(u, 2)), h1 = add(hip1, mul(n, 4)), h2 = add(hip2, mul(n, -4));
+    const d = `M${f1(s1[0])} ${f1(s1[1])} Q${f1(wa1[0] + n[0] * 3)} ${f1(wa1[1] + n[1] * 3)} ${f1(wa1[0])} ${f1(wa1[1])} L${f1(h1[0])} ${f1(h1[1])} L${f1(h2[0])} ${f1(h2[1])} L${f1(wa2[0])} ${f1(wa2[1])} Q${f1(wa2[0] - n[0] * 3)} ${f1(wa2[1] - n[1] * 3)} ${f1(s2[0])} ${f1(s2[1])} Z`;
+    const b1 = add(lerpP(hipC, shC, 0.3), mul(n, 12.5)), b2 = add(lerpP(hipC, shC, 0.3), mul(n, -12.5)), c1 = add(hip1, mul(n, 6)), c2 = add(hip2, mul(n, -6));
+    const shorts = `M${f1(b1[0])} ${f1(b1[1])} L${f1(b2[0])} ${f1(b2[1])} L${f1(c2[0])} ${f1(c2[1] + 4)} L${f1(c1[0])} ${f1(c1[1] + 4)} Z`;
+    return `<path class="fx-shirt" d="${d}"/><path class="fx-shorts" d="${shorts}"/>`;
+  }
+  function head(P, frame, view) {
+    const t = (frame.t ?? 180) + (frame.h || 0);
+    const up = dir(t, 1); let fw = perp(up); // Blickrichtung
+    if (view === 'front') {
+      const c = P.head;
+      return limb(P.shC, c, 8, 8, 'fx-skin') + dot(add(c, mul(up, 1.5)), L.head + 0.8, 'fx-hair') + dot(add(c, mul(up, -1)), L.head - 0.5, 'fx-skin')
+        + dot(add(add(c, mul(fw, 4)), mul(up, -0.5)), 1.4, 'fx-eye') + dot(add(add(c, mul(fw, -4)), mul(up, -0.5)), 1.4, 'fx-eye');
+    }
+    // Seitenansicht: Gesicht zeigt in Richtung des Rumpf-„Vorne“
+    const tu = unit(sub(P.shC, P.hipC)); const tn = perp(tu);
+    if (fw[0] * tn[0] + fw[1] * tn[1] < 0) fw = mul(fw, -1);
+    const c = P.head;
+    let s = limb(P.shC, add(c, mul(up, -4)), 8, 7, 'fx-skin');
+    s += dot(add(add(c, mul(up, 1.2)), mul(fw, -1.6)), L.head + 0.6, 'fx-hair');
+    s += dot(add(c, mul(fw, 1.4)), L.head - 0.6, 'fx-skin');
+    s += dot(add(add(c, mul(fw, 6.2)), mul(up, 1)), 1.5, 'fx-eye');
+    s += dot(add(add(c, mul(fw, -3.5)), mul(up, -0.5)), 2.4, 'fx-skin2');
+    return s;
+  }
+
+  function figure(P, frame, anim) {
+    const view = anim.view || 'side';
+    const props = [anim.prop, anim.extraProp].filter(Boolean);
+    const far = `<g class="${view === 'front' ? 'fx-back' : 'fx-far'}">${leg(P.hip2, P.kn2, P.ft2, P.to2)}${arm(P.sh2, P.el2, P.ha2)}</g>`;
+    const body = (view === 'front' ? torsoFront(P) : torsoSide(P.hipC, P.shC)) + head(P, frame, view);
+    const nearLeg = leg(P.hip1, P.kn1, P.ft1, P.to1);
+    const nearArm = arm(P.sh1, P.el1, P.ha1);
+    // Konturdurchgang (dunkle Silhouette) + Farbdurchgang
+    const all = far + body + nearLeg + nearArm;
+    let s = `<g class="fx-outline">${all}</g>`;
+    s += far + body + nearLeg;
+    for (const pr of props) s += drawProps(P, frame, anim, 'front', pr);
+    s += nearArm;
+    return s;
+  }
+
   function render(frame, anim) {
     const view = anim.view || 'side';
     const P = place(solve(frame, view), frame, anim);
-    let s = `<line x1="8" y1="${GROUND}" x2="${W - 8}" y2="${GROUND}" class="fx-ground" stroke-width="3"/>`;
-    s += `<g transform="translate(${autoOffset(anim)} 0)">`;
+    const ox = autoOffset(anim);
+    // Bodenschatten: unter Hüfte/Füßen, kleiner je höher die Figur abhebt
+    const xs = ['ft1', 'ft2', 'hipC', 'shC', 'ha1'].map(k => P[k][0]);
+    const lowY = Math.max(P.ft1[1], P.ft2[1], P.hipC[1], P.ha1[1]);
+    const gap = clampN(GROUND - lowY, 0, 60);
+    const sx = (Math.min(...xs) + Math.max(...xs)) / 2 + ox, sw = Math.max(26, (Math.max(...xs) - Math.min(...xs)) / 2 + 14) * (1 - gap / 140);
+    let s = `<rect class="fx-bg" x="0" y="0" width="${W}" height="${H}"/><ellipse class="fx-spot" cx="${CX}" cy="${GROUND}" rx="${W * 0.46}" ry="16"/>`;
+    s += `<line x1="10" y1="${GROUND}" x2="${W - 10}" y2="${GROUND}" class="fx-ground" stroke-width="1.5"/>`;
+    s += `<ellipse class="fx-shadow" cx="${f1(sx)}" cy="${GROUND + 1.5}" rx="${f1(sw)}" ry="${f1(4.5 * (1 - gap / 120))}"/>`;
+    s += `<g transform="translate(${ox} 0)">`;
     for (const pr of [anim.prop, anim.extraProp]) if (pr) s += drawProps(P, frame, anim, 'back', pr);
-    // ferne Gliedmaßen
-    s += `<g class="fx-far">${seg(P.hip2, P.kn2, 8, 'fx-limb')}${seg(P.kn2, P.ft2, 7, 'fx-limb')}${seg(P.ft2, P.to2, 5, 'fx-limb')}`;
-    s += `${seg(P.sh2, P.el2, 7, 'fx-limb')}${seg(P.el2, P.ha2, 6, 'fx-limb')}</g>`;
-    // Rumpf + Kopf
-    if (view === 'front') {
-      s += `<path d="M${P.sh1[0]} ${P.sh1[1]} L${P.sh2[0]} ${P.sh2[1]} L${P.hip2[0]} ${P.hip2[1]} L${P.hip1[0]} ${P.hip1[1]} Z" class="fx-torso"/>`;
-    } else {
-      s += seg(P.hipC, P.shC, 13, 'fx-body');
-    }
-    s += circ(P.head, L.head, 'fx-head');
-    // nahe Gliedmaßen
-    s += `${seg(P.hip1, P.kn1, 9, 'fx-limb fx-near')}${seg(P.kn1, P.ft1, 8, 'fx-limb fx-near')}${seg(P.ft1, P.to1, 6, 'fx-limb fx-near')}`;
-    for (const pr of [anim.prop, anim.extraProp]) if (pr) s += drawProps(P, frame, anim, 'front', pr);
-    s += `${seg(P.sh1, P.el1, 8, 'fx-limb fx-near')}${seg(P.el1, P.ha1, 7, 'fx-limb fx-near')}`;
-    s += circ(P.kn1, 3, 'fx-joint') + circ(P.el1, 3, 'fx-joint');
+    s += figure(P, frame, anim);
     return s + '</g>';
   }
+  const clampN = (v, a, b) => Math.max(a, Math.min(b, v));
 
   function frameAt(anim, time) {
     const frames = anim.frames.map(f => normalize(f, anim.view));
