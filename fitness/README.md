@@ -7,8 +7,8 @@ Installierbare Web-App (PWA). Läuft komplett im Browser, ohne Build-Schritt und
 | Bereich | Inhalt |
 |---|---|
 | **Registrierung** | Konto anlegen (Name, E-Mail, Passwort, Profilfarbe), Körperdaten (Geschlecht, Geburtsdatum, Größe, Gewicht, Zielgewicht, Körperfett, Ruhepuls), Alltagsaktivität, Erfahrung, Trainingstage, Schrittziel, Verletzungen. Daraus berechnet: BMI, Grund- und Gesamtumsatz, Kalorienziel, Makros und Wasserbedarf. |
-| **Ziele** | Abnehmen · Muskelaufbau · Ausdauer · Golf-spezifisch · HYROX-spezifisch. Jedes Ziel hat eigene Trainingspläne und eigene Kalorien- und Makroziele. |
-| **Übungen** | 76 Übungen mit Suche und Filtern nach Kategorie und Ziel, Favoriten (★) und Anleitung. Jede Übung wird von einer animierten Strichfigur vorgemacht (Tempo einstellbar). |
+| **Ziele** | Abnehmen · Muskelaufbau · Ausdauer · Golf-spezifisch · HYROX-spezifisch · Pilates. Jedes Ziel hat eigene Trainingspläne und eigene Kalorien- und Makroziele. |
+| **Übungen** | 88 Übungen mit Suche und Filtern nach Kategorie und Ziel, Favoriten (★) und Anleitung. Jede Übung wird von einer animierten Strichfigur vorgemacht (Tempo einstellbar). |
 | **Training** | Geführter Live-Modus mit Sätzen, Gewicht, Satz-Timer und Pause-Timer. Einheiten lassen sich auch nachtragen. |
 | **Tracker** | Schritte (manuell oder Live-Schrittzähler über den Bewegungssensor des Handys), Gewichtsverlauf, Wasser, Trainingsvolumen und Verlauf. |
 | **Wochen-Challenge** | Jede Woche eine neue Challenge, für alle Freunde dieselbe. Geschafft: **+100 Punkte**, verpasst: **−75 Punkte** in der Wertung. Die erste Woche ist straffrei. |
