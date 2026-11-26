@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0E1013">
+  <meta name="description" content="FitDuell – Fitness-App mit Übungen, Tracker, Ernährungs-Scanner und Wettkampf gegen deine Freunde.">
+  <title>FitDuell</title>
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="auth" class="auth" hidden></div>
+
+  <div id="app" hidden>
+    <header class="topbar">
+      <div class="brand"><span class="logo">⚡</span> Fit<b>Duell</b></div>
+      <button class="avatar-btn" id="profileBtn" aria-label="Profil öffnen"></button>
+    </header>
+    <main id="view" class="view"></main>
+    <nav class="tabbar" id="tabbar">
+      <button data-tab="home"><span class="ti">🏠</span><span>Start</span></button>
+      <button data-tab="training"><span class="ti">🏋️</span><span>Training</span></button>
+      <button data-tab="tracker"><span class="ti">📈</span><span>Tracker</span></button>
+      <button data-tab="food"><span class="ti">🥗</span><span>Ernährung</span></button>
+      <button data-tab="friends"><span class="ti">🏆</span><span>Freunde</span></button>
+    </nav>
+  </div>
+
+  <div id="modal" class="modal" hidden>
+    <div class="sheet" role="dialog" aria-modal="true">
+      <button class="sheet-close" id="modalClose" aria-label="Schließen">✕</button>
+      <div id="modalBody"></div>
+    </div>
+  </div>
+  <div id="toast" class="toast" hidden></div>
+
+  <script src="config.js"></script>
+  <script src="cloud.js"></script>
+  <script src="anim.js"></script>
+  <script src="data.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
