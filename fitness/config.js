@@ -5,6 +5,6 @@
  * Leer lassen = App läuft rein lokal (Freundes-Codes statt Online-Rangliste).
  */
 window.FITDUELL_CONFIG = {
-  supabaseUrl: '',
+  supabaseUrl: 'https://cnfdowfzsjhumvipptzf.supabase.co',
   supabaseAnonKey: ''
 };
