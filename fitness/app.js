@@ -337,7 +337,7 @@
   function ring(val, max, label, sub, color = 'var(--accent)', size = 120) {
     const r = 50, c = 2 * Math.PI * r, k = clamp(max ? val / max : 0, 0, 1);
     const col = max && val > max * 1.05 ? 'var(--orange)' : color;
-    return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 120 120" width="${size}" height="${size}"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - k)}"/></svg><div class="rv"><b>${label}</b><span>${sub}</span></div></div>`;
+    return `<div class="ring" style="width:${size}px;height:${size}px"><svg viewBox="0 0 120 120" width="${size}" height="${size}"><circle cx="60" cy="60" r="${r}" fill="none" stroke="var(--line)" stroke-width="11"/><circle cx="60" cy="60" r="${r}" fill="none" stroke="${col}" stroke-width="11" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${c * (1 - k)}"/></svg><div class="rv"><b style="font-size:${Math.round(size * 0.18)}px">${label}</b><span>${sub}</span></div></div>`;
   }
   const bar = (v, max, cls = '') => `<div class="bar ${cls}"><i style="width:${clamp(max ? v / max * 100 : 0, 0, 100)}%"></i></div>`;
 
@@ -502,10 +502,10 @@
       ${S.session ? `<div class="card hl mt"><div class="row between"><div><b>Training läuft</b><div class="muted small">${esc(S.session.title)}</div></div><button class="btn primary sm" id="resume">Fortsetzen</button></div></div>` : ''}
       <div class="mt">${challengeCard(ws)}</div>
       <div class="card"><div class="row between"><h3>Heute</h3><span class="muted small">${fmtDate(t)}</span></div>
-        <div class="row mt" style="justify-content:space-around;flex-wrap:wrap;gap:14px">
-          ${ring(eaten, c.kcal, nf(eaten), `von ${nf(c.kcal)} kcal`, 'var(--accent)', 112)}
-          ${ring(d.steps, p.stepGoal || 10000, nf(d.steps), 'Schritte', 'var(--accent2)', 112)}
-          ${ring(d.kcal, 400, nf(d.kcal), 'kcal verbrannt', 'var(--orange)', 112)}
+        <div class="rings mt">
+          <div class="ring-cell">${ring(eaten, c.kcal, nf(eaten), 'kcal', 'var(--accent)', 96)}<div class="ring-cap">Gegessen<span>Ziel ${nf(c.kcal)}</span></div></div>
+          <div class="ring-cell">${ring(d.steps, p.stepGoal || 10000, nf(d.steps), 'Schritte', 'var(--accent2)', 96)}<div class="ring-cap">Bewegung<span>Ziel ${nf(p.stepGoal || 10000)}</span></div></div>
+          <div class="ring-cell">${ring(d.kcal, 400, nf(d.kcal), 'kcal', 'var(--orange)', 96)}<div class="ring-cap">Verbrannt<span>im Training</span></div></div>
         </div></div>
       <div class="card"><div class="row between"><div><div class="muted small">Nächstes Training</div><h3>${esc(plan.name)}</h3><div class="muted small">${plan.items.length} Übungen · ${plan.items.map(i => EX[i[0]].name).slice(0, 3).join(', ')} …</div></div>
         <button class="btn primary" id="startPlan">▶ Start</button></div></div>
