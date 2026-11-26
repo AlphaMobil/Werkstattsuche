@@ -90,6 +90,12 @@ revoke all on function public.remove_friend(uuid) from public, anon;
 grant execute on function public.add_friend(text) to authenticated;
 grant execute on function public.remove_friend(uuid) to authenticated;
 
+-- Zugriffsrechte für angemeldete Nutzer (neuere Supabase-Projekte vergeben diese nicht automatisch)
+grant usage on schema public to authenticated;
+grant select, insert, update, delete on public.digests to authenticated;
+grant select on public.friendships to authenticated;
+grant select, insert, delete on public.duels to authenticated;
+
 -- Echtzeit-Updates für Rangliste und Duelle
 do $$ begin
   alter publication supabase_realtime add table public.digests;
