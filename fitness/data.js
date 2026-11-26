@@ -7,7 +7,8 @@
     muscle: { label: 'Muskelaufbau', icon: '💪', kcal: 300, protein: 2.0, fat: 1.0, desc: 'Progressives Krafttraining im Push/Pull/Beine-Split mit leichtem Überschuss.' },
     endurance: { label: 'Ausdauer', icon: '🫀', kcal: 0, protein: 1.6, fat: 1.0, desc: 'Laufen, Rudern, Radfahren und Intervalle für Herz und Lunge.' },
     golf: { label: 'Golf-spezifisch', icon: '⛳', kcal: 0, protein: 1.6, fat: 1.0, desc: 'Rotation, Hüftkraft, Balance und Mobilität für einen kraftvollen Schwung.' },
-    hyrox: { label: 'HYROX-spezifisch', icon: '🏁', kcal: 200, protein: 1.8, fat: 1.0, desc: 'Laufen plus die acht HYROX-Stationen: Ski, Sled, Burpees, Rudern, Carry, Lunges, Wall Balls.' }
+    hyrox: { label: 'HYROX-spezifisch', icon: '🏁', kcal: 200, protein: 1.8, fat: 1.0, desc: 'Laufen plus die acht HYROX-Stationen: Ski, Sled, Burpees, Rudern, Carry, Lunges, Wall Balls.' },
+    pilates: { label: 'Pilates', icon: '🧘', kcal: 0, protein: 1.6, fat: 1.0, desc: 'Kontrollierte Matten-Übungen für starken Rumpf, gute Haltung und Beweglichkeit.' }
   };
 
   const ACTIVITY = [
@@ -19,7 +20,7 @@
   ];
   const LEVELS = { beginner: 'Einsteiger', intermediate: 'Fortgeschritten', advanced: 'Profi' };
 
-  const CATS = ['Kraft', 'Core', 'Cardio', 'HYROX', 'Golf', 'Mobilität'];
+  const CATS = ['Kraft', 'Core', 'Cardio', 'HYROX', 'Golf', 'Pilates', 'Mobilität'];
 
   // Häufig verwendete Posen
   const STAND = { t: 180, a1: [6, 10], a2: [-4, 4], l1: [0, 0] };
@@ -363,6 +364,62 @@
       anim: { dur: 0.8, fixX: 'hand', frames: [PLANK_TOP, { t: 115, a1: [0, 0], a2: [3, 0], l1: [-70, -70], l2: [-58, -58], lift: 3 }] } }
   );
 
+  // ---- Pilates ----
+  const SUP = { t: 90, a1: [-88, -90], l1: [-90, -90] }; // Rückenlage, Kopf rechts
+  EXERCISES.push(
+    { id: 'hundred', name: 'The Hundred', cat: 'Pilates', goals: ['pilates', 'golf'], muscles: 'Tiefe Bauchmuskulatur, Atmung', equip: 'Matte', level: 2, type: 'time', met: 3.5, bw: 0,
+      steps: ['Rückenlage, Beine im 45°-Winkel gestreckt (Einsteiger: Knie gebeugt).', 'Kopf und Schultern abheben, Blick zum Bauch.', 'Gestreckte Arme knapp über dem Boden kurz und kräftig auf und ab pumpen.', '5 Pumpbewegungen einatmen, 5 ausatmen – 10 Runden = 100.'],
+      tips: 'Unterer Rücken bleibt fest auf der Matte.',
+      anim: { dur: 0.5, fixX: 'hip', headGround: true, frames: [{ t: 108, h: -10, a1: [-78, -78], l1: [-135, -135] }, { t: 108, h: -10, a1: [-96, -96], l1: [-135, -135] }] } },
+    { id: 'rollup', name: 'Roll Up', cat: 'Pilates', goals: ['pilates', 'golf'], muscles: 'Bauch, Wirbelsäulen-Beweglichkeit', equip: 'Matte', level: 2, type: 'reps', met: 3.5, bw: 0,
+      steps: ['Rückenlage, Beine gestreckt, Arme über dem Kopf.', 'Arme nach vorn bringen, Kinn zur Brust.', 'Wirbel für Wirbel aufrollen und über die Beine nach vorn strecken.', 'Langsam Wirbel für Wirbel wieder abrollen.'],
+      tips: 'Kein Schwung – die Kraft kommt aus dem Bauch.',
+      anim: { dur: 4, fixX: 'hip', headGround: true, frames: [{ t: 270, h: 0, a1: [268, 268], l1: [90, 90] }, { t: 180, h: 20, a1: [95, 95], l1: [90, 90] }, { t: 125, h: 30, a1: [100, 95], l1: [90, 90] }, { t: 180, h: 20, a1: [95, 95], l1: [90, 90] }] } },
+    { id: 'singleleg', name: 'Single Leg Stretch', cat: 'Pilates', goals: ['pilates', 'lose'], muscles: 'Bauch, Hüftbeuger, Koordination', equip: 'Matte', level: 2, type: 'reps', met: 3.8, bw: 0,
+      steps: ['Rückenlage, Kopf und Schultern abheben.', 'Ein Knie zur Brust ziehen, Hände am Schienbein.', 'Anderes Bein lang und flach ausstrecken.', 'Beine fließend wechseln.'],
+      tips: 'Oberkörper bleibt ruhig, nur die Beine wechseln.',
+      anim: { dur: 1.4, fixX: 'hip', headGround: true, frames: [{ t: 110, h: -10, a1: [-150, -110], l1: [155, -100], l2: [-112, -112] }, { t: 110, h: -10, a1: [-150, -110], l1: [-112, -112], l2: [155, -100] }] } },
+    { id: 'doubleleg', name: 'Double Leg Stretch', cat: 'Pilates', goals: ['pilates', 'lose'], muscles: 'Bauch, Koordination', equip: 'Matte', level: 2, type: 'reps', met: 4, bw: 0,
+      steps: ['Rückenlage, Knie zur Brust, Hände an den Schienbeinen, Kopf abgehoben.', 'Einatmen: Arme über den Kopf und Beine schräg nach vorn strecken.', 'Ausatmen: Arme kreisen zurück, Knie wieder zur Brust.', 'Rumpf bleibt die ganze Zeit stabil.'],
+      tips: 'Je tiefer die Beine, desto schwerer.',
+      anim: { dur: 2.6, fixX: 'hip', headGround: true, frames: [{ t: 112, h: -10, a1: [-150, -110], l1: [155, -100], l2: [153, -98] }, { t: 108, h: -10, a1: [95, 92], l1: [-130, -130], l2: [-128, -128] }] } },
+    { id: 'scissors', name: 'Scissors (Beinschere)', cat: 'Pilates', goals: ['pilates', 'lose'], muscles: 'Bauch, Beinbeuger-Flexibilität', equip: 'Matte', level: 2, type: 'reps', met: 3.8, bw: 0,
+      steps: ['Rückenlage, Kopf und Schultern abheben.', 'Ein Bein gestreckt zur Decke, Hände am Bein.', 'Anderes Bein gestreckt knapp über dem Boden.', 'Beine scherenartig wechseln, zweimal kurz ziehen.'],
+      tips: 'Becken bleibt ruhig und schwer.',
+      anim: { dur: 1.6, fixX: 'hip', headGround: true, frames: [{ t: 110, h: -10, a1: [-160, -175], l1: [-178, -178], l2: [-110, -110] }, { t: 110, h: -10, a1: [-160, -175], l1: [-110, -110], l2: [-178, -178] }] } },
+    { id: 'spinestretch', name: 'Spine Stretch Forward', cat: 'Pilates', goals: ['pilates', 'golf', 'endurance'], muscles: 'Rücken, Beinbeuger', equip: 'Matte', level: 1, type: 'reps', met: 2.5, bw: 0,
+      steps: ['Aufrecht sitzen, Beine gestreckt und etwas mehr als hüftbreit.', 'Arme auf Schulterhöhe nach vorn strecken.', 'Ausatmen: Wirbel für Wirbel nach vorn rund machen.', 'Einatmen: von unten nach oben wieder aufrichten.'],
+      tips: 'Stell dir vor, du rollst über einen großen Ball.',
+      anim: { dur: 3.6, fixX: 'hip', frames: [{ t: 180, a1: [90, 90], l1: [90, 90] }, { t: 125, h: -35, a1: [100, 100], l1: [90, 90] }] } },
+    { id: 'swimming', name: 'Swimming', cat: 'Pilates', goals: ['pilates', 'golf'], muscles: 'Rückenstrecker, Gesäß, Schultern', equip: 'Matte', level: 2, type: 'time', met: 3.5, bw: 0,
+      steps: ['Bauchlage, Arme lang nach vorn, Beine lang nach hinten.', 'Arme, Beine und Kopf leicht abheben.', 'Arme und Beine diagonal im schnellen Wechsel paddeln.', 'Bauch bleibt angespannt.'],
+      tips: 'Nacken lang, Blick zur Matte.',
+      anim: { dur: 0.8, fixX: 'hip', frames: [{ t: 97, a1: [110, 110], a2: [92, 92], l1: [-100, -100], l2: [-86, -86] }, { t: 97, a1: [92, 92], a2: [110, 110], l1: [-86, -86], l2: [-100, -100] }] } },
+    { id: 'teaser', name: 'Teaser', cat: 'Pilates', goals: ['pilates'], muscles: 'Gesamter Bauch, Hüftbeuger, Balance', equip: 'Matte', level: 3, type: 'reps', met: 4, bw: 0,
+      steps: ['Rückenlage, Arme über dem Kopf, Beine gestreckt.', 'Gleichzeitig Oberkörper und Beine anheben.', 'In der V-Position balancieren, Arme parallel zu den Beinen.', 'Kontrolliert abrollen.'],
+      tips: 'Die Königsübung – Einsteiger beugen die Knie.',
+      anim: { dur: 3.4, fixX: 'hip', headGround: true, frames: [{ t: 270, a1: [268, 268], l1: [92, 92] }, { t: 215, h: 10, a1: [128, 128], l1: [140, 140] }] } },
+    { id: 'swan', name: 'Swan (Schwan)', cat: 'Pilates', goals: ['pilates', 'golf', 'endurance'], muscles: 'Rückenstrecker, Brustöffnung', equip: 'Matte', level: 1, type: 'reps', met: 2.8, bw: 0,
+      steps: ['Bauchlage, Hände neben den Schultern.', 'Beine lang, Gesäß leicht angespannt.', 'Ausatmen: Oberkörper langsam aufrichten, Brust öffnen.', 'Kontrolliert wieder ablegen.'],
+      tips: 'Schultern weg von den Ohren.',
+      anim: { dur: 3, fixX: 'hip', frames: [{ t: 92, a1: [-60, 40], l1: [-90, -90] }, { t: 128, h: 15, a1: [-12, 10], l1: [-90, -90] }] } },
+    { id: 'shoulderbridge', name: 'Shoulder Bridge', cat: 'Pilates', goals: ['pilates', 'golf'], muscles: 'Gesäß, Beinbeuger, Rumpfstabilität', equip: 'Matte', level: 2, type: 'reps', met: 3.5, bw: 0,
+      steps: ['Rückenlage, Füße hüftbreit aufgestellt.', 'Becken Wirbel für Wirbel in die Brücke anheben.', 'Ein Bein zur Decke strecken, Becken bleibt waagerecht.', 'Bein absenken und tippen, nach allen Wdh. Seite wechseln.'],
+      tips: 'Becken darf nicht zur Seite kippen.',
+      anim: { dur: 2.6, headGround: true, frames: [{ t: 70, h: 20, a1: [-85, -88], l1: [-110, 10], l2: [-108, 8] }, { t: 70, h: 20, a1: [-85, -88], l1: [-178, -178], l2: [-110, 10] }] } },
+    { id: 'legpull', name: 'Leg Pull Front', cat: 'Pilates', goals: ['pilates', 'muscle'], muscles: 'Schultern, Rumpf, Gesäß', equip: 'Matte', level: 2, type: 'reps', met: 4, bw: 0,
+      steps: ['Hohe Plank-Position, Körper in einer Linie.', 'Ein gestrecktes Bein anheben.', 'Fuß strecken und beugen, dann absetzen.', 'Seiten im Wechsel.'],
+      tips: 'Hüfte bleibt auf einer Höhe.',
+      anim: { dur: 2, fixX: 'hand', frames: [{ t: 115, a1: [0, 0], a2: [3, 0], l1: [-65, -65], l2: [-66, -66] }, { t: 115, a1: [0, 0], a2: [3, 0], l1: [-92, -92], l2: [-66, -66] }] } },
+    { id: 'sideleg', name: 'Seitliches Beinheben im Stand', cat: 'Pilates', goals: ['pilates', 'golf'], muscles: 'Äußere Hüfte, Balance', equip: 'Ohne', level: 1, type: 'reps', met: 2.8, bw: 0,
+      steps: ['Aufrecht stehen, Hände an der Hüfte.', 'Gewicht auf ein Bein verlagern.', 'Anderes Bein gestreckt seitlich anheben.', 'Langsam absenken, Seite nach allen Wdh. wechseln.'],
+      tips: 'Oberkörper bleibt senkrecht, nicht zur Seite kippen.',
+      anim: { view: 'front', dur: 2.2, fixX: 'center', frames: [{ a1: [30, -40], a2: [30, -40], l1: [3, 0], l2: [3, 0] }, { t: 186, a1: [30, -40], a2: [30, -40], l1: [42, 42], l2: [0, 0] }] } }
+  );
+  // Passende vorhandene Übungen auch dem Pilates-Ziel zuordnen
+  for (const id of ['plank', 'bridge', 'birddog', 'deadbug', 'catcow', 'childpose', 'hamstretch', 'legraise', 'flutter', 'superman', 'kickback', 'sidebend', 'thoracic', 'bicycle'])
+    EXERCISES.find(e => e.id === id).goals.push('pilates');
+
   // Bankdrücken: Langhantel zusätzlich zur Bank zeichnen
   EXERCISES.find(e => e.id === 'bench').anim.extraProp = 'barbell';
 
@@ -391,6 +448,11 @@
       { name: 'HYROX-Simulation', items: [['run', 4, 300], ['skierg', 1, 270], ['sledpush', 4, 30], ['sledpull', 4, 30], ['broadjump', 2, 10], ['rowerg', 1, 270], ['farmers', 4, 45], ['sandbag', 2, 20], ['wallball', 4, 25]] },
       { name: 'Kraftausdauer', items: [['wallball', 5, 20], ['sandbag', 4, 16], ['thruster', 4, 12], ['kbswing', 4, 20], ['burpee', 4, 10]] },
       { name: 'Lauf + Erg', items: [['run', 6, 240], ['rowerg', 3, 180], ['skierg', 3, 180]] }
+    ],
+    pilates: [
+      { name: 'Pilates Basics', items: [['hundred', 1, 60], ['rollup', 2, 6], ['singleleg', 2, 10], ['spinestretch', 2, 6], ['swan', 2, 6], ['childpose', 1, 45]] },
+      { name: 'Core & Kontrolle', items: [['hundred', 1, 60], ['doubleleg', 3, 8], ['scissors', 3, 10], ['teaser', 3, 5], ['legpull', 2, 8], ['deadbug', 2, 10]] },
+      { name: 'Rücken & Haltung', items: [['catcow', 2, 8], ['swimming', 3, 30], ['swan', 3, 6], ['shoulderbridge', 3, 8], ['birddog', 2, 10], ['sideleg', 2, 12], ['hamstretch', 1, 45]] }
     ]
   };
 
